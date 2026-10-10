@@ -477,14 +477,11 @@ function quotePricingAudit(data,booking,items,labour,otherCharges){
   const catalogPartsTotal=catalogItems.reduce((sum,x)=>sum+x.amount,0);
   const requestedPartsTotal=items.reduce((sum,x)=>sum+Number(x.amount||0),0);
   const markupPercent=catalogPartsTotal?Math.max(0,((requestedPartsTotal-catalogPartsTotal)/catalogPartsTotal)*100):0;
-  const baseTotal=Number(labour||0)+catalogPartsTotal;
-  const otherLimit=baseTotal*(policy.otherChargeMaxPercent/100);
-  const warnings=[];
-  if(catalogItems.some(x=>!x.partFound)) warnings.push('One or more parts are not in the NearFix catalog.');
-  if(markupPercent>policy.maxPartsMarkupPercent) warnings.push('Part pricing was above the shared catalog reference.');
-  if(Number(otherCharges||0)>otherLimit && otherLimit>0) warnings.push('Other charges exceed the standard transparency limit.');
-  if(Number(labour||0)>policy.baseMax) warnings.push('Labour is above the published service range.');
-  return {policy,catalogItems,catalogPartsTotal,requestedPartsTotal,markupPercent:Number(markupPercent.toFixed(1)),warnings,requiresAdminReview:warnings.length>0,fairnessStatus:warnings.length?'REVIEW_REQUIRED':'WITHIN_REFERENCE'};
+  // Apply the catalog and service policy automatically instead of creating a manual review queue.
+  const finalLabour=Math.max(0,Math.min(Number(labour||0),policy.baseMax));
+  const otherLimit=(finalLabour+catalogPartsTotal)*(policy.otherChargeMaxPercent/100);
+  const finalOtherCharges=Math.max(0,Math.min(Number(otherCharges||0),otherLimit));
+  return {policy,catalogItems,catalogPartsTotal,requestedPartsTotal,markupPercent:Number(markupPercent.toFixed(1)),labour:finalLabour,otherCharges:finalOtherCharges,automaticCheck:'APPLIED'};
 }
 function bookingView(data,b,viewer=null){
   const view={...b,customer:safeUser(findUser(data,b.customerId)),technician:technicianView(data,technicianFor(data,b.technicianId)),quote:data.quotes.find(q=>q.bookingId===b.id)||null,payment:data.payments.find(p=>p.bookingId===b.id)||null,invoice:data.invoices.find(i=>i.bookingId===b.id)||null,media:Array.isArray(b.media)?b.media:[]};
@@ -890,7 +887,7 @@ async function api(req,res,url){
   }
   if(req.method==='POST'&&url.pathname==='/api/quotes'){
     if(!me||!['technician','admin'].includes(me.role))return json(res,403,{success:false,message:'Technician access required',code:'FORBIDDEN'}); const b=await readBody(req); const booking=data.bookings.find(x=>x.id===b.bookingId); if(!booking)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'}); if(me.role==='technician'&&booking.technicianId!==me.id&&technicianFor(data,booking.technicianId)?.userId!==me.id)return json(res,403,{success:false,message:'Forbidden',code:'FORBIDDEN'});
-    const items=Array.isArray(b.items)?b.items:[]; const auditPrice=quotePricingAudit(data,booking,items,Number(b.labour||0),Number(b.otherCharges||0)); const catalogItems=auditPrice.catalogItems; const catalogParts=auditPrice.catalogPartsTotal; const total=Number(b.labour||0)+catalogParts+Number(b.otherCharges||0); const q={id:id('q'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,labour:Number(b.labour||0),parts:catalogParts,otherCharges:Number(b.otherCharges||0),items:catalogItems,notes:b.notes||'',total:total||Number(b.total||booking.estimate),reason:b.reason||'Inspection-based quotation',status:'PENDING',createdAt:now(),pricingAudit:auditPrice}; data.quotes.push(q); booking.status='AWAITING_APPROVAL'; booking.statusHistory.push({status:'AWAITING_APPROVAL',at:now(),by:me.id}); notify(data,booking.customerId,`A quotation of ₹${q.total.toLocaleString('en-IN')} is ready for approval.`); audit(data,me,'CREATE','Quote',q.id); await savePersistent(data); return json(res,201,{success:true,quote:q});
+    const items=Array.isArray(b.items)?b.items:[]; const auditPrice=quotePricingAudit(data,booking,items,Number(b.labour||0),Number(b.otherCharges||0)); const catalogItems=auditPrice.catalogItems; const catalogParts=auditPrice.catalogPartsTotal; const total=auditPrice.labour+catalogParts+auditPrice.otherCharges; const q={id:id('q'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,labour:auditPrice.labour,parts:catalogParts,otherCharges:auditPrice.otherCharges,items:catalogItems,notes:b.notes||'',total:total||Number(b.total||booking.estimate),reason:b.reason||'Inspection-based quotation',status:'PENDING',createdAt:now(),pricingAudit:auditPrice}; data.quotes.push(q); booking.status='AWAITING_APPROVAL'; booking.statusHistory.push({status:'AWAITING_APPROVAL',at:now(),by:me.id}); notify(data,booking.customerId,`A quotation of ₹${q.total.toLocaleString('en-IN')} is ready for approval.`); audit(data,me,'CREATE','Quote',q.id); await savePersistent(data); return json(res,201,{success:true,quote:q});
   }
   const qm=url.pathname.match(/^\/api\/quotes\/([^/]+)\/(approve|reject)$/);
   if(qm&&req.method==='POST'){
