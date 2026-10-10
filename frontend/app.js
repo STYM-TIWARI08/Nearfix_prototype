@@ -4188,14 +4188,14 @@ function ensureAIAssistantWidget(){
         <div class="nf-ai-title"><span class="nf-ai-avatar">🤖</span><div><b>NearFix AI Guide</b><small>Instant help before you book</small></div></div>
         <button class="nf-ai-close" onclick="toggleAIAssistant(false)" aria-label="Close AI Guide">×</button>
       </header>
-      <div id="nearfix-ai-log" class="nf-ai-log"><div class="nf-ai-msg bot">Hi! 👋 Tell me what is wrong at home. I can suggest the right service, safe next steps and help you find nearby technicians.</div></div>
+      <div id="nearfix-ai-log" class="nf-ai-log"><div class="nf-ai-msg bot">नमस्ते! Hi! 👋 Apni problem Hindi, Hinglish, ya English mein batayein. Main sahi service aur safe next step suggest karke nearby technician dhoondhne mein help karunga.</div></div>
       <div class="nf-ai-suggestions">
         <button onclick="aiChatAsk('AC se paani leak ho raha hai')">AC leaking</button>
         <button onclick="aiChatAsk('Mera switch spark kar raha hai')">Electrical issue</button>
         <button onclick="aiChatAsk('Pipe leak ho raha hai')">Pipe leakage</button>
         <button onclick="aiChatAsk('Washing machine drain nahi kar rahi')">Appliance issue</button>
       </div>
-      <div class="nf-ai-compose"><input id="nearfix-ai-input" placeholder="Describe your problem..." onkeydown="if(event.key==='Enter')aiChatAsk(this.value)"><button onclick="aiChatAsk(document.getElementById('nearfix-ai-input').value)">Send</button></div>
+      <div class="nf-ai-compose"><input id="nearfix-ai-input" placeholder="Describe your problem / Apni problem batayein..." onkeydown="if(event.key==='Enter')aiChatAsk(this.value)"><button onclick="aiChatAsk(document.getElementById('nearfix-ai-input').value)">Send</button></div>
       <div class="nf-ai-note">AI guidance is preliminary. Share photos for better context.</div>
     </section>`;
   document.body.appendChild(wrap);
@@ -4207,11 +4207,27 @@ function toggleAIAssistant(open){
   if(open) setTimeout(()=>document.getElementById('nearfix-ai-input')?.focus(),80);
 }
 window.openCustomerAIChat=function(){ toggleAIAssistant(true); };
+// Lightweight offline chat responses also follow Hindi, Hinglish, or English input.
+function localGuideResponse(message){
+  const devanagari=/[\u0900-\u097F]/.test(message);
+  const hinglish=/\b(hai|hain|hoon|nahi|nahin|kya|kaise|mera|meri|mujhe|chahiye|karna|yeh|iska|batao)\b/i.test(message);
+  const language=devanagari?'Hindi':hinglish?'Hinglish':'English';
+  const text=message.toLowerCase(); let service='General Repair';
+  if(/ac|air conditioner|cooling|एसी|ठंडा|कूलिंग/i.test(text)) service='AC Repair';
+  else if(/pipe|leak|tap|water|plumb|पानी|लीक|नल|पाइप|टपक/i.test(text)) service='Plumbing';
+  else if(/switch|spark|wire|electric|fan|mcb|socket|बिजली|स्विच|चिंगारी|तार|पंखा|सॉकेट/i.test(text)) service='Electrical';
+  else if(/washing|fridge|microwave|appliance|फ्रिज|वॉशिंग|माइक्रोवेव|उपकरण/i.test(text)) service='Appliance Repair';
+  const replies={
+    Hindi:{'General Repair':'कृपया बताइए कौन-सी चीज़ खराब है और क्या लक्षण दिख रहे हैं।','AC Repair':'यह AC की समस्या लगती है। Panel खुद न खोलें; सुरक्षित जाँच के लिए technician को बुलाएँ।','Plumbing':'यह plumbing की समस्या लगती है। अगर सुरक्षित हो तो पानी का valve बंद करें और plumber को बुलाएँ।','Electrical':'यह electrical समस्या हो सकती है। Spark हो तो सुरक्षित होने पर circuit बंद करें; live wire को न छुएँ।','Appliance Repair':'यह appliance repair का मामला हो सकता है। Technician को model number और photo भेजें।'},
+    Hinglish:{'General Repair':'Kaunsi cheez kharab hai aur exact symptom kya hai? Main sahi technician dhoondhne mein help karunga.','AC Repair':'Yeh AC issue lag raha hai. Panel khud na kholein; technician ko dikhayein.','Plumbing':'Yeh plumbing problem lagti hai. Agar safe ho to paani ka valve band karein aur plumber ko bulaein.','Electrical':'Yeh electrical issue ho sakta hai. Spark ho to safe hone par circuit band karein; live wire touch na karein.','Appliance Repair':'Yeh appliance repair ka issue lagta hai. Technician ko model number aur photo bhejein.'}
+  };
+  return {service,reply:replies[language]?.[service]||'Tell me what is broken and what symptoms you notice.'};
+}
 window.aiChatAsk=async function(text){
   ensureAIAssistantWidget(); const q=String(text||'').trim(); if(!q)return; toggleAIAssistant(true);
   const log=document.getElementById('nearfix-ai-log'); const input=document.getElementById('nearfix-ai-input'); if(input)input.value='';
   log.insertAdjacentHTML('beforeend',`<div class="nf-ai-msg user">${esc(q)}</div><div class="nf-ai-msg bot ai-thinking">Thinking…</div>`); const thinking=log.querySelector('.ai-thinking');
-  try{if(nfToken){const r=await nfFetch('/api/ai/chat',{method:'POST',body:JSON.stringify({message:q})});const svc=r.service||'General Repair';thinking.innerHTML=`${esc(r.reply)}<div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${esc(svc)} technicians →</button><button onclick="state.service='${svc}';openAIAnalyzer()">Full diagnosis</button></div>`;}else{let svc='General Repair',reply='Tell me the appliance/service, exact symptom and whether it is urgent.';if(/ac|air conditioner|cooling|gas/i.test(q)){svc='AC Repair';reply='This sounds like an AC issue. If water is leaking, switch it off safely and avoid opening electrical panels.';}else if(/pipe|leak|tap|water|plumb/i.test(q)){svc='Plumbing';reply='This looks like a plumbing issue. If water is actively leaking, close the nearest isolation valve if safe.';}else if(/switch|spark|wire|electric|fan|mcb|socket/i.test(q)){svc='Electrical';reply='This sounds electrical. If you see sparks or burning smell, switch off the affected circuit if safe and avoid live wiring.';}else if(/washing|fridge|microwave|appliance/i.test(q)){svc='Appliance Repair';reply='This sounds like an appliance repair. A clear photo/video and model number can help the technician prepare.';}thinking.innerHTML=`${esc(reply)}<div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${svc} technicians →</button></div>`;}}catch(e){thinking.innerHTML=`${esc(e.message||'AI assistant is temporarily unavailable.')}<div class="nf-ai-actions"><button onclick="setRoute('find');toggleAIAssistant(false)">Browse technicians</button></div>`;} thinking.classList.remove('ai-thinking'); log.scrollTop=log.scrollHeight;
+  try{if(nfToken){const r=await nfFetch('/api/ai/chat',{method:'POST',body:JSON.stringify({message:q})});const svc=r.service||'General Repair';thinking.innerHTML=`${esc(r.reply)}<div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${esc(svc)} technicians →</button><button onclick="state.service='${svc}';openAIAnalyzer()">Full diagnosis</button></div>`;}else{const result=localGuideResponse(q);const svc=result.service;thinking.innerHTML=`${esc(result.reply)}<div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${svc} technicians →</button></div>`;}}catch(e){thinking.innerHTML=`${esc(e.message||'AI assistant is temporarily unavailable.')}<div class="nf-ai-actions"><button onclick="setRoute('find');toggleAIAssistant(false)">Browse technicians</button></div>`;} thinking.classList.remove('ai-thinking'); log.scrollTop=log.scrollHeight;
 };
 
 /* Re-run render after overrides so the active screen immediately uses the production layer. */

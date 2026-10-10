@@ -11,5 +11,8 @@
   },
   "engines": {
     "node": "24.x"
+  },
+  "dependencies": {
+    "@tiny-fish/sdk": "^0.8.0"
   }
 }

@@ -93,13 +93,11 @@ Then run `npm start` again.
 
 ## Environment
 
-Copy `.env.example` to `.env` when enabling the optional Razorpay test gateway. Maps/location still require no Google key.
+Copy `.env.example` to `.env` when enabling TinyFish or the optional Razorpay test gateway. Maps/location still require no Google key.
 
 - `PORT` — optional, default 5050.
 - `JWT_SECRET` — recommended for any non-demo deployment.
-- `AI_API_KEY` — optional provider key for the AI chat endpoint.
-- `AI_API_URL` — optional OpenAI-compatible chat endpoint.
-- `AI_MODEL` — optional provider model name, default `gpt-4o-mini`.
+- `TINYFISH_API_KEY` — optional TinyFish Web Agent key used by diagnosis and the AI guide. Keep it in `.env`; never add it to frontend code.
 - `RAZORPAY_KEY_ID` — optional Razorpay test key ID.
 - `RAZORPAY_KEY_SECRET` — optional Razorpay test secret; server-side only.
 
@@ -116,9 +114,9 @@ Copy `.env.example` to `.env` when enabling the optional Razorpay test gateway. 
 
 ## Important implementation limitation
 
-This is intentionally a dependency-free hackathon/demo build. It uses JSON persistence rather than PostgreSQL/Prisma. Real production deployment should migrate persistence to PostgreSQL/Prisma, store photos/videos in object storage instead of JSON, add HTTPS, refresh-token rotation, WebSockets, production secrets management, a dedicated routing/geocoding provider, and Razorpay webhooks/payment-status reconciliation. The included Razorpay flow is intentionally test-mode ready.
+This is a lightweight hackathon/demo build with the TinyFish SDK as its only required runtime package. It uses JSON persistence rather than PostgreSQL/Prisma. Real production deployment should migrate persistence to PostgreSQL/Prisma, store photos/videos in object storage instead of JSON, add HTTPS, refresh-token rotation, WebSockets, production secrets management, a dedicated routing/geocoding provider, and Razorpay webhooks/payment-status reconciliation. The included Razorpay flow is intentionally test-mode ready.
 
-The AI assistant is a real backend-backed chat endpoint with a deterministic local assistant that classifies common service problems and can optionally call an OpenAI-compatible provider when AI_API_KEY and AI_API_URL are configured. It is still not a substitute for a real appliance inspection.
+The AI assistant is a backend-backed chat endpoint with a deterministic local fallback. When `TINYFISH_API_KEY` is configured, the backend streams a TinyFish web agent to research repair guidance and provide preliminary context. It is still not a substitute for a real appliance inspection.
 
 ## Project structure
 
@@ -227,7 +225,7 @@ NearFix does not require a degree field to match a technician. Profiles emphasiz
 - Verified manual/gateway payments automatically generate an invoice if one does not already exist.
 
 ### Customer AI Guide
-The customer dashboard includes a lightweight AI guide that works without an external AI key and can route the customer to the relevant service or the full AI diagnosis flow. `AI_API_KEY` can still be supplied for a future provider integration.
+The customer dashboard includes an AI guide that can route the customer to the relevant service or full AI diagnosis flow. TinyFish is prompted to respond in the language used by the customer, including Hindi and Hinglish. The local fallback also has Hindi and Hinglish replies for common repair categories.
 
 
 ## Vercel deployment

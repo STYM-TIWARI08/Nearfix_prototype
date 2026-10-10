@@ -14,14 +14,12 @@ const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
 const ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD || '');
 const ADMIN_NAME = String(process.env.ADMIN_NAME || 'NearFix Admin').trim();
 const ADMIN_AREA = String(process.env.ADMIN_AREA || 'All Areas').trim();
-const AI_API_KEY = process.env.AI_API_KEY || '';
+const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY || '';
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
-const AI_API_URL = process.env.AI_API_URL || '';
-const AI_MODEL = process.env.AI_MODEL || 'gpt-4o-mini';
 const SUPABASE_URL = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_SERVICE_ROLE_KEY = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 const SQL_PERSISTENCE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
@@ -364,15 +362,80 @@ function priceEstimate(data,service,problem='',location='',urgent=false){
 }
 function analyzeProblem(data,problem,service,urgent=false){
   const text=String(problem||'').toLowerCase();
+  const language=detectCustomerLanguage(problem);
   let detected=service||'General Repair', skill='Handyman', urgency=urgent?'High':'Medium', causes=['Requires on-site inspection'];
-  if(/ac|cooling|compressor|gas/.test(text)){detected='AC Repair';skill='AC Technician';causes=['Refrigerant/gas issue','Airflow or filter restriction','Compressor or electrical issue'];}
-  else if(/water|leak|tap|pipe|drain/.test(text)){detected='Plumbing';skill='Plumber';causes=['Loose or damaged fitting','Pipe/faucet leakage','Drain blockage'];}
-  else if(/switch|fan|socket|wire|electric|power|mcb/.test(text)){detected='Electrical';skill='Electrician';causes=['Loose connection','Faulty switch/socket','Circuit protection issue'];}
-  else if(/fridge|refrigerator|washing|microwave|appliance/.test(text)){detected='Appliance Repair';skill='Appliance Technician';causes=['Component fault','Power/control issue','Mechanical wear'];}
+  if(/ac|cooling|compressor|gas|एसी|ठंडा|कूलिंग/.test(text)){detected='AC Repair';skill='AC Technician';causes=['Refrigerant/gas issue','Airflow or filter restriction','Compressor or electrical issue'];}
+  else if(/water|leak|tap|pipe|drain|पानी|लीक|नल|पाइप|टपक/.test(text)){detected='Plumbing';skill='Plumber';causes=['Loose or damaged fitting','Pipe/faucet leakage','Drain blockage'];}
+  else if(/switch|fan|socket|wire|electric|power|mcb|बिजली|स्विच|चिंगारी|तार|पंखा|सॉकेट/.test(text)){detected='Electrical';skill='Electrician';causes=['Loose connection','Faulty switch/socket','Circuit protection issue'];}
+  else if(/fridge|refrigerator|washing|microwave|appliance|फ्रिज|वॉशिंग|माइक्रोवेव|उपकरण/.test(text)){detected='Appliance Repair';skill='Appliance Technician';causes=['Component fault','Power/control issue','Mechanical wear'];}
   else if(/laptop|computer|wifi|network|pc/.test(text)){detected='Computer Repair';skill='Computer Technician';causes=['Software/configuration issue','Power or hardware issue','Network configuration'];}
-  if(/urgent|emergency|sparks|smoke|burn|gas smell|flood/.test(text)) urgency='High';
+  if(/urgent|emergency|sparks|smoke|burn|gas smell|flood|जरूरी|आपात|चिंगारी|धुआँ|जलने|गैस की गंध|बाढ़/.test(text)) urgency='High';
   const estimate=priceEstimate(data,detected,problem,'',urgency==='High');
-  return {service:detected,summary:problem||'General service request',possibleCauses:causes,requiredSkill:skill,urgency,estimatedRange:`₹${estimate.min.toLocaleString('en-IN')}–₹${estimate.max.toLocaleString('en-IN')}`,recommendedNextAction:urgency==='High'?'Arrange a verified technician promptly and avoid unsafe DIY work.':'Book a suitable verified technician for inspection.',preliminary:true,mode:AI_API_KEY?'provider-ready':'demo-fallback'};
+  if(language!=='English'){
+    const translations={
+      'General Repair':['मुद्दे की सही वजह पता करने के लिए technician को मौके पर जाँच करनी होगी।',['मौके पर जाँच ज़रूरी है'],'सही technician की पहचान और सुरक्षित अगला कदम'],
+      'AC Repair':['यह AC से जुड़ी समस्या लगती है। technician airflow, filter और cooling system की जाँच कर सकता है।',['Filter या airflow में रुकावट','Cooling system की समस्या','Compressor या electrical fault'],'AC technician से जाँच करवाएँ; unit का panel खुद न खोलें'],
+      'Plumbing':['यह पानी के leak या plumbing fitting की समस्या हो सकती है।',['ढीली या खराब fitting','Pipe या tap में leak','Drain blockage'],'अगर सुरक्षित हो तो पानी का valve बंद करें और plumber से जाँच करवाएँ'],
+      'Electrical':['यह electrical fitting या connection की समस्या हो सकती है।',['ढीला connection','खराब switch या socket','Circuit protection की समस्या'],'अगर spark या जलने की गंध हो तो सुरक्षित होने पर circuit बंद करें; live wiring को न छुएँ'],
+      'Appliance Repair':['यह appliance के component या power connection से जुड़ी समस्या हो सकती है।',['Component fault','Power या control issue','Mechanical wear'],'Appliance technician से जाँच करवाएँ; उपकरण खुद न खोलें'],
+      'Computer Repair':['यह computer, software या network की समस्या हो सकती है।',['Software या configuration issue','Power या hardware issue','Network configuration'],'Technician से जाँच करवाएँ और अपना password या OTP साझा न करें']
+    };
+    const translation=translations[detected]||translations['General Repair'];
+    causes=translation[1];
+    if(language==='Hindi'){
+      // Hindi UI copy is in Devanagari; service and skill names stay in English for matching.
+      var localizedSummary=translation[0], localizedAction=urgency==='High'?'कृपया जल्द ही verified technician से संपर्क करें और unsafe DIY काम से बचें।':translation[2];
+    }else{
+      // Hinglish keeps the familiar Latin script while the service taxonomy stays unchanged.
+      var localizedSummary={Plumbing:'Yeh plumbing ya water leak ki problem lagti hai.',Electrical:'Yeh electrical fitting ya connection ki problem ho sakti hai. Live wiring ko touch na karein.','AC Repair':'Yeh AC airflow ya cooling system se judi problem lagti hai.','Appliance Repair':'Yeh appliance ke component ya power connection ki problem ho sakti hai.','Computer Repair':'Yeh computer, software ya network ki problem ho sakti hai.','General Repair':'Is issue ki exact wajah technician inspection ke baad pata chalegi.'}[detected]||'Is issue ki exact wajah technician inspection ke baad pata chalegi.';
+      causes={Plumbing:['Loose ya damaged fitting','Pipe ya tap leak','Drain blockage'],Electrical:['Loose connection','Faulty switch ya socket','Circuit protection issue'],'AC Repair':['Filter ya airflow blockage','Cooling system issue','Compressor ya electrical fault'],'Appliance Repair':['Component fault','Power ya control issue','Mechanical wear'],'Computer Repair':['Software ya configuration issue','Power ya hardware issue','Network configuration']}[detected]||['On-site inspection zaroori hai'];
+      localizedAction=urgency==='High'?'Jaldi verified technician se baat karein aur unsafe DIY work avoid karein.':translation[2];
+    }
+  }
+  return {service:detected,summary:language==='English'?(problem||'General service request'):localizedSummary,possibleCauses:causes,requiredSkill:skill,urgency,estimatedRange:`₹${estimate.min.toLocaleString('en-IN')}–₹${estimate.max.toLocaleString('en-IN')}`,recommendedNextAction:language==='English'?(urgency==='High'?'Arrange a verified technician promptly and avoid unsafe DIY work.':'Book a suitable verified technician for inspection.'):localizedAction,preliminary:true,mode:TINYFISH_API_KEY?'tinyfish-agent':'demo-fallback'};
+}
+
+// Keep output in Devanagari Hindi or Latin-script Hinglish when that is how the customer writes.
+function detectCustomerLanguage(message){
+  const text=String(message||'');
+  if(/[\u0900-\u097F]/.test(text)) return 'Hindi';
+  if(/\b(hai|hain|hoon|nahi|nahin|kya|kaise|mera|meri|mujhe|chahiye|karna|kar|yeh|iska|isse|bhejo|batao)\b/i.test(text)) return 'Hinglish';
+  return 'English';
+}
+function localChatReply(service,language){
+  const replies={
+    Hindi:{'General Repair':'कृपया बताइए कौन-सी चीज़ खराब है, क्या लक्षण दिख रहे हैं और क्या समस्या तुरंत ठीक करवानी है।','Plumbing':'यह plumbing की समस्या लगती है। अगर पानी leak हो रहा है और सुरक्षित हो, तो valve बंद करें। Nearby plumber को बुलाएँ।','Electrical':'यह electrical समस्या हो सकती है। Spark या जलने की गंध हो तो सुरक्षित होने पर circuit बंद करें। Live wire को न छुएँ; verified electrician को बुलाएँ।','AC Repair':'यह AC की समस्या लगती है। Unit का panel न खोलें; AC technician को दिखाने के लिए समस्या की photo या video जोड़ें।','Appliance Repair':'यह appliance repair का मामला हो सकता है। Technician की मदद के लिए model number और समस्या की photo जोड़ें।','Computer Repair':'यह computer या network की समस्या हो सकती है। अपना password, PIN या OTP किसी से साझा न करें।','Mobile Repair':'Mobile model और समस्या का विवरण दें; फिर आसपास के mobile technicians देखें।'},
+    Hinglish:{'General Repair':'Kaunsi cheez kharab hai, exact symptom kya hai, aur kya issue urgent hai? Yeh details sahi technician dhoondhne mein help karengi.','Plumbing':'Yeh plumbing problem lagti hai. Agar leak ho raha hai aur safe ho, to valve band kar dein. Nearby plumber ko bula sakte hain.','Electrical':'Yeh electrical issue ho sakta hai. Spark ya jalne ki smell ho to safe hone par circuit band karein. Live wire touch na karein; verified electrician ko bulaein.','AC Repair':'Yeh AC issue lag raha hai. Unit ka panel na kholein; technician ke liye photo ya video add karein.','Appliance Repair':'Yeh appliance repair ka issue ho sakta hai. Model number aur photo share karne se technician prepare ho sakta hai.','Computer Repair':'Yeh computer ya network issue ho sakta hai. Apna password, PIN ya OTP kabhi share na karein.','Mobile Repair':'Mobile model aur issue batayein; phir aas-paas ke mobile technicians dhoondhein.'}
+  };
+  return replies[language]?.[service]||null;
+}
+
+// Use TinyFish to research repair guidance from the web while keeping its API key on the server.
+async function tinyFishRepairResearch(service,problem){
+  if(!TINYFISH_API_KEY) throw new Error('TinyFish is not configured.');
+  const {TinyFish}=await import('@tiny-fish/sdk');
+  const client=new TinyFish({apiKey:TINYFISH_API_KEY});
+  const query=encodeURIComponent(`${service} repair ${String(problem||'').slice(0,180)}`);
+  const stream=await client.agent.stream({
+    url:`https://www.wikihow.com/wikiHowTo?search=${query}`,
+    goal:`Research the repair issue for a NearFix home-service customer. Service: ${service}. Customer description: ${String(problem||'').slice(0,500)}. Detect the language used in the customer description and write all customer-facing text in that same language. If the customer writes Hindi in Latin letters, reply in Hinglish using Latin letters; if they write Hindi in Devanagari, reply in Devanagari Hindi. Keep JSON keys, service taxonomy, technician skill names, and urgency enum values in English so the app can use them. Find relevant repair guidance and return a JSON object with keys summary (one short paragraph describing relevant symptoms), possibleCauses (array of up to three possibilities), requiredSkill (professional technician type), urgency (Low, Medium, or High), recommendedNextAction (safe next step). Do not give dangerous DIY instructions or tell the customer to open electrical, gas, or appliance equipment. If unsure, say that a professional inspection is needed in the customer's language.`
+  });
+  for await(const event of stream){
+    if(event.type==='FAILED'||event.type==='ERROR') throw new Error('TinyFish agent could not complete the repair research.');
+    if(event.type!=='COMPLETE') continue;
+    let result=event.result??event.result_json??event.data;
+    if(result&&typeof result==='object'){
+      if(result.result&&typeof result.result==='object') result=result.result;
+      if(result.summary||result.possibleCauses) return result;
+      result=JSON.stringify(result);
+    }
+    if(typeof result==='string'){
+      const cleaned=result.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'');
+      try{return JSON.parse(cleaned);}catch{return {summary:cleaned};}
+    }
+    throw new Error('TinyFish returned no repair research.');
+  }
+  throw new Error('TinyFish stream ended without a completed result.');
 }
 function audit(data,actor,action,entity,entityId,meta={}){ data.auditLogs.push({id:id('audit'),actorId:actor?.id||null,action,entity,entityId,meta,createdAt:now()}); }
 function notify(data,userId,text){ data.notifications.unshift({id:id('n'),userId,text,read:false,time:'Just now',createdAt:now()}); }
@@ -444,7 +507,7 @@ async function api(req,res,url){
   if(req.method==='OPTIONS') return json(res,204,{});
   await loadPersistentState();
   const data=db();
-  if(req.method==='GET'&&url.pathname==='/api/health') return json(res,200,{ok:true,service:'NearFix API',version:'2.3.0',mode:AI_API_KEY&&AI_API_URL?'provider-ready':'local-smart-assistant',time:now()});
+  if(req.method==='GET'&&url.pathname==='/api/health') return json(res,200,{ok:true,service:'NearFix API',version:'2.3.0',mode:TINYFISH_API_KEY?'tinyfish-agent':'local-smart-assistant',time:now()});
   if(req.method==='GET'&&url.pathname==='/api/public') return json(res,200,{success:true,services:data.services,technicians:techniciansView(data,data.technicians)});
 
   if(req.method==='GET'&&url.pathname==='/api/parts'){
@@ -528,7 +591,7 @@ async function api(req,res,url){
     }
     const user=safeUser(meUser);
     const bookings=data.bookings.filter(b=>me.role==='admin'||b.customerId===me.id||(me.role==='technician'&&technicianFor(data,b.technicianId)?.userId===me.id)).map(b=>bookingView(data,b,me));
-    const myTechProfile=me.role==='technician'?technicianForUser(data,me.id):null; const base={success:true,user,services:data.services,technicians:techniciansView(data,data.technicians),bookings,reviews:data.reviews.filter(r=>me.role==='admin'||r.customerId===me.id),quotes:data.quotes.filter(q=>me.role==='admin'||q.customerId===me.id||q.technicianId===me.id||myTechProfile?.id===q.technicianId),parts:data.parts||[],payments:data.payments.filter(p=>me.role==='admin'||p.customerId===me.id||myTechProfile?.id===p.technicianId),invoices:data.invoices.filter(i=>me.role==='admin'||i.customerId===me.id||myTechProfile?.id===i.technicianId),notifications:data.notifications.filter(n=>n.userId===me.id),messages:data.messages.filter(m=>m.participantIds?.includes(me.id)||me.role==='admin'),disputes:data.disputes.filter(d=>me.role==='admin'||d.customerId===me.id),account:accountSummary(data,me.id),mode:AI_API_KEY&&AI_API_URL?'provider-ready':'local-smart-assistant'};
+    const myTechProfile=me.role==='technician'?technicianForUser(data,me.id):null; const base={success:true,user,services:data.services,technicians:techniciansView(data,data.technicians),bookings,reviews:data.reviews.filter(r=>me.role==='admin'||r.customerId===me.id),quotes:data.quotes.filter(q=>me.role==='admin'||q.customerId===me.id||q.technicianId===me.id||myTechProfile?.id===q.technicianId),parts:data.parts||[],payments:data.payments.filter(p=>me.role==='admin'||p.customerId===me.id||myTechProfile?.id===p.technicianId),invoices:data.invoices.filter(i=>me.role==='admin'||i.customerId===me.id||myTechProfile?.id===i.technicianId),notifications:data.notifications.filter(n=>n.userId===me.id),messages:data.messages.filter(m=>m.participantIds?.includes(me.id)||me.role==='admin'),disputes:data.disputes.filter(d=>me.role==='admin'||d.customerId===me.id),account:accountSummary(data,me.id),mode:TINYFISH_API_KEY?'tinyfish-agent':'local-smart-assistant'};
     if(me.role==='admin') {
       const admin=findUser(data,me.id); const scoped=adminScopedData(data,admin); const scopedBookingIds=new Set(scoped.bookings.map(b=>b.id)); const scopedUserIds=new Set(scoped.users.map(u=>u.id)); const scopedTechIds=new Set(scoped.technicians.map(t=>t.id));
       Object.assign(base,{adminArea:admin.area||'All Areas',allUsers:scoped.users.map(safeUser),allBookings:scoped.bookings.map(b=>bookingView(data,b)),allTechnicians:techniciansView(data,scoped.technicians),allQuotes:data.quotes.filter(q=>scopedBookingIds.has(q.bookingId)||scopedUserIds.has(q.customerId)||scopedTechIds.has(q.technicianId)),allPayments:data.payments.filter(p=>scopedBookingIds.has(p.bookingId)||scopedUserIds.has(p.customerId)||scopedTechIds.has(p.technicianId)),allInvoices:data.invoices.filter(i=>scopedBookingIds.has(i.bookingId)||scopedUserIds.has(i.customerId)||scopedTechIds.has(i.technicianId)),allReviews:data.reviews.filter(r=>scopedUserIds.has(r.customerId)),allMessages:data.messages,allNotifications:data.notifications,allDisputes:data.disputes.filter(d=>scopedUserIds.has(d.customerId)||scopedTechIds.has(d.technicianId)),allAiAnalyses:data.aiAnalyses,allAuditLogs:data.auditLogs,pricingRules:data.pricingRules,allParts:data.parts||[],allAdmins:data.users.filter(u=>u.role==='admin' && adminHasAreaAccess(admin,u.area)).map(safeUser)});
@@ -558,26 +621,48 @@ async function api(req,res,url){
     return json(res,200,{success:true,technicians:techniciansView(data,visible),radius,searchRadiusUsed,minimumNearbyTarget:5,location:validCoords(lat,lng)?{lat:Number(lat),lng:Number(lng)}:null});
   }
   if(req.method==='POST'&&url.pathname==='/api/ai/analyze-problem'){
-    if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); const b=await readBody(req); const result=analyzeProblem(data,b.problem,b.service,b.urgent); const row={id:id('ai'),userId:me.id,type:'problem',input:b.problem,result,createdAt:now()}; data.aiAnalyses.push(row); audit(data,me,'AI_ANALYZE','AIAnalysis',row.id); await savePersistent(data); return json(res,200,{success:true,analysis:result,analysisId:row.id});
+    if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});
+    const b=await readBody(req); const result=analyzeProblem(data,b.problem,b.service,b.urgent);
+    if(TINYFISH_API_KEY){
+      try{
+        const research=await tinyFishRepairResearch(result.service,b.problem);
+        result.summary=String(research.summary||result.summary);
+        if(Array.isArray(research.possibleCauses)&&research.possibleCauses.length) result.possibleCauses=research.possibleCauses.slice(0,3).map(String);
+        if(research.requiredSkill) result.requiredSkill=String(research.requiredSkill);
+        if(['Low','Medium','High'].includes(research.urgency)) result.urgency=research.urgency;
+        if(research.recommendedNextAction) result.recommendedNextAction=String(research.recommendedNextAction);
+        result.mode='tinyfish-agent';
+      }catch(error){console.error('TinyFish diagnosis failed:',error.message); result.mode='demo-fallback';}
+    }
+    const row={id:id('ai'),userId:me.id,type:'problem',input:b.problem,result,createdAt:now()}; data.aiAnalyses.push(row); audit(data,me,'AI_ANALYZE','AIAnalysis',row.id); await savePersistent(data); return json(res,200,{success:true,analysis:result,analysisId:row.id});
   }
   if(req.method==='POST'&&url.pathname==='/api/ai/chat'){
     if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});
     const b=await readBody(req); const message=String(b.message||'').trim();
     if(!message) return json(res,400,{success:false,message:'Message is required',code:'VALIDATION'});
     let reply='Tell me the appliance/service, the exact symptom and whether it is urgent. I can help you choose the right skill and find nearby technicians.'; let service='General Repair'; const text=message.toLowerCase();
-    if(/ac|air conditioner|cooling|compressor|gas/.test(text)){service='AC Repair';reply='This sounds like an AC issue. If water is leaking or the unit is sparking, switch it off safely and avoid opening electrical panels. I recommend an AC technician and a photo/video with the request.';}
-    else if(/pipe|tap|water|leak|drain|plumb/.test(text)){service='Plumbing';reply='This looks like a plumbing issue. If water is actively leaking, close the nearest isolation valve if safe. NearFix can show plumbers within your chosen radius and transparent starting prices.';}
-    else if(/switch|spark|wire|electric|fan|socket|mcb/.test(text)){service='Electrical';reply='This appears electrical. If there are sparks, burning smell or exposed wires, switch off the affected circuit if safe. Do not touch live wiring; choose a verified electrician.';}
-    else if(/washing|fridge|microwave|appliance/.test(text)){service='Appliance Repair';reply='This sounds like an appliance repair. Share a clear photo/video and model number if available so the technician can prepare before arriving.';}
+    if(/ac|air conditioner|cooling|compressor|gas|एसी|एयर कंडीशनर|ठंडा|कूलिंग/.test(text)){service='AC Repair';reply='This sounds like an AC issue. If water is leaking or the unit is sparking, switch it off safely and avoid opening electrical panels. I recommend an AC technician and a photo/video with the request.';}
+    else if(/pipe|tap|water|leak|drain|plumb|पानी|लीक|नल|पाइप|टपक/.test(text)){service='Plumbing';reply='This looks like a plumbing issue. If water is actively leaking, close the nearest isolation valve if safe. NearFix can show plumbers within your chosen radius and transparent starting prices.';}
+    else if(/switch|spark|wire|electric|fan|socket|mcb|बिजली|स्विच|चिंगारी|तार|पंखा|सॉकेट/.test(text)){service='Electrical';reply='This appears electrical. If there are sparks, burning smell or exposed wires, switch off the affected circuit if safe. Do not touch live wiring; choose a verified electrician.';}
+    else if(/washing|fridge|microwave|appliance|फ्रिज|वॉशिंग|माइक्रोवेव|उपकरण/.test(text)){service='Appliance Repair';reply='This sounds like an appliance repair. Share a clear photo/video and model number if available so the technician can prepare before arriving.';}
     else if(/laptop|computer|wifi|network|pc|printer/.test(text)){service='Computer Repair';reply='This appears to be a computer/network issue. Never share passwords, PINs or OTPs. A computer technician can inspect the device and quote after diagnosis.';}
     else if(/mobile|phone|screen|charging/.test(text)){service='Mobile Repair';reply='This sounds like a mobile repair. Tell me the model and symptom, then NearFix can show nearby mobile technicians and reference parts pricing.';}
+    reply=localChatReply(service,detectCustomerLanguage(message))||reply;
     const local={reply,service,mode:'local-smart-assistant',suggestedAction:`Find ${service} technicians near your live location.`};
-    if(AI_API_KEY&&AI_API_URL){try{const r=await fetch(AI_API_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${AI_API_KEY}`},body:JSON.stringify({model:AI_MODEL,messages:[{role:'system',content:'You are NearFix AI Guide. Help customers diagnose household service issues safely, identify the correct technician skill, explain fair-price concepts, and never request passwords, payment PINs or OTPs.'},{role:'user',content:message}],temperature:0.2})});const out=await r.json();const content=out?.choices?.[0]?.message?.content;if(r.ok&&content)local.reply=content;}catch(e){}}
+    if(TINYFISH_API_KEY){
+      try{
+        const research=await tinyFishRepairResearch(service,message);
+        local.reply=String(research.summary||reply);
+        if(Array.isArray(research.possibleCauses)&&research.possibleCauses.length) local.reply+=` Likely checks include: ${research.possibleCauses.slice(0,3).join('; ')}.`;
+        if(research.recommendedNextAction) local.reply+=` ${research.recommendedNextAction}`;
+        local.mode='tinyfish-agent';
+      }catch(error){console.error('TinyFish chat lookup failed:',error.message);}
+    }
     data.aiAnalyses.push({id:id('ai'),userId:me.id,type:'chat',input:message,result:local,createdAt:now()}); await savePersistent(data); return json(res,200,{success:true,...local});
   }
 
   if(req.method==='POST'&&url.pathname==='/api/ai/estimate-price'){
-    if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); const b=await readBody(req); const result=priceEstimate(data,b.service,b.problem,b.location,b.urgent); const row={id:id('ai'),userId:me.id,type:'price',input:b,result,createdAt:now()}; data.aiAnalyses.push(row); await savePersistent(data); return json(res,200,{success:true,estimate:result,mode:AI_API_KEY?'provider-ready':'demo-fallback'});
+    if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); const b=await readBody(req); const result=priceEstimate(data,b.service,b.problem,b.location,b.urgent); const row={id:id('ai'),userId:me.id,type:'price',input:b,result,createdAt:now()}; data.aiAnalyses.push(row); await savePersistent(data); return json(res,200,{success:true,estimate:result,mode:TINYFISH_API_KEY?'tinyfish-agent':'demo-fallback'});
   }
   if(req.method==='POST'&&url.pathname==='/api/matching/find'){
     if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); const b=await readBody(req); return json(res,200,{success:true,matches:matchTechs(data,b).slice(0,8)});
