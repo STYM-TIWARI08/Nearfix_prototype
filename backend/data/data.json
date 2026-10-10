@@ -1,0 +1,341 @@
+{
+  "users": [
+    {
+      "id": "admin_c674d333-383b-4166-ba77-9603383724a3",
+      "role": "admin",
+      "name": "Owner Admin",
+      "email": "owner@nearfix.test",
+      "phone": "",
+      "area": "All Areas",
+      "passwordHash": "scrypt$16384$8$1$90d7425b4d47d1be442e81641a36e7cb$54dce0881806e80d7ad4bee5317ee39d21b6f0b2cb1b2f02fb99120f91fd63ac18e82e3512ad2009f535780c2442f765bd423bef010b7d29c89a40f2ec97acc6"
+    },
+    {
+      "id": "admin_c5ae1698-a7f9-4caf-807e-a7eabf8667c9",
+      "role": "admin",
+      "name": "Ghaziabad Admin",
+      "email": "gzb@nearfix.test",
+      "phone": "",
+      "area": "Ghaziabad, Uttar Pradesh",
+      "passwordHash": "scrypt$16384$8$1$6e7b4a645cc5e9e648dbe3c9aae4744d$4fb85e962cfc386bfecacacdedf95e68f5f4d34c7808127a3e1e7f6d75768cdf3335b6edf0b84f8f356ab84ebb42db5a8c19002e35a0c729242149f18a09701f"
+    }
+  ],
+  "technicians": [],
+  "services": [
+    {
+      "id": "s1",
+      "icon": "🔌",
+      "name": "Electrical",
+      "technicianType": "Electrician",
+      "active": true,
+      "baseMin": 300,
+      "baseMax": 1200
+    },
+    {
+      "id": "s2",
+      "icon": "🚰",
+      "name": "Plumbing",
+      "technicianType": "Plumber",
+      "active": true,
+      "baseMin": 250,
+      "baseMax": 1200
+    },
+    {
+      "id": "s3",
+      "icon": "❄️",
+      "name": "AC Repair",
+      "technicianType": "AC Technician",
+      "active": true,
+      "baseMin": 500,
+      "baseMax": 2500
+    },
+    {
+      "id": "s4",
+      "icon": "🔧",
+      "name": "Appliance Repair",
+      "technicianType": "Appliance Technician",
+      "active": true,
+      "baseMin": 350,
+      "baseMax": 2500
+    },
+    {
+      "id": "s5",
+      "icon": "🪚",
+      "name": "Carpentry",
+      "technicianType": "Carpenter",
+      "active": true,
+      "baseMin": 400,
+      "baseMax": 1800
+    },
+    {
+      "id": "s6",
+      "icon": "🎨",
+      "name": "Painting",
+      "technicianType": "Painter",
+      "active": true,
+      "baseMin": 500,
+      "baseMax": 3000
+    },
+    {
+      "id": "s7",
+      "icon": "🧹",
+      "name": "Cleaning",
+      "technicianType": "Cleaning Expert",
+      "active": true,
+      "baseMin": 250,
+      "baseMax": 1500
+    },
+    {
+      "id": "s8",
+      "icon": "💻",
+      "name": "Computer Repair",
+      "technicianType": "Computer Technician",
+      "active": true,
+      "baseMin": 400,
+      "baseMax": 2500
+    },
+    {
+      "id": "s9",
+      "icon": "📱",
+      "name": "Mobile Repair",
+      "technicianType": "Mobile Technician",
+      "active": true,
+      "baseMin": 300,
+      "baseMax": 2000
+    },
+    {
+      "id": "s10",
+      "icon": "🔑",
+      "name": "Locksmith",
+      "technicianType": "Locksmith",
+      "active": true,
+      "baseMin": 350,
+      "baseMax": 1500
+    },
+    {
+      "id": "s11",
+      "icon": "🚗",
+      "name": "Mechanic",
+      "technicianType": "Vehicle Mechanic",
+      "active": true,
+      "baseMin": 500,
+      "baseMax": 5000
+    },
+    {
+      "id": "s12",
+      "icon": "🛠️",
+      "name": "General Repair",
+      "technicianType": "Handyman",
+      "active": true,
+      "baseMin": 250,
+      "baseMax": 1500
+    }
+  ],
+  "bookings": [],
+  "quotes": [],
+  "payments": [],
+  "invoices": [],
+  "reviews": [],
+  "messages": [],
+  "notifications": [],
+  "disputes": [],
+  "verifications": [],
+  "aiAnalyses": [],
+  "auditLogs": [
+    {
+      "id": "audit_9d094e1c-3d5f-4787-89d0-9c8147137a2b",
+      "actorId": "admin_c674d333-383b-4166-ba77-9603383724a3",
+      "action": "CREATE",
+      "entity": "Admin",
+      "entityId": "admin_c5ae1698-a7f9-4caf-807e-a7eabf8667c9",
+      "meta": {
+        "area": "Ghaziabad, Uttar Pradesh"
+      },
+      "createdAt": "2026-09-22T15:28:57.037Z"
+    }
+  ],
+  "pricingRules": [],
+  "otpChallenges": [],
+  "pendingRegistrations": [],
+  "parts": [
+    {
+      "id": "p1",
+      "barcode": "8901001000011",
+      "name": "1/2 inch Brass Ball Valve",
+      "category": "Plumbing",
+      "brand": "NearFix Supply",
+      "price": 185,
+      "unit": "piece",
+      "stock": 42,
+      "image": "assets/parts/brass-ball-valve.svg",
+      "description": "Brass quarter-turn valve for common household water lines.",
+      "compatible": [
+        "Plumbing"
+      ]
+    },
+    {
+      "id": "p2",
+      "barcode": "8901001000012",
+      "name": "Braided Water Hose 1.5m",
+      "category": "Plumbing",
+      "brand": "NearFix Supply",
+      "price": 240,
+      "unit": "piece",
+      "stock": 28,
+      "image": "assets/parts/water-hose.svg",
+      "description": "Flexible braided inlet hose with standard fittings.",
+      "compatible": [
+        "Plumbing"
+      ]
+    },
+    {
+      "id": "p3",
+      "barcode": "8901001000013",
+      "name": "16A Modular Switch",
+      "category": "Electrical",
+      "brand": "NearFix Supply",
+      "price": 95,
+      "unit": "piece",
+      "stock": 75,
+      "image": "assets/parts/modular-switch.svg",
+      "description": "16A modular switch for residential circuits.",
+      "compatible": [
+        "Electrical"
+      ]
+    },
+    {
+      "id": "p4",
+      "barcode": "8901001000014",
+      "name": "6A Universal Socket",
+      "category": "Electrical",
+      "brand": "NearFix Supply",
+      "price": 125,
+      "unit": "piece",
+      "stock": 63,
+      "image": "assets/parts/socket.svg",
+      "description": "Universal modular socket with safety shutters.",
+      "compatible": [
+        "Electrical"
+      ]
+    },
+    {
+      "id": "p5",
+      "barcode": "8901001000015",
+      "name": "AC Copper Capacitor 35+5 µF",
+      "category": "AC Repair",
+      "brand": "NearFix Supply",
+      "price": 520,
+      "unit": "piece",
+      "stock": 19,
+      "image": "assets/parts/capacitor.svg",
+      "description": "Dual-run capacitor for compatible split/window AC units.",
+      "compatible": [
+        "AC Repair"
+      ]
+    },
+    {
+      "id": "p6",
+      "barcode": "8901001000016",
+      "name": "AC Air Filter 1.5 Ton",
+      "category": "AC Repair",
+      "brand": "NearFix Supply",
+      "price": 310,
+      "unit": "piece",
+      "stock": 34,
+      "image": "assets/parts/ac-filter.svg",
+      "description": "Washable replacement mesh filter for common AC units.",
+      "compatible": [
+        "AC Repair"
+      ]
+    },
+    {
+      "id": "p7",
+      "barcode": "8901001000017",
+      "name": "Washing Machine Drain Pump",
+      "category": "Appliance Repair",
+      "brand": "NearFix Supply",
+      "price": 690,
+      "unit": "piece",
+      "stock": 14,
+      "image": "assets/parts/drain-pump.svg",
+      "description": "Replacement drain pump for compatible washing machines.",
+      "compatible": [
+        "Appliance Repair"
+      ]
+    },
+    {
+      "id": "p8",
+      "barcode": "8901001000018",
+      "name": "Laptop 65W USB-C Adapter",
+      "category": "Computer Repair",
+      "brand": "NearFix Supply",
+      "price": 1199,
+      "unit": "piece",
+      "stock": 21,
+      "image": "assets/parts/usb-c-adapter.svg",
+      "description": "65W USB-C PD adapter for compatible laptops.",
+      "compatible": [
+        "Computer Repair"
+      ]
+    },
+    {
+      "id": "p9",
+      "barcode": "8901001000019",
+      "name": "Door Hinge Heavy Duty",
+      "category": "Carpentry",
+      "brand": "NearFix Supply",
+      "price": 160,
+      "unit": "pair",
+      "stock": 51,
+      "image": "assets/parts/door-hinge.svg",
+      "description": "Heavy-duty steel hinges for interior/exterior doors.",
+      "compatible": [
+        "Carpentry"
+      ]
+    },
+    {
+      "id": "p10",
+      "barcode": "8901001000020",
+      "name": "LED Bulb 12W",
+      "category": "Electrical",
+      "brand": "NearFix Supply",
+      "price": 110,
+      "unit": "piece",
+      "stock": 120,
+      "image": "assets/parts/led-bulb.svg",
+      "description": "12W energy-efficient LED bulb, warm/neutral compatible.",
+      "compatible": [
+        "Electrical"
+      ]
+    },
+    {
+      "id": "p11",
+      "barcode": "8901001000021",
+      "name": "PTFE Thread Seal Tape",
+      "category": "Plumbing",
+      "brand": "NearFix Supply",
+      "price": 35,
+      "unit": "roll",
+      "stock": 200,
+      "image": "assets/parts/ptfe-tape.svg",
+      "description": "Thread sealing tape for plumbing fittings.",
+      "compatible": [
+        "Plumbing"
+      ]
+    },
+    {
+      "id": "p12",
+      "barcode": "8901001000022",
+      "name": "Universal Extension Cord 5m",
+      "category": "Electrical",
+      "brand": "NearFix Supply",
+      "price": 349,
+      "unit": "piece",
+      "stock": 36,
+      "image": "assets/parts/extension-cord.svg",
+      "description": "5m heavy-duty extension cord with overload protection.",
+      "compatible": [
+        "Electrical"
+      ]
+    }
+  ]
+}
