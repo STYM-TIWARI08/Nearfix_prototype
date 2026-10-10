@@ -3966,6 +3966,10 @@ void completeAuthRedirect();
     const p=await nfFetch('/api/public'); if(p.technicians)db.techs=p.technicians; saveDB();
     if(nfToken){
       await hydrateServer();
+      // A saved login is hydrated asynchronously on page load. Start polling
+      // only after that first response restores the user role, so technicians
+      // receive new requests without having to reload the dashboard.
+      if(currentUser()?.role) startServerSync();
       render();
       if(currentUser()?.role==='customer' && !hasUserLocation()) autoSelectCustomerLocation();
     } else render();
