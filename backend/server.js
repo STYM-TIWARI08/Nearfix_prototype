@@ -487,7 +487,7 @@ function quotePricingAudit(data,booking,items,labour,otherCharges){
   return {policy,catalogItems,catalogPartsTotal,requestedPartsTotal,markupPercent:Number(markupPercent.toFixed(1)),warnings,requiresAdminReview:warnings.length>0,fairnessStatus:warnings.length?'REVIEW_REQUIRED':'WITHIN_REFERENCE'};
 }
 function bookingView(data,b,viewer=null){
-  const view={...b,customer:safeUser(findUser(data,b.customerId)),technician:technicianView(data,technicianFor(data,b.technicianId)),quote:data.quotes.find(q=>q.bookingId===b.id)||null,payment:data.payments.find(p=>p.bookingId===b.id)||null,invoice:data.invoices.find(i=>i.bookingId===b.id)||null,media:Array.isArray(b.media)?b.media:[],workVerification:b.workVerification||{status:'PENDING',notes:''}};
+  const view={...b,customer:safeUser(findUser(data,b.customerId)),technician:technicianView(data,technicianFor(data,b.technicianId)),quote:data.quotes.find(q=>q.bookingId===b.id)||null,payment:data.payments.find(p=>p.bookingId===b.id)||null,invoice:data.invoices.find(i=>i.bookingId===b.id)||null,media:Array.isArray(b.media)?b.media:[]};
   if(b.arrivalVerification){
     view.arrivalVerification={...b.arrivalVerification};
     // The arrival code is visible only to the customer for this booking.
@@ -773,7 +773,7 @@ async function api(req,res,url){
     });
     const t=technicianFor(data,b.technicianId)||matches[0];
     if(!t) return json(res,409,{success:false,message:'No technician found in the selected radius',code:'NO_MATCH'});
-    const ai=analyzeProblem(data,b.problem,b.service,b.urgent); const estimate=priceEstimate(data,ai.service,b.problem,b.location,b.urgent); const distanceFee=Math.max(0,Math.min(80,Math.round(Number(t.distance||0)*12))); const selectedStartingPrice=Number(t.price||0)+distanceFee; const fairMin=Math.max(Number(estimate.min||0),selectedStartingPrice); estimate.min=fairMin; estimate.selectedTechnicianStartingPrice=selectedStartingPrice; estimate.distanceFee=distanceFee; estimate.selectedTechnicianId=t.id; const media=Array.isArray(b.media)?b.media.filter(x=>x&&typeof x.data==='string').slice(0,3):[]; const booking={id:Date.now(),customerId:me.id,technicianId:t.id,service:ai.service,problem:b.problem||'',file:b.file||'',location:b.location||'',latitude:validCoords(customerLat,customerLng)?customerLat:null,longitude:validCoords(customerLat,customerLng)?customerLng:null,date:b.date||'',time:b.time||'',budget:Number(b.budget||0),status:'REQUESTED',urgent:Boolean(b.urgent),estimate:fairMin,estimateRange:estimate,createdAt:now(),statusHistory:[{status:'REQUESTED',at:now(),by:me.id}],paymentStatus:'PENDING',media,workVerification:{status:'PENDING',notes:'Waiting for service evidence and admin review.'},cancellation:null};
+    const ai=analyzeProblem(data,b.problem,b.service,b.urgent); const estimate=priceEstimate(data,ai.service,b.problem,b.location,b.urgent); const distanceFee=Math.max(0,Math.min(80,Math.round(Number(t.distance||0)*12))); const selectedStartingPrice=Number(t.price||0)+distanceFee; const fairMin=Math.max(Number(estimate.min||0),selectedStartingPrice); estimate.min=fairMin; estimate.selectedTechnicianStartingPrice=selectedStartingPrice; estimate.distanceFee=distanceFee; estimate.selectedTechnicianId=t.id; const media=Array.isArray(b.media)?b.media.filter(x=>x&&typeof x.data==='string').slice(0,3):[]; const booking={id:Date.now(),customerId:me.id,technicianId:t.id,service:ai.service,problem:b.problem||'',file:b.file||'',location:b.location||'',latitude:validCoords(customerLat,customerLng)?customerLat:null,longitude:validCoords(customerLat,customerLng)?customerLng:null,date:b.date||'',time:b.time||'',budget:Number(b.budget||0),status:'REQUESTED',urgent:Boolean(b.urgent),estimate:fairMin,estimateRange:estimate,createdAt:now(),statusHistory:[{status:'REQUESTED',at:now(),by:me.id}],paymentStatus:'PENDING',media,cancellation:null};
     data.bookings.push(booking); notify(data,me.id,`Booking request sent to ${t.name}.`); const tu=findUser(data,t.userId); if(tu) notify(data,tu.id,`New ${booking.service} request from ${findUser(data,me.id)?.name||'customer'}.`); audit(data,me,'CREATE','Booking',booking.id,{technicianId:t.id}); await savePersistent(data); return json(res,201,{success:true,booking:bookingView(data,booking,me),technician:t,ai,estimate});
   }
   const arrivalVerifyMatch=url.pathname.match(/^\/api\/bookings\/([^/]+)\/arrival-otp\/verify$/);
@@ -842,7 +842,6 @@ async function api(req,res,url){
       if(!isAdmin && isCustomer && body.status!=='CANCELLED') return json(res,403,{success:false,message:'Customers cannot change technician job status.',code:'ROLE_STATUS_RESTRICTED'});
       if(!isAdmin && isAssignedTechnician && body.status==='ACCEPTED' && b.status!=='REQUESTED') return json(res,409,{success:false,message:'This request is no longer pending.',code:'REQUEST_NOT_PENDING'});
       if(!isAdmin && isAssignedTechnician && b.status==='ARRIVED' && body.status==='INSPECTION') return json(res,409,{success:false,message:'Enter the customer arrival OTP before starting inspection.',code:'ARRIVAL_OTP_REQUIRED'});
-      if(!isAdmin && isAssignedTechnician && body.status==='COMPLETED' && b.workVerification?.status!=='VERIFIED') return json(res,409,{success:false,message:'Admin must verify the technician work evidence before the job can be completed.',code:'WORK_VERIFICATION_REQUIRED'});
       if(!isAdmin && isAssignedTechnician && !transitions[b.status]?.includes(body.status)) return json(res,409,{success:false,message:`Cannot move booking from ${b.status} to ${body.status}.`,code:'INVALID_TRANSITION'});
       if(isCustomer && body.status==='CANCELLED' && ['COMPLETED','CANCELLED'].includes(b.status)) return json(res,409,{success:false,message:'Completed bookings cannot be cancelled.',code:'BOOKING_CLOSED'});
       if(body.status==='ARRIVED' && isAssignedTechnician){
@@ -861,8 +860,7 @@ async function api(req,res,url){
       }
       if(b.status==='COMPLETED' && me.role==='technician'){
         const customer=findUser(data,b.customerId);
-        const verified=b.workVerification?.status==='VERIFIED';
-        if(customer) notify(data,customer.id,verified?`Service completed for booking #${String(b.id).slice(-6)}. Your UPI payment QR is ready.`:`Service completed for booking #${String(b.id).slice(-6)}. Payment will unlock after admin work verification.`);
+        if(customer) notify(data,customer.id,`Service completed for booking #${String(b.id).slice(-6)}. You can now rate the service and choose Cash or Online payment.`);
         if(assignedTech?.userId) notify(data,assignedTech.userId,`Booking #${String(b.id).slice(-6)} completed. Payment status: ${b.paymentStatus||'PENDING'}.`);
       }
     }
@@ -887,14 +885,9 @@ async function api(req,res,url){
     if(dataUrl.length>1500000)return json(res,413,{success:false,message:'Evidence file is too large. Keep each upload under about 1 MB.',code:'MEDIA_TOO_LARGE'});
     const type=String(b.type|| (me.role==='customer'?'CUSTOMER_ISSUE':'WORK_EVIDENCE')).toUpperCase(); const allowedTypes=['CUSTOMER_ISSUE','BEFORE','AFTER','WORK_EVIDENCE','INVOICE']; if(!allowedTypes.includes(type))return json(res,400,{success:false,message:'Invalid evidence type',code:'INVALID_MEDIA_TYPE'});
     booking.media=Array.isArray(booking.media)?booking.media:[]; booking.media.push({id:id('media'),type,name:String(b.name||'Evidence'),data:dataUrl,uploadedBy:me.id,uploadedRole:me.role,createdAt:now()});
-    if(me.role==='technician'&&['AFTER','WORK_EVIDENCE'].includes(type)) booking.workVerification={...(booking.workVerification||{}),status:'PENDING',notes:'Technician evidence submitted. Waiting for admin verification.'};
+    // Work photos stay optional and informational; they never block completion or payment.
     audit(data,me,'UPLOAD','BookingMedia',booking.id,{type}); await savePersistent(data); return json(res,201,{success:true,booking:bookingView(data,booking)});
   }
-  const verifyBookingMatch=url.pathname.match(/^\/api\/admin\/bookings\/([^/]+)\/verify$/);
-  if(verifyBookingMatch&&req.method==='PATCH'){
-    if(!me||me.role!=='admin')return json(res,403,{success:false,message:'Admin access required',code:'FORBIDDEN'}); const booking=data.bookings.find(x=>String(x.id)===String(verifyBookingMatch[1])); if(!booking)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'}); const b=await readBody(req); const approved=Boolean(b.approved); booking.workVerification={status:approved?'VERIFIED':'REJECTED',notes:String(b.notes||'').slice(0,500),verifiedBy:me.id,verifiedAt:now()}; if(approved)notify(data,booking.customerId,`NearFix admin verified the work evidence for booking #${String(booking.id).slice(-6)}.`); else notify(data,booking.technicianId?technicianFor(data,booking.technicianId)?.userId:null,`Admin requested a new work-evidence review for booking #${String(booking.id).slice(-6)}.`); audit(data,me,approved?'VERIFY_WORK':'REJECT_WORK','Booking',booking.id,{approved}); await savePersistent(data); return json(res,200,{success:true,booking:bookingView(data,booking,me)});
-  }
-
   if(req.method==='POST'&&url.pathname==='/api/quotes'){
     if(!me||!['technician','admin'].includes(me.role))return json(res,403,{success:false,message:'Technician access required',code:'FORBIDDEN'}); const b=await readBody(req); const booking=data.bookings.find(x=>x.id===b.bookingId); if(!booking)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'}); if(me.role==='technician'&&booking.technicianId!==me.id&&technicianFor(data,booking.technicianId)?.userId!==me.id)return json(res,403,{success:false,message:'Forbidden',code:'FORBIDDEN'});
     const items=Array.isArray(b.items)?b.items:[]; const auditPrice=quotePricingAudit(data,booking,items,Number(b.labour||0),Number(b.otherCharges||0)); const catalogItems=auditPrice.catalogItems; const catalogParts=auditPrice.catalogPartsTotal; const total=Number(b.labour||0)+catalogParts+Number(b.otherCharges||0); const q={id:id('q'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,labour:Number(b.labour||0),parts:catalogParts,otherCharges:Number(b.otherCharges||0),items:catalogItems,notes:b.notes||'',total:total||Number(b.total||booking.estimate),reason:b.reason||'Inspection-based quotation',status:'PENDING',createdAt:now(),pricingAudit:auditPrice}; data.quotes.push(q); booking.status='AWAITING_APPROVAL'; booking.statusHistory.push({status:'AWAITING_APPROVAL',at:now(),by:me.id}); notify(data,booking.customerId,`A quotation of ₹${q.total.toLocaleString('en-IN')} is ready for approval.`); audit(data,me,'CREATE','Quote',q.id); await savePersistent(data); return json(res,201,{success:true,quote:q});
@@ -912,7 +905,7 @@ async function api(req,res,url){
     const assigned=technicianFor(data,booking.technicianId);
     const allowed=me.role==='admin'||booking.customerId===me.id||assigned?.userId===me.id;
     if(!allowed)return json(res,403,{success:false,message:'You can only access the payment QR for your booking or assigned job.',code:'FORBIDDEN'});
-    if(booking.status!=='COMPLETED'||booking.workVerification?.status!=='VERIFIED')return json(res,409,{success:false,message:'Payment QR unlocks after service completion and admin verification.',code:'PAYMENT_LOCKED'});
+    if(booking.status!=='COMPLETED')return json(res,409,{success:false,message:'Payment QR is available after service completion.',code:'PAYMENT_LOCKED'});
     const upiId=String(assigned?.upiId||'').trim();
     if(!upiId)return json(res,409,{success:false,message:'Technician UPI account is not configured.',code:'UPI_NOT_CONFIGURED'});
     const amount=Number(booking.total||booking.estimate||0);
@@ -929,7 +922,7 @@ async function api(req,res,url){
     if(!me||me.role!=='customer')return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'});
     if(!RAZORPAY_KEY_ID||!RAZORPAY_KEY_SECRET)return json(res,503,{success:false,message:'Razorpay test keys are not configured. Add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to .env.',code:'PAYMENT_NOT_CONFIGURED'});
     const b=await readBody(req); const booking=data.bookings.find(x=>String(x.id)===String(b.bookingId)); if(!booking||booking.customerId!==me.id)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'});
-    if(booking.status!=='COMPLETED' && booking.workVerification?.status!=='VERIFIED') return json(res,409,{success:false,message:'Payment unlocks after service completion and admin verification.',code:'PAYMENT_LOCKED'});
+    if(booking.status!=='COMPLETED') return json(res,409,{success:false,message:'Payment unlocks after service completion.',code:'PAYMENT_LOCKED'});
     const amount=Math.round(Number(booking.total||booking.estimate||0)*100); if(amount<=0)return json(res,400,{success:false,message:'Invalid payment amount',code:'INVALID_AMOUNT'});
     const authHeader=Buffer.from(`${RAZORPAY_KEY_ID}:${RAZORPAY_KEY_SECRET}`).toString('base64');
     const response=await fetch('https://api.razorpay.com/v1/orders',{method:'POST',headers:{Authorization:`Basic ${authHeader}`,'Content-Type':'application/json'},body:JSON.stringify({amount,currency:'INR',receipt:`nfx_${String(booking.id).slice(-10)}`,notes:{bookingId:String(booking.id),customerId:me.id}})});
@@ -949,7 +942,7 @@ async function api(req,res,url){
     if(!me||me.role!=='customer')return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'});
     const b=await readBody(req); const booking=data.bookings.find(x=>String(x.id)===String(b.bookingId));
     if(!booking||booking.customerId!==me.id)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'});
-    if(booking.status!=='COMPLETED'||booking.workVerification?.status!=='VERIFIED')return json(res,409,{success:false,message:'Payment unlocks only after completed work and admin verification.',code:'PAYMENT_LOCKED'});
+    if(booking.status!=='COMPLETED')return json(res,409,{success:false,message:'Payment unlocks after service completion.',code:'PAYMENT_LOCKED'});
     if(data.payments.some(p=>String(p.bookingId)===String(booking.id)&&['SUCCESS','PENDING_CONFIRMATION'].includes(p.status)))return json(res,409,{success:false,message:'A payment is already pending or completed for this booking.',code:'PAYMENT_EXISTS'});
     const method=String(b.method||'CASH').toUpperCase(); if(!['CASH','UPI'].includes(method))return json(res,400,{success:false,message:'Choose Cash or UPI.',code:'INVALID_METHOD'});
     if(method==='UPI'&&!String(b.reference||'').trim())return json(res,400,{success:false,message:'UPI reference is required.',code:'REFERENCE_REQUIRED'});
@@ -968,7 +961,7 @@ async function api(req,res,url){
   }
 
   if(req.method==='POST'&&url.pathname==='/api/payments'){
-    if(!me||me.role!=='customer')return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'}); const b=await readBody(req); const booking=data.bookings.find(x=>x.id===b.bookingId); if(!booking||booking.customerId!==me.id)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'}); if(booking.status!=='COMPLETED'&&booking.workVerification?.status!=='VERIFIED')return json(res,409,{success:false,message:'Payment unlocks after service completion and admin verification.',code:'PAYMENT_LOCKED'}); const amount=Number(booking.total||booking.estimate||0); const p={id:id('pay'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,amount,method:b.method||'Cash',status:'SUCCESS',transactionId:`NFX${Date.now().toString(36).toUpperCase()}`,createdAt:now(),mode:'offline-demo'}; data.payments.push(p);booking.paymentStatus='PAID'; notify(data,technicianFor(data,booking.technicianId)?.userId,`Payment recorded for booking ${String(booking.id).slice(-6)}.`); audit(data,me,'PAYMENT_SUCCESS','Payment',p.id,{amount,mode:'offline-demo'});await savePersistent(data);return json(res,201,{success:true,payment:p});
+    if(!me||me.role!=='customer')return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'}); const b=await readBody(req); const booking=data.bookings.find(x=>x.id===b.bookingId); if(!booking||booking.customerId!==me.id)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'}); if(booking.status!=='COMPLETED')return json(res,409,{success:false,message:'Payment unlocks after service completion.',code:'PAYMENT_LOCKED'}); const amount=Number(booking.total||booking.estimate||0); const p={id:id('pay'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,amount,method:b.method||'Cash',status:'SUCCESS',transactionId:`NFX${Date.now().toString(36).toUpperCase()}`,createdAt:now(),mode:'offline-demo'}; data.payments.push(p);booking.paymentStatus='PAID'; notify(data,technicianFor(data,booking.technicianId)?.userId,`Payment recorded for booking ${String(booking.id).slice(-6)}.`); audit(data,me,'PAYMENT_SUCCESS','Payment',p.id,{amount,mode:'offline-demo'});await savePersistent(data);return json(res,201,{success:true,payment:p});
   }
   if(req.method==='GET'&&url.pathname==='/api/invoices'){
     if(!me)return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); return json(res,200,{success:true,invoices:data.invoices.filter(i=>me.role==='admin'||i.customerId===me.id||i.technicianId===me.id)});

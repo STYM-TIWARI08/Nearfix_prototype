@@ -1282,6 +1282,7 @@ function adminPage(){
         <button class="${state.adminTab==='users'?'active':''}" onclick="adminTab(this,'users')">Users</button><button class="${state.adminTab==='admins'?'active':''}" onclick="adminTab(this,'admins')">Admins</button>
         <button class="${state.adminTab==='technicians'?'active':''}" onclick="adminTab(this,'technicians')">Technicians</button>
         <button class="${state.adminTab==='bookings'?'active':''}" onclick="adminTab(this,'bookings')">Bookings</button>
+        <button class="${state.adminTab==='reviews'?'active':''}" onclick="adminTab(this,'reviews')">Customer ratings</button>
         <button class="${state.adminTab==='complaints'?'active':''}" onclick="adminTab(this,'complaints')">Complaints</button><button class="${state.adminTab==='parts'?'active':''}" onclick="adminTab(this,'parts')">Parts</button>
         <button class="${state.adminTab==='offers'?'active':''}" onclick="adminTab(this,'offers')">Offers</button><button class="${state.adminTab==='data'?'active':''}" onclick="adminTab(this,'data')">All Data</button>
       </div>
@@ -1362,6 +1363,7 @@ function adminTabContent(tab){
   if(tab==='admins')return adminAdmins();
   if(tab==='technicians')return adminTechs();
   if(tab==='bookings')return adminBookings();
+  if(tab==='reviews')return adminReviews();
   if(tab==='complaints')return adminComplaints();
   if(tab==='payments')return adminPayments();
   if(tab==='parts')return adminParts();
@@ -1379,7 +1381,7 @@ function adminTab(btn,tab){
   if(btn)btn.classList.add('active');
   else {
     const buttons=document.querySelectorAll('.admin-tabs button');
-    const names=['overview','users','admins','technicians','bookings','complaints','parts','offers','data'];
+    const names=['overview','users','admins','technicians','bookings','reviews','complaints','parts','offers','data'];
     const index=names.indexOf(state.adminTab);
     if(index>=0 && buttons[index])buttons[index].classList.add('active');
   }
@@ -1418,6 +1420,15 @@ function adminTechs(){
 function adminBookings(){
   const list=db.adminAllBookings||db.bookings;
   return `<section class="panel table-panel"><div class="panel-head"><div><b>All service requests & bookings</b><small>Customer → assigned technician lifecycle.</small></div></div>${list.slice().reverse().map(b=>bookingRow(b,false)).join('')||'<p class="muted">No bookings.</p>'}</section>`;
+}
+
+// Customer feedback gets its own admin view so ratings are easy to find.
+function adminReviews(){
+  const reviews=db.adminAllReviews||[];
+  const users=db.adminAllUsers||[];
+  const technicians=db.adminAllTechnicians||[];
+  const bookings=db.adminAllBookings||[];
+  return `<section class="panel table-panel"><div class="panel-head"><div><b>Customer ratings & feedback</b><small>${reviews.length} reviews submitted after completed services.</small></div></div>${reviews.slice().reverse().map(r=>{const customer=users.find(u=>u.id===r.customerId);const technician=technicians.find(t=>String(t.id)===String(r.technicianId));const booking=bookings.find(b=>String(b.id)===String(r.bookingId));return `<article class="review-card"><div class="panel-head"><div><b>${esc(customer?.name||'Customer')}</b><small>${esc(booking?.service||'Service')} · Technician: ${esc(technician?.name||'—')} · Booking #${String(r.bookingId).slice(-6)}</small></div><span class="rating">${'★'.repeat(Math.max(0,Math.min(5,Number(r.rating)||0)))}${'☆'.repeat(5-Math.max(0,Math.min(5,Number(r.rating)||0)))}</span></div><p>${esc(r.text||'No written comment.')}</p><small class="muted">${esc(r.createdAt?new Date(r.createdAt).toLocaleString():'')}</small></article>`}).join('')||'<p class="muted">No customer ratings yet. Ratings appear here after a customer reviews a completed service.</p>'}</section>`;
 }
 
 function adminComplaints(){
@@ -3755,7 +3766,7 @@ function applyServerState(payload){
   if(payload.technicians) db.techs = payload.technicians.map(t=>({...t,techId:t.id,userId:techUserId(t)??t.userId??t.user_id}));
   if(payload.parts) db.parts = payload.parts;
   if(payload.bookings) db.bookings = payload.bookings.map(b=>({
-    ...b, id:b.id, customerId:b.customerId, techId:b.technicianId, service:b.service, problem:b.problem, file:b.file||'', media:Array.isArray(b.media)?b.media:[], workVerification:b.workVerification||{status:'PENDING',notes:''}, arrivalVerification:b.arrivalVerification ? {...b.arrivalVerification, otp:(b.arrivalVerification.otp!=null?String(b.arrivalVerification.otp).padStart(6,'0'):undefined)} : null, cancellation:b.cancellation||null, location:b.location||'', date:b.date||'', time:b.time||'', status:nfStatus(b.status), estimate:Number(b.estimate||b.estimateRange?.min||0), estimateRange:b.estimateRange, total:b.total||b.quote?.total||0, urgent:Boolean(b.urgent), paymentStatus:b.paymentStatus, quote:b.quote||null, customer:b.customer||null, technician:b.technician||null, payment:b.payment||null, invoice:b.invoice||null
+    ...b, id:b.id, customerId:b.customerId, techId:b.technicianId, service:b.service, problem:b.problem, file:b.file||'', media:Array.isArray(b.media)?b.media:[], arrivalVerification:b.arrivalVerification ? {...b.arrivalVerification, otp:(b.arrivalVerification.otp!=null?String(b.arrivalVerification.otp).padStart(6,'0'):undefined)} : null, cancellation:b.cancellation||null, location:b.location||'', date:b.date||'', time:b.time||'', status:nfStatus(b.status), estimate:Number(b.estimate||b.estimateRange?.min||0), estimateRange:b.estimateRange, total:b.total||b.quote?.total||0, urgent:Boolean(b.urgent), paymentStatus:b.paymentStatus, quote:b.quote||null, customer:b.customer||null, technician:b.technician||null, payment:b.payment||null, invoice:b.invoice||null
   }));
   if(payload.reviews) db.reviews = payload.reviews.map(r=>({id:r.id,bookingId:r.bookingId,customerId:r.customerId,techId:r.technicianId,rating:r.rating,text:r.text,created:r.createdAt}));
   if(payload.payments) db.payments = payload.payments.map(p=>({id:p.id,bookingId:p.bookingId,techId:p.technicianId,customerId:p.customerId,amount:p.amount,status:p.status==='SUCCESS'?'Paid':p.status,method:p.method,transactionId:p.transactionId,reference:p.reference,createdAt:p.createdAt}));
@@ -4162,21 +4173,9 @@ window.uploadBookingEvidence=async function(id,type='WORK_EVIDENCE'){
     bookingDetails(id);
     const updatedModal=modal().querySelector('.modal-box');
     if(updatedModal) updatedModal.scrollTop=scrollTop;
-    toast('Evidence uploaded. Admin can review it now.');
+    toast('Optional work photo uploaded and shared.');
   }catch(e){toast(e.message);}
   finally{buttons.forEach(button=>{button.disabled=false;if(button.dataset.originalLabel)button.textContent=button.dataset.originalLabel;});}
-};
-window.verifyBookingEvidence=async function(id,approved){
-  const note=document.getElementById(`verify-note-${id}`)?.value.trim()||'';
-  try{
-    await nfFetch(`/api/admin/bookings/${id}/verify`,{method:'PATCH',body:JSON.stringify({approved,notes:note})});
-    applyServerState(await nfFetch('/api/bootstrap'));
-    const scrollTop=modal().querySelector('.modal-box')?.scrollTop||0;
-    bookingDetails(id);
-    const updatedModal=modal().querySelector('.modal-box');
-    if(updatedModal) updatedModal.scrollTop=scrollTop;
-    toast(approved?'Work verified. Customer can pay.':'Evidence rejected; technician needs to resubmit.');
-  }catch(e){toast(e.message);}
 };
 
 /* Replace booking details with a trust-first workflow. */
@@ -4187,25 +4186,23 @@ bookingDetails = async function(id){
   const canCancelCustomer=role==='customer' && !['Completed','Cancelled','Service started','Inspection','Awaiting approval'].includes(b.status);
   const canCancelTech=role==='technician' && ['Requested','Accepted','On the way','Arrived'].includes(b.status);
   const evidence=media.map(m=>`<div class="evidence-card"><img src="${esc(m.data)}" alt="${esc(m.name||'Evidence')}" loading="lazy"><div><b>${esc(m.type)}</b><small>${esc(m.name||'Evidence')} · ${esc(m.uploadedRole||'user')}</small></div></div>`).join('');
-  const verification=b.workVerification||{status:'PENDING',notes:''};
   modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box wide">
     <div class="modal-head"><div><span class="eyebrow">SERVICE CONTROL · #${String(id).slice(-6)}</span><h2>${esc(b.service)}</h2><p class="muted">${esc(b.date||'')} · ${esc(b.time||'')} · ${esc(b.location||'Location not shared')}</p></div><button class="close" onclick="closeModal()">×</button></div>
     <div class="status-banner"><span class="status">${esc(b.status)}</span><b>${money(b.total||b.estimate||0)}</b></div><div class="payment-status-strip"><span>💳 Payment: <b>${esc(b.paymentStatus||'PENDING')}</b></span>${b.payment?.method?`<span>Method: <b>${esc(b.payment.method)}</b></span>`:''}${b.payment?.transactionId?`<span>Txn: <b>${esc(b.payment.transactionId)}</b></span>`:''}${b.invoice?.number?`<span>Invoice: <b>${esc(b.invoice.number)}</b></span>`:''}</div>
-    <div class="trust-strip"><span>🛡️ Admin verification: <b>${esc(verification.status)}</b></span><span>💰 Transparent quote: <b>${quote?'Itemized':'Pending inspection'}</b></span><span>📍 GPS: <b>${b.latitude&&b.longitude?'Captured':'Address only'}</b></span></div>
+    <div class="trust-strip"><span>💰 Transparent quote: <b>${quote?'Itemized':'Pending inspection'}</b></span><span>📍 GPS: <b>${b.latitude&&b.longitude?'Captured':'Address only'}</b></span></div>
     <div class="detail-grid"><div class="panel-lite"><small>Problem reported</small><p>${esc(b.problem||'—')}</p></div><div class="panel-lite"><small>Price protection</small><p>Parts use the shared NearFix catalog. Additional work requires an itemized quotation and customer approval.</p></div>${role==='technician'?`<div class="panel-lite"><small>Customer</small><b>${esc(b.customer?.name||'Customer')}</b><p>${esc(b.customer?.phone||'Phone not shared')} · ${esc(b.customer?.email||'')}</p></div>`:''}${role==='customer'&&t?`<div class="panel-lite"><small>Assigned technician</small><b>${esc(t.name)}</b><p>${esc(t.service)} · ${t.distance??'—'} km · ★ ${t.rating}</p></div>`:''}</div>
+    ${role==='customer'&&b.status==='Completed'&&!String(b.paymentStatus||'').includes('PAID')?`<section class="panel-lite"><b>Pay your technician</b><small>Choose how you want to pay for this completed service.</small><div class="payment-choice-grid payment-choice-two"><button class="pay-option" onclick="closeModal();paymentModal(${id})"><span>💵</span><b>Cash or Online</b><small>Choose payment method</small></button><button class="pay-option" onclick="closeModal();showOnlinePayment(${id})"><span>▦</span><b>Online QR</b><small>Scan and pay with UPI</small></button></div></section>`:''}
     <div class="timeline">${timeline(b)}</div>
     ${role==='customer'&&b.status==='Arrived'&&b.arrivalVerification?.status==='PENDING'?`<section class="arrival-otp-card"><div><span class="eyebrow">ARRIVAL VERIFICATION</span><h3>Technician has arrived</h3><p>Your arrival OTP is shown here directly. Share it with the technician only after they have arrived.</p></div><div class="arrival-otp-display"><small>YOUR ARRIVAL OTP</small><strong>${b.arrivalVerification?.otp!=null?esc(String(b.arrivalVerification.otp).replace(/\D/g,'').padStart(6,'0').slice(-6)):'------'}</strong><span>No mobile number is required.</span></div></section>`:''}
     ${role==='technician'&&b.status==='Arrived'?`<section class="arrival-otp-card technician"><div><span class="eyebrow">CUSTOMER CHECK-IN</span><h3>Get customer OTP</h3><p>Ask the customer for the arrival OTP. Do not start inspection until NearFix verifies it.</p></div><button class="btn primary" onclick="verifyArrivalOtp(${id})">🔐 Verify customer OTP</button></section>`:''}
     ${media.length?`<section class="evidence-section"><div class="panel-head"><div><b>Service evidence</b><small>Visible to customer, technician and admin.</small></div></div><div class="evidence-grid">${evidence}</div></section>`:''}
-    ${role==='technician' && ['Arrived','Inspection','Service started','Completed'].includes(b.status)?`<section class="panel-lite evidence-upload"><b>Upload work evidence</b><small>Send a clear before/after/service photo. Admin reviews it before payment release.</small><input id="evidence-file-${id}" type="file" accept="image/*,video/*"><small>Large photos compress automatically. Videos must be under 900 KB.</small><div class="inline-actions"><button class="btn secondary" onclick="uploadBookingEvidence(${id},'BEFORE')">📷 Upload before</button><button class="btn primary" onclick="uploadBookingEvidence(${id},'AFTER')">📷 Upload after/work</button></div></section>`:''}
-    ${role==='admin'?`<section class="panel-lite"><div class="panel-head"><div><b>Admin verification</b><small>Review work photos and verify the completed job.</small></div><span class="badge ${verification.status==='VERIFIED'?'green':''}">${esc(verification.status)}</span></div>${media.length?`<div class="evidence-grid">${evidence}</div>`:'<p class="muted">No evidence uploaded yet.</p>'}<textarea id="verify-note-${id}" placeholder="Verification note / reason">${esc(verification.notes||'')}</textarea><div class="inline-actions"><button class="btn danger" onclick="verifyBookingEvidence(${id},false)">Reject / Request resubmission</button><button class="btn primary" onclick="verifyBookingEvidence(${id},true)">✓ Verify work</button></div></section>`:''}
+    ${role==='technician' && ['Arrived','Inspection','Service started','Completed'].includes(b.status)?`<section class="panel-lite evidence-upload"><b>Optional work photos</b><small>Share before/after photos with the customer and admin. Photos are optional and do not affect job completion or payment.</small><input id="evidence-file-${id}" type="file" accept="image/*,video/*"><small>Large photos compress automatically. Videos must be under 900 KB.</small><div class="inline-actions"><button class="btn secondary" onclick="uploadBookingEvidence(${id},'BEFORE')">📷 Upload before</button><button class="btn primary" onclick="uploadBookingEvidence(${id},'AFTER')">📷 Upload after/work</button></div></section>`:''}
     ${quote?`<section class="panel-lite"><div class="match-title"><b>Itemized quotation</b><span class="badge ${quote.status==='APPROVED'?'green':''}">${esc(quote.status)}</span></div><p>${esc(quote.reason||'')}</p><div class="review-grid"><div><small>Labour</small><b>${money(quote.labour)}</b></div><div><small>Catalog parts</small><b>${money(quote.parts)}</b></div><div><small>Other</small><b>${money(quote.otherCharges)}</b></div><div><small>Total</small><b>${money(quote.total)}</b></div></div>${quote.pricingAudit?`<div class="price-audit ${quote.pricingAudit.requiresAdminReview?'warn':'ok'}"><b>${quote.pricingAudit.requiresAdminReview?'⚠️ Admin price review required':'✓ Within shared catalog reference'}</b><small>Parts reference: ${money(quote.pricingAudit.catalogPartsTotal)} · markup: ${Number(quote.pricingAudit.markupPercent||0).toFixed(1)}%</small>${(quote.pricingAudit.warnings||[]).map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:''}${role==='customer'&&quote.status==='PENDING'?`<div class="modal-footer"><button class="btn ghost" onclick="approveQuote(${id},'reject')">Decline</button><button class="btn primary" onclick="approveQuote(${id},'approve')">Approve ₹${Number(quote.total).toLocaleString('en-IN')}</button></div>`:''}</section>`:''}
     ${b.cancellation?`<div class="location-note"><span>✕</span><div><b>Cancelled</b><small>${esc(b.cancellation.reason||'No reason')} · ${esc(b.cancellation.role||'user')}</small>${b.refundStatus?`<small>Refund: ${esc(b.refundStatus)}</small>`:''}</div></div>`:''}
     <div class="modal-footer">
       ${role==='technician'&&b.status==='Inspection'?`<button class="btn primary" onclick="closeModal();openQuote(${id})">Create quotation →</button>`:''}
       ${role==='technician'&&nextTech[b.status]?`<button class="btn primary" onclick="closeModal();advanceBooking(${id},'${nextTech[b.status]}')">${nextTech[b.status]==='Completed'?'Complete service':'Update to '+nextTech[b.status]} →</button>`:''}
-      ${role==='customer'&&b.status==='Completed'&&quote?.status==='APPROVED'&&verification.status==='VERIFIED'&&!b.paymentStatus?.includes('PAID')?`<button class="btn primary" onclick="closeModal();paymentModal(${id})">💳 Pay securely</button>`:''}
-      ${role==='customer'&&b.status==='Completed'&&quote?.status==='APPROVED'&&verification.status!=='VERIFIED'&&!b.paymentStatus?.includes('PAID')?`<span class="muted">Payment unlocks after admin verifies work evidence.</span>`:''}
+      ${role==='customer'&&b.status==='Completed'&&!String(b.paymentStatus||'').includes('PAID')?`<button class="btn primary" onclick="closeModal();paymentModal(${id})">💳 Choose Cash or Online</button>`:''}
       ${b.status==='On the way'&&role==='customer'?`<button class="btn secondary" onclick="tracking(${id})">📍 Live Map</button>`:''}
       ${role==='customer'&&t?.phone?`<button class="btn whatsapp-btn" onclick="whatsappTechnician(${id})">💬 WhatsApp Technician</button>`:''}
       ${role==='customer'&&canCancelCustomer?`<button class="btn danger" onclick="cancelBooking(${id})">Cancel booking</button>`:''}
@@ -4222,15 +4219,18 @@ window.bookingDetails=bookingDetails;
 /* Razorpay Standard Checkout, test-ready. The server creates the order and verifies the signature. */
 window.paymentModal=async function(id){
   const b=db.bookings.find(x=>String(x.id)===String(id)); if(!b)return;
-  let qr=null; try{qr=await nfFetch(`/api/payments/${encodeURIComponent(id)}/qr`);}catch(e){qr={error:e.message};}
-  let cfg={enabled:false}; try{cfg=await nfFetch('/api/payment/config');}catch(e){}
   modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box wide">
     <div class="modal-head"><div><span class="eyebrow">FINAL PAYMENT</span><h2>Pay for completed service</h2><p class="muted">Booking #${String(id).slice(-6)}</p></div><button class="close" onclick="closeModal()">×</button></div>
     <div class="pay-total"><span>Final approved amount</span><b>${money(b.total||b.estimate)}</b></div>
-    ${qr&&!qr.error?`<section class="upi-qr-card"><div class="upi-qr-copy"><span class="badge green">PAYMENT QR READY</span><h3>Scan & pay with any UPI app</h3><p>Scan this QR using GPay, PhonePe, Paytm or another UPI app. Pay only the approved NearFix amount.</p><div class="detail-grid"><div class="panel-lite"><small>Pay to</small><b>${esc(qr.payee)}</b></div><div class="panel-lite"><small>UPI ID</small><b>${esc(qr.upiId)}</b></div><div class="panel-lite"><small>Amount</small><b>${money(qr.amount)}</b></div></div></div><div class="upi-qr-image"><img src="${esc(qr.qrImageUrl)}" alt="NearFix UPI payment QR"><small>Booking #${String(id).slice(-6)}</small><a class="btn secondary" href="${esc(qr.upiUri)}">Open UPI app</a></div></section>`:`<div class="location-note"><span>ℹ️</span><div><b>UPI QR unavailable</b><small>${esc(qr?.error||'Technician payment account is not configured yet.')}</small></div></div>`}
-    <div class="payment-choice-grid payment-choice-two"><button class="pay-option" onclick="openManualPayment(${id},'UPI')"><span>📲</span><b>UPI</b><small>Scan QR, then submit UTR/reference</small></button><button class="pay-option" onclick="openManualPayment(${id},'CASH')"><span>💵</span><b>Cash</b><small>Technician confirms cash received</small></button>${cfg.enabled?`<button class="pay-option" onclick="startRazorpayPayment(${id})"><span>🔒</span><b>Secure Checkout</b><small>Razorpay test gateway</small></button>`:''}</div>
+    <div class="payment-choice-grid payment-choice-two"><button class="pay-option" onclick="showOnlinePayment(${id})"><span>📲</span><b>Online pay</b><small>UPI QR and transaction reference</small></button><button class="pay-option" onclick="openManualPayment(${id},'CASH')"><span>💵</span><b>Cash pay</b><small>Technician confirms cash received</small></button></div>
     <div class="location-note"><span>🛡️</span><div><b>Payment status is shared</b><small>After verification, the paid status and invoice are visible to customer, technician and admin.</small></div></div>
   </div></div>`;
+};
+// Only fetch and reveal the technician's QR after the customer chooses online payment.
+window.showOnlinePayment=async function(id){
+  const b=db.bookings.find(x=>String(x.id)===String(id));if(!b)return;
+  let qr=null;try{qr=await nfFetch(`/api/payments/${encodeURIComponent(id)}/qr`);}catch(e){qr={error:e.message};}
+  modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box wide"><div class="modal-head"><div><span class="eyebrow">ONLINE PAYMENT</span><h2>Scan and pay</h2><p class="muted">Booking #${String(id).slice(-6)} · ${money(b.total||b.estimate||0)}</p></div><button class="close" onclick="closeModal()">×</button></div>${qr&&!qr.error?`<section class="upi-qr-card"><div class="upi-qr-copy"><span class="badge green">UPI PAYMENT</span><h3>Pay the assigned technician</h3><p>Scan this QR in your UPI app, then enter the UTR/reference number.</p><div class="detail-grid"><div class="panel-lite"><small>Pay to</small><b>${esc(qr.payee)}</b></div><div class="panel-lite"><small>UPI ID</small><b>${esc(qr.upiId)}</b></div><div class="panel-lite"><small>Amount</small><b>${money(qr.amount)}</b></div></div></div><div class="upi-qr-image"><img src="${esc(qr.qrImageUrl)}" alt="UPI QR code"><a class="btn secondary" href="${esc(qr.upiUri)}">Open UPI app</a></div></section><div class="upi-pay-box"><label>UPI transaction / UTR reference</label><input id="manual-payment-ref" placeholder="Enter reference after paying"><small class="muted">The payment will show as pending until the technician or admin confirms receipt.</small></div><div class="modal-footer"><button class="btn ghost" onclick="paymentModal(${id})">Back</button><button class="btn primary" onclick="submitManualPayment(${id},'UPI')">Submit online payment →</button></div>`:`<div class="location-note"><span>ℹ️</span><div><b>Online QR unavailable</b><small>${esc(qr?.error||'Technician payment account is not configured yet.')}</small></div></div><div class="modal-footer"><button class="btn ghost" onclick="paymentModal(${id})">Back</button></div>`}</div></div>`;
 };
 window.openManualPayment=function(id,method){
   const b=db.bookings.find(x=>String(x.id)===String(id)); if(!b)return;

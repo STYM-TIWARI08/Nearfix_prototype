@@ -190,12 +190,12 @@
       ],
       "upiId": "demo.tech01@nearfix",
       "demoProfile": true,
-      "lat": 28.4700947,
-      "lng": 77.4934566,
-      "accuracy": 141,
+      "lat": 28.47024015,
+      "lng": 77.49381745,
+      "accuracy": 99,
       "heading": 0,
       "speed": 0,
-      "locationUpdatedAt": "2026-10-10T11:30:11.112Z",
+      "locationUpdatedAt": "2026-10-10T11:46:11.608Z",
       "locationSource": "technician-gps"
     },
     {
@@ -664,7 +664,7 @@
       "date": "2026-10-11",
       "time": "5:00 PM – 6:00 PM",
       "budget": 500,
-      "status": "IN_PROGRESS",
+      "status": "COMPLETED",
       "urgent": false,
       "estimate": 400,
       "estimateRange": {
@@ -720,13 +720,20 @@
           "status": "IN_PROGRESS",
           "at": "2026-10-10T11:18:19.184Z",
           "by": "demo-tech-user-01"
+        },
+        {
+          "status": "COMPLETED",
+          "at": "2026-10-10T11:33:57.546Z",
+          "by": "demo-tech-user-01"
         }
       ],
       "paymentStatus": "PENDING",
       "media": [],
       "workVerification": {
-        "status": "PENDING",
-        "notes": "Waiting for service evidence and admin review."
+        "status": "VERIFIED",
+        "notes": "Waiting for service evidence and admin review.",
+        "verifiedBy": "demo-admin-user",
+        "verifiedAt": "2026-10-10T11:32:51.958Z"
       },
       "cancellation": null,
       "arrivalVerification": {
@@ -742,6 +749,46 @@
   "reviews": [],
   "messages": [],
   "notifications": [
+    {
+      "id": "n_944c9b30-0a2e-4e3b-9ee5-f00777e87cae",
+      "userId": "demo-customer-user",
+      "text": "Booking #995376 is now COMPLETED.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:33:57.547Z"
+    },
+    {
+      "id": "n_89c1b370-45e8-4dc1-a98c-88c1d31e6673",
+      "userId": "demo-tech-user-01",
+      "text": "Booking #995376 completed. Payment status: PENDING.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:33:57.547Z"
+    },
+    {
+      "id": "n_07f469dd-2eee-49c4-8815-6fc830061910",
+      "userId": "demo-customer-user",
+      "text": "Service completed for booking #995376. Your UPI payment QR is ready.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:33:57.547Z"
+    },
+    {
+      "id": "n_7c014700-e305-4e49-bd2e-ffae3bb78e21",
+      "userId": "demo-customer-user",
+      "text": "NearFix admin verified the work evidence for booking #995376.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:32:51.958Z"
+    },
+    {
+      "id": "n_2074aa15-7a22-448c-9243-4cd48213b6eb",
+      "userId": "demo-customer-user",
+      "text": "NearFix admin verified the work evidence for booking #995376.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:32:50.486Z"
+    },
     {
       "id": "n_6dff1b03-69c4-4912-9c3f-903ee9be41a1",
       "userId": "demo-customer-user",
@@ -1025,6 +1072,39 @@
         "status": "IN_PROGRESS"
       },
       "createdAt": "2026-10-10T11:18:19.184Z"
+    },
+    {
+      "id": "audit_8b61d41f-b2a1-4fb7-99e5-e0c87ca6f1b0",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY_WORK",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "approved": true
+      },
+      "createdAt": "2026-10-10T11:32:50.486Z"
+    },
+    {
+      "id": "audit_94aa6a86-b90f-46cd-819e-64f800c9fb31",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY_WORK",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "approved": true
+      },
+      "createdAt": "2026-10-10T11:32:51.958Z"
+    },
+    {
+      "id": "audit_5dc0fc72-befa-49d3-8ff1-7e0cffcc6ab3",
+      "actorId": "demo-tech-user-01",
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "status": "COMPLETED"
+      },
+      "createdAt": "2026-10-10T11:33:57.547Z"
     }
   ],
   "pricingRules": [],

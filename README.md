@@ -102,7 +102,7 @@ Copy `.env.example` to `.env` when enabling TinyFish or the optional Razorpay te
 
 - **Customer** can discover 4–5+ nearby professionals when the selected radius contains them, create requests with issue photos/videos, cancel eligible bookings, chat with the assigned technician, track GPS, approve/reject itemized quotations, pay and review.
 - **Technician** sees only jobs assigned to their own technician profile. They receive customer requests, accept/reject pending requests, cancel eligible jobs with a reason, update job status in order, share live GPS, upload before/after evidence, create catalog-backed quotations and view customer contact details for assigned jobs.
-- **Admin** has a separate control center with platform-wide users, technicians, bookings, quotes, payments, invoices, reviews, messages, notifications, disputes, AI analyses, audit logs, parts and evidence. Admin can open job media, verify/reject work evidence, review price exceptions and manage technician verification.
+- **Admin** has a separate control center with platform-wide users, technicians, bookings, customer ratings, quotes, payments, invoices, messages, notifications, disputes, AI analyses, audit logs and parts. Admin can review optional job media, price exceptions and technician profile verification.
 - A technician account cannot create a customer booking or send a request to another technician.
 - Booking status notifications are delivered to the correct opposite party: customer → assigned technician, technician → customer.
 - Technician status changes are server-authorized so a technician can update only their assigned job and only through the valid lifecycle.
@@ -173,8 +173,9 @@ Do not scrape or bulk-query public services. Cache results and throttle requests
 ## Trust and pricing rules
 
 - Customer issue media is attached to the booking so the assigned technician and admin can review the reported problem.
-- Technician can upload before/after/service evidence; admin can mark the work `VERIFIED` or request resubmission.
-- Payment is intentionally gated behind an approved quotation and admin work verification.
+- Technician can optionally upload before/after/service photos for customer and admin reference.
+- Work completion does not require admin evidence review. Once a job is completed, the customer can rate the service; the rating appears in the admin Customer ratings tab.
+- Completed bookings offer Cash and Online (UPI QR) payment choices. Choosing Online reveals the assigned technician's QR and a transaction reference field.
 - Spare-part quote items are resolved against the shared NearFix catalog on the server; the technician-supplied unit price is not trusted.
 - Quote responses include a pricing audit with catalog total, markup percentage and review warnings.
 - Platform fee is configured as 0% in the demo so the customer sees the service/parts charges separately.
@@ -198,18 +199,18 @@ For local/offline demo mode, no SMS provider is required: the generated OTP is d
 Do not commit real credentials. Use a secrets manager/environment variables in production.
 
 ## NearFix differentiators
-The product flow includes five core differentiators: (1) Skill Passport with skill/identity/experience verification, (2) AI preliminary problem diagnosis with photo/problem context and price range, (3) fair-price/itemized quotation checks against the shared parts catalog, (4) before/after work evidence with admin verification, and (5) location-aware technician matching with real browser GPS, technician GPS sharing, nearby results and road routing via OpenStreetMap/Leaflet/OSRM.
+The product flow includes five core differentiators: (1) Skill Passport with skill/identity/experience verification, (2) AI preliminary problem diagnosis with photo/problem context and price range, (3) fair-price/itemized quotation checks against the shared parts catalog, (4) optional before/after work photos and customer ratings, and (5) location-aware technician matching with real browser GPS, technician GPS sharing, nearby results and road routing via OpenStreetMap/Leaflet/OSRM.
 
 ## Final business workflow
 
 The final build is role-separated and uses a customer-to-technician service lifecycle:
 
-Customer → Request → Technician Accept/Reject → On the Way → Arrived → Customer Arrival OTP → Inspection → Itemized Fair Quote → Customer Approval → Service → Before/After Evidence → Admin Verification → Payment (Razorpay / manual UPI / Cash) → Invoice → Review.
+Customer → Request → Technician Accept/Reject → On the Way → Arrived → Customer Arrival OTP → Inspection → Itemized Fair Quote → Customer Approval → Service → Optional Work Photos → Cash or Online UPI Payment → Invoice → Customer Rating.
 
 ### Role boundaries
 - Customer: discovery, location matching, booking, cancellation, AI guide, barcode/parts price check, approvals, payment and invoices.
 - Technician: assigned customer jobs only, live GPS, arrival Arrival OTP verification, inspection, catalog-based parts, quotations, evidence and payment confirmation.
-- Admin: platform operations, user/technician/booking/parts/payment/evidence verification, disputes, analytics and audit data. No barcode camera scanner is exposed to the admin role.
+- Admin: platform operations, user/technician/booking/parts/payment management, customer ratings, disputes, analytics and audit data. Job evidence does not need admin verification. No barcode camera scanner is exposed to the admin role.
 
 ### Skill-first model
 NearFix does not require a degree field to match a technician. Profiles emphasize practical skills, verified work, experience, response/completion metrics and customer reviews. The demo seed contains at least five field-specific technician profiles for each service category so location-aware discovery can return 5–10 profiles where available.
