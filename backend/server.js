@@ -763,7 +763,15 @@ async function api(req,res,url){
     const assignedTech=technicianFor(data,booking.technicianId);
     const isTech=me.role==='technician'&&assignedTech?.userId===me.id;
     if(!(isCustomer||isTech||me.role==='admin')) return json(res,403,{success:false,message:'Forbidden',code:'FORBIDDEN'});
-    const arrival=booking.arrivalVerification;
+    let arrival=booking.arrivalVerification;
+    // Replace a legacy SMS-only code with an app-only code when its customer
+    // opens the booking details; the previously sent code becomes invalid.
+    if(isCustomer && arrival?.status==='PENDING' && !arrival.otp){
+      const otp=otpCode();
+      arrival={...arrival,otp,otpHash:crypto.createHash('sha256').update(otp).digest('hex'),attempts:0,sentAt:now(),expiresAt:new Date(Date.now()+OTP_TTL_MS).toISOString(),deliveryMode:'IN_APP'};
+      booking.arrivalVerification=arrival;
+      await savePersistent(data);
+    }
     const response={success:true,status:arrival?.status||'NOT_SENT',expiresAt:arrival?.expiresAt||null,verifiedAt:arrival?.verifiedAt||null};
     if(isCustomer && arrival?.status==='PENDING' && arrival.otp && (!arrival.expiresAt || Date.now()<=new Date(arrival.expiresAt).getTime())) response.otp=arrival.otp;
     return json(res,200,response);
