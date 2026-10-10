@@ -943,11 +943,24 @@ async function api(req,res,url){
     const b=await readBody(req); const booking=data.bookings.find(x=>String(x.id)===String(b.bookingId));
     if(!booking||booking.customerId!==me.id)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'});
     if(booking.status!=='COMPLETED')return json(res,409,{success:false,message:'Payment unlocks after service completion.',code:'PAYMENT_LOCKED'});
-    if(data.payments.some(p=>String(p.bookingId)===String(booking.id)&&['SUCCESS','PENDING_CONFIRMATION'].includes(p.status)))return json(res,409,{success:false,message:'A payment is already pending or completed for this booking.',code:'PAYMENT_EXISTS'});
     const method=String(b.method||'CASH').toUpperCase(); if(!['CASH','UPI'].includes(method))return json(res,400,{success:false,message:'Choose Cash or UPI.',code:'INVALID_METHOD'});
     if(method==='UPI'&&!String(b.reference||'').trim())return json(res,400,{success:false,message:'UPI reference is required.',code:'REFERENCE_REQUIRED'});
-    const p={id:id('pay'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,amount:Number(booking.total||booking.estimate||0),method,status:'PENDING_CONFIRMATION',reference:String(b.reference||''),transactionId:`NFX-${Date.now().toString(36).toUpperCase()}`,createdAt:now(),verification:{status:'PENDING',verifiedBy:null,verifiedAt:null}};
-    data.payments.push(p); booking.paymentStatus='PENDING_CONFIRMATION'; notify(data,technicianFor(data,booking.technicianId)?.userId,`Payment confirmation required for booking #${String(booking.id).slice(-6)}.`); const admin=data.users.find(u=>u.role==='admin'); if(admin)notify(data,admin.id,`Payment ${p.method} pending verification for booking #${String(booking.id).slice(-6)}.`); audit(data,me,'PAYMENT_SUBMITTED','Payment',p.id,{method:p.method}); await savePersistent(data); return json(res,201,{success:true,message:`${method} payment submitted for verification.`,payment:p});
+    const existing=data.payments.find(p=>String(p.bookingId)===String(booking.id)&&['SUCCESS','PENDING_CONFIRMATION'].includes(p.status));
+    if(existing?.status==='SUCCESS'||(existing&&existing.method!=='CASH'))return json(res,409,{success:false,message:'A payment is already pending or completed for this booking.',code:'PAYMENT_EXISTS'});
+    const amount=Number(booking.total||booking.estimate||0);
+    // Cash is customer-confirmed in this demo, so it is recorded as paid immediately.
+    const p=existing||{id:id('pay'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,amount,method,transactionId:`NFX-${Date.now().toString(36).toUpperCase()}`,createdAt:now()};
+    p.method=method;p.amount=amount;p.reference=String(b.reference||'');p.status=method==='CASH'?'SUCCESS':'PENDING_CONFIRMATION';
+    if(!existing)data.payments.push(p);
+    if(method==='CASH'){
+      booking.paymentStatus='PAID';booking.paidAt=now();
+      const quote=data.quotes.find(x=>String(x.bookingId)===String(booking.id));
+      if(!data.invoices.some(i=>String(i.bookingId)===String(booking.id)))data.invoices.push({id:id('inv'),number:`NFX-${new Date().getFullYear()}-${String(data.invoices.length+1).padStart(5,'0')}`,bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,service:booking.service,labour:Number(quote?.labour||Math.round(amount*.35)),parts:Number(quote?.parts||Math.round(amount*.65)),platformFee:0,total:amount,paymentStatus:'PAID',createdAt:now()});
+      const techUser=technicianFor(data,booking.technicianId)?.userId;if(techUser)notify(data,techUser,`Customer marked cash received for completed booking #${String(booking.id).slice(-6)}.`);
+      notify(data,me.id,`Cash payment recorded for booking #${String(booking.id).slice(-6)}. Invoice generated.`);
+      audit(data,me,'CASH_PAYMENT_RECEIVED','Payment',p.id,{amount});await savePersistent(data);return json(res,201,{success:true,message:'Cash payment marked paid. The booking is complete and the invoice is ready.',payment:p});
+    }
+    p.verification={status:'PENDING',verifiedBy:null,verifiedAt:null};booking.paymentStatus='PENDING_CONFIRMATION';notify(data,technicianFor(data,booking.technicianId)?.userId,`Online payment confirmation required for booking #${String(booking.id).slice(-6)}.`);const admin=data.users.find(u=>u.role==='admin');if(admin)notify(data,admin.id,`Online payment pending verification for booking #${String(booking.id).slice(-6)}.`);audit(data,me,'PAYMENT_SUBMITTED','Payment',p.id,{method:p.method});await savePersistent(data);return json(res,201,{success:true,message:'Online payment submitted for confirmation.',payment:p});
   }
   const manualVerifyMatch=url.pathname.match(/^\/api\/payments\/([^/]+)\/verify$/);
   if(manualVerifyMatch&&req.method==='PATCH'){

@@ -217,9 +217,9 @@ NearFix does not require a degree field to match a technician. Profiles emphasiz
 
 ### Payment verification
 - Razorpay test checkout is available when `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are configured.
-- Manual UPI requires a transaction/reference ID and remains `PENDING_CONFIRMATION` until the assigned technician or admin verifies it.
-- Cash remains `PENDING_CONFIRMATION` until the assigned technician or admin confirms receipt.
-- Verified manual/gateway payments automatically generate an invoice if one does not already exist.
+- Online UPI requires a transaction/reference ID and can appear in the technician/admin confirmation queue.
+- Cash is customer-confirmed in the demo: pressing **I have paid cash** immediately marks the payment `PAID`, generates an invoice and requires no further payment verification.
+- Successful cash and gateway payments generate an invoice if one does not already exist.
 
 ### Customer AI Guide
 The customer dashboard includes an AI guide that can route the customer to the relevant service or full AI diagnosis flow. TinyFish is prompted to respond in the language used by the customer, including Hindi and Hinglish. The local fallback also has Hindi and Hinglish replies for common repair categories.
