@@ -1561,6 +1561,10 @@ function favouritesPage(){
 }
 
 function startBooking(service='Plumbing',techId=null){
+  if(techId!=null && tech(techId)?.showcaseOnly){
+    toast('This is a showcase profile for the demo. Please choose an active technician to book.');
+    return;
+  }
   if(!currentUser()){
     openLoginPrompt();
     return;
@@ -2798,6 +2802,7 @@ function techDetails(id){
             ${esc(t.name)}
             ${t.verified?'<span class="verified">✓ Verified</span>':''}
           </h2>
+          ${t.showcaseOnly?'<span class="demo-profile">Showcase profile · demo listing</span>':''}
 
           <p>${esc(t.service)} · ${t.exp}+ years experience</p>
 
@@ -2857,14 +2862,9 @@ function techDetails(id){
       '<p class="muted">No customer reviews yet.</p>'}
 
       <div class="modal-footer">
-        <button class="btn secondary" onclick="openChat(null)">💬 Chat</button>
-
-        <button
-          class="btn primary"
-          onclick="closeModal();startBooking('${esc(t.category)}',${t.id})"
-        >
-          Book Technician →
-        </button>
+        ${t.showcaseOnly
+          ? '<span class="muted">Demo listing only · no technician account is connected.</span>'
+          : `<button class="btn secondary" onclick="openChat(null)">💬 Chat</button><button class="btn primary" onclick="closeModal();startBooking('${esc(t.category)}',${t.id})">Book Technician →</button>`}
       </div>
 
     </div>
@@ -3798,7 +3798,7 @@ function startServerSync(){
       }
       // Don't replace other dialogs: that could reset OTP input or an upload in progress.
       if(document.querySelector('.modal-box')) return;
-      if(['customer','technician','admin','bookings'].includes(state.route)) render();
+      if(['customer','technician','admin','bookings','find','parts'].includes(state.route)) render();
     } catch(e){} finally { serverSyncInFlight=false; }
   };
   void syncNow();
@@ -4111,12 +4111,12 @@ techCard = function(t){
   const fav=db.favourites.includes(t.id);
   const reason=t.matchReason||'Nearby professional';
   return `<article class="tech-card reveal-card">
-    <div class="tech-top"><div class="avatar large">${initials(t.name)}</div><div class="grow"><h3>${esc(t.name)} ${t.verified?'<span class="verified">✓ Verified</span>':''}</h3><p>${esc(t.service)} · ${t.exp}+ years practical experience</p><div class="rating">★ ${t.rating} <small>(${t.reviews} reviews)</small></div></div><button class="heart ${fav?'saved':''}" onclick="toggleFavourite(${t.id});event.stopPropagation()">${fav?'♥':'♡'}</button></div>
+    <div class="tech-top"><div class="avatar large">${initials(t.name)}</div><div class="grow"><h3>${esc(t.name)} ${t.showcaseOnly?'<span class="demo-profile">Showcase</span>':t.verified?'<span class="verified">✓ Verified</span>':''}</h3><p>${esc(t.service)} · ${t.exp}+ years practical experience</p><div class="rating">★ ${t.rating} <small>(${t.reviews} reviews)</small></div></div><button class="heart ${fav?'saved':''}" onclick="toggleFavourite(${t.id});event.stopPropagation()">${fav?'♥':'♡'}</button></div>
     <div class="tech-tags"><span>📍 ${Number(t.distance||0).toFixed(1)} km</span><span>⏱️ ~${Number(t.eta||Math.max(5,Math.round(Number(t.distance||2)*4)))} min</span><span>${t.available?'🟢 Available':'🔴 Busy'}</span></div>
     <div class="trust-row"><span class="badge green">${esc(reason)}</span>${t.skillVerified||t.verified?'<span class="badge">Skill checked</span>':''}<span class="badge">No degree required · Skill first</span></div>
     <div class="skills">${(t.skills||[]).slice(0,4).map(s=>`<span>${esc(s)}</span>`).join('')}</div>
     <div class="tech-bottom"><div><small>Transparent starting price</small><strong>${money(t.price)}</strong><small>No hidden platform fee</small></div><span class="jobs">${t.jobs||0} jobs · ${t.response||0}% response</span></div>
-    <div class="card-actions"><button class="btn ghost" onclick="techDetails(${t.id})">Full profile</button><button class="btn primary" onclick="startBooking('${esc(t.category)}',${t.id})">Book technician</button></div>
+    <div class="card-actions"><button class="btn ghost" onclick="techDetails(${t.id})">Full profile</button>${t.showcaseOnly?'<button class="btn secondary" disabled title="Showcase listing only">Demo listing</button>':`<button class="btn primary" onclick="startBooking('${esc(t.category)}',${t.id})">Book technician</button>`}</div>
   </article>`;
 };
 
