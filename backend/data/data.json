@@ -1,1009 +1,1284 @@
 {
+  "parts": [],
   "users": [
     {
-      "id": "admin_599a627c-251a-4a08-986c-e3efb6735190",
-      "role": "admin",
-      "name": "NearFix Admin",
-      "email": "admin@yourdomain.com",
-      "passwordHash": "scrypt$16384$8$1$bd886506f7577abb356bed638c3861d8$04bf2f1ad33c2b02e571889ab3d7a6c873e635944723708682e7181a6276b2fd453031ec2d952a8e6f5b8780190c38286952aa3eb452deb56b31b0710294b03d",
-      "phone": "",
-      "area": "All Areas"
+      "id": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "area": "Ghaziabad, Uttar Pradesh",
+      "name": "satyam",
+      "role": "customer",
+      "email": "st2701846@gmail.com",
+      "phone": "+918295569711"
     },
     {
-      "id": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "role": "customer",
-      "name": "satyam",
-      "email": "st2701846@gmail.com",
-      "passwordHash": "scrypt$16384$8$1$b4ba68f55c1bf2b1b3dc677812242ed1$acc68365df32fce295a3619cfb6ef76a10fd212cd4b8768aee7db45c89ff99c3ad245edf363df9226862b8182196288e29a5ab8b783e89fedd718582bb437f1f",
-      "phone": "8295569711",
+      "id": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
       "area": "Ghaziabad, Uttar Pradesh",
-      "lastLocation": {
-        "lat": 28.5371,
-        "lng": 77.4536,
-        "accuracy": 50000,
-        "updatedAt": "2026-10-10T20:25:07.290Z",
-        "source": "customer-gps"
+      "name": "anshu kumar mishra",
+      "role": "technician",
+      "email": "anshuntpc128@gmail.com",
+      "phone": "9205869738"
+    }
+  ],
+  "quotes": [],
+  "reviews": [],
+  "bookings": [
+    {
+      "id": 1791664646085,
+      "date": "2026-10-11",
+      "file": "",
+      "time": "10:00 AM – 11:00 AM",
+      "media": [],
+      "budget": 500,
+      "status": "CANCELLED",
+      "urgent": false,
+      "problem": "wiring",
+      "service": "Electrical",
+      "estimate": 400,
+      "latitude": 28.470223368804927,
+      "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+      "createdAt": "2026-10-10T20:37:26.085Z",
+      "longitude": 77.49377431391329,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": {
+        "at": "2026-10-10T20:44:29.726Z",
+        "role": "technician",
+        "reason": "Changed my mind",
+        "cancelledBy": "cba83f57-5fa3-4dc4-8051-39302bc5d09b"
+      },
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1800,
+        "min": 400,
+        "parts": {
+          "max": 1170,
+          "min": 260
+        },
+        "labour": {
+          "max": 990,
+          "min": 140
+        },
+        "urgent": false,
+        "service": "Electrical",
+        "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
+        "distanceFee": 42,
+        "inspectionFee": 99,
+        "platformFeePercent": 0,
+        "selectedTechnicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+        "selectedTechnicianStartingPrice": 341
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T20:37:26.085Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T20:38:06.836Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ACCEPTED"
+        },
+        {
+          "at": "2026-10-10T20:38:13.108Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ON_THE_WAY"
+        },
+        {
+          "at": "2026-10-10T20:38:21.899Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ARRIVED"
+        },
+        {
+          "at": "2026-10-10T20:44:29.726Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "CANCELLED"
+        }
+      ],
+      "arrivalVerification": {
+        "sentAt": "2026-10-10T20:38:21.899Z",
+        "status": "EXPIRED",
+        "otpHash": "7de88cb1d579c631a90228d85c0e09b1a7e03fcda3c7665ea2d1f5ec4530fb14",
+        "attempts": 0,
+        "expiresAt": "2026-10-10T20:43:21.899Z",
+        "deliveryMode": "IN_APP"
       }
     },
     {
-      "id": "u_8ab771da-f5b7-43ef-90bf-c3a737688c4e",
-      "role": "customer",
-      "name": "satyam tiwari",
-      "email": "st201846@gmail.com",
-      "passwordHash": "scrypt$16384$8$1$11e5ecfeba55f70bd0c898f3819f56b8$ae7ae0addfd95e7adeeb3112263d6a4239c41189946c6b6749f08d61008a5962ac733191252ec174c7fe72850ebc70c7453ce787383512cc851f19034b451b33",
-      "phone": "8295569711",
-      "area": "Ghaziabad, Uttar Pradesh"
+      "id": 1791665807565,
+      "date": "2026-10-11",
+      "file": "",
+      "time": "10:00 AM – 11:00 AM",
+      "media": [],
+      "budget": 500,
+      "status": "CANCELLED",
+      "urgent": false,
+      "problem": "wiring",
+      "service": "Electrical",
+      "estimate": 400,
+      "latitude": 28.470223368804927,
+      "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+      "createdAt": "2026-10-10T20:56:47.565Z",
+      "longitude": 77.49377431391329,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": {
+        "at": "2026-10-10T21:05:10.993Z",
+        "role": "customer",
+        "reason": "Changed my mind",
+        "cancelledBy": "8d0460a8-28f9-42ab-82aa-9df2986a8b27"
+      },
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1800,
+        "min": 400,
+        "parts": {
+          "max": 1170,
+          "min": 260
+        },
+        "labour": {
+          "max": 990,
+          "min": 140
+        },
+        "urgent": false,
+        "service": "Electrical",
+        "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
+        "distanceFee": 42,
+        "inspectionFee": 99,
+        "platformFeePercent": 0,
+        "selectedTechnicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+        "selectedTechnicianStartingPrice": 341
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T20:56:47.565Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T20:57:18.360Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ACCEPTED"
+        },
+        {
+          "at": "2026-10-10T20:57:26.851Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ON_THE_WAY"
+        },
+        {
+          "at": "2026-10-10T20:57:33.124Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ARRIVED"
+        },
+        {
+          "at": "2026-10-10T21:05:10.993Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "CANCELLED"
+        }
+      ],
+      "arrivalVerification": {
+        "sentAt": "2026-10-10T20:59:41.823Z",
+        "status": "EXPIRED",
+        "otpHash": "8271bf88eb3884fa9e0d95e1a07e18b95895e938a6aa186aad5607c39a9785a4",
+        "attempts": 0,
+        "expiresAt": "2026-10-10T21:04:41.823Z",
+        "deliveryMode": "IN_APP"
+      }
     },
     {
-      "id": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "role": "technician",
-      "name": "satya",
-      "email": "st270846@gmail.com",
-      "passwordHash": "scrypt$16384$8$1$5997d13ce1ac93d70df6fb70ec23329e$ed137fdaa677a26adb29f2cf4f893e4c6c8b2ece0f70e20387db984300de9c270a76c8f39bb439b10857a30fce9362a246dbd1d3df3c32127d746ece9b77fc87",
-      "phone": "8295569711",
-      "area": "Ghaziabad, Uttar Pradesh"
-    }
-  ],
-  "technicians": [
-    {
-      "id": 1791663619256,
-      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "name": "satya",
+      "id": 1791665809242,
+      "date": "2026-10-11",
+      "file": "",
+      "time": "10:00 AM – 11:00 AM",
+      "media": [],
+      "budget": 500,
+      "status": "CANCELLED",
+      "urgent": false,
+      "problem": "wiring",
       "service": "Electrical",
-      "category": "Electrical",
-      "rating": 0,
-      "reviews": 0,
-      "exp": 0,
-      "distance": 3.5,
-      "price": 299,
-      "available": true,
-      "jobs": 0,
-      "verified": false,
-      "identityVerified": false,
-      "skillVerified": false,
-      "experienceVerified": false,
-      "response": 0,
-      "completionRate": 100,
-      "cancellationRate": 0,
-      "repeatCustomers": 0,
-      "eta": 15,
-      "area": "Ghaziabad, Uttar Pradesh",
-      "skills": [],
-      "upiId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175@nearfix",
-      "lat": 28.5371,
-      "lng": 77.4536,
-      "accuracy": 50000,
-      "heading": 0,
-      "speed": 0,
-      "locationUpdatedAt": "2026-10-10T20:23:54.268Z",
-      "locationSource": "technician-gps"
+      "estimate": 400,
+      "latitude": 28.470223368804927,
+      "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+      "createdAt": "2026-10-10T20:56:49.242Z",
+      "longitude": 77.49377431391329,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": {
+        "at": "2026-10-10T20:57:00.343Z",
+        "role": "customer",
+        "reason": "Changed my mind",
+        "cancelledBy": "8d0460a8-28f9-42ab-82aa-9df2986a8b27"
+      },
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1800,
+        "min": 400,
+        "parts": {
+          "max": 1170,
+          "min": 260
+        },
+        "labour": {
+          "max": 990,
+          "min": 140
+        },
+        "urgent": false,
+        "service": "Electrical",
+        "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
+        "distanceFee": 42,
+        "inspectionFee": 99,
+        "platformFeePercent": 0,
+        "selectedTechnicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+        "selectedTechnicianStartingPrice": 341
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T20:56:49.242Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T20:57:00.343Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "CANCELLED"
+        }
+      ]
+    },
+    {
+      "id": 1791666438101,
+      "date": "2026-10-11",
+      "file": "",
+      "time": "10:00 AM – 11:00 AM",
+      "media": [],
+      "budget": 500,
+      "status": "INSPECTION",
+      "urgent": false,
+      "problem": "wirng",
+      "service": "Electrical",
+      "estimate": 341,
+      "latitude": 28.470223368804927,
+      "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+      "createdAt": "2026-10-10T21:07:18.101Z",
+      "longitude": 77.49377431391329,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": null,
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1200,
+        "min": 341,
+        "parts": {
+          "max": 780,
+          "min": 195
+        },
+        "labour": {
+          "max": 660,
+          "min": 105
+        },
+        "urgent": false,
+        "service": "Electrical",
+        "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
+        "distanceFee": 42,
+        "inspectionFee": 99,
+        "platformFeePercent": 0,
+        "selectedTechnicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+        "selectedTechnicianStartingPrice": 341
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T21:07:18.101Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T21:07:33.759Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ACCEPTED"
+        },
+        {
+          "at": "2026-10-10T21:07:50.694Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ON_THE_WAY"
+        },
+        {
+          "at": "2026-10-10T21:08:05.557Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ARRIVED"
+        },
+        {
+          "at": "2026-10-10T21:08:39.758Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "via": "ARRIVAL_OTP",
+          "status": "INSPECTION"
+        }
+      ],
+      "arrivalVerification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-10-10T21:08:39.758Z",
+        "verifiedBy": "cba83f57-5fa3-4dc4-8051-39302bc5d09b"
+      }
+    },
+    {
+      "id": 1791666949437,
+      "date": "2026-10-11",
+      "file": "",
+      "time": "10:00 AM – 11:00 AM",
+      "media": [],
+      "budget": 500,
+      "status": "ARRIVED",
+      "urgent": false,
+      "problem": "wiring",
+      "service": "Electrical",
+      "estimate": 400,
+      "latitude": 28.470223368804927,
+      "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+      "createdAt": "2026-10-10T21:15:49.437Z",
+      "longitude": 77.49377431391329,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": null,
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1800,
+        "min": 400,
+        "parts": {
+          "max": 1170,
+          "min": 260
+        },
+        "labour": {
+          "max": 990,
+          "min": 140
+        },
+        "urgent": false,
+        "service": "Electrical",
+        "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
+        "distanceFee": 42,
+        "inspectionFee": 99,
+        "platformFeePercent": 0,
+        "selectedTechnicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+        "selectedTechnicianStartingPrice": 341
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T21:15:49.437Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T21:16:10.111Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ACCEPTED"
+        },
+        {
+          "at": "2026-10-10T21:16:41.342Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ON_THE_WAY"
+        },
+        {
+          "at": "2026-10-10T21:17:40.880Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ARRIVED"
+        }
+      ],
+      "arrivalVerification": {
+        "sentAt": "2026-10-10T21:17:40.880Z",
+        "status": "EXPIRED",
+        "otpHash": "e65dd56693666e595cd1f45bdf37908342a520c9ec766b95deb05b0c64aea7b0",
+        "attempts": 0,
+        "expiresAt": "2026-10-10T21:22:40.880Z",
+        "deliveryMode": "IN_APP"
+      }
+    },
+    {
+      "id": 1791667174540,
+      "date": "2026-10-10",
+      "file": "",
+      "time": "Hackathon demo",
+      "media": [],
+      "total": 0,
+      "budget": 650,
+      "status": "REQUESTED",
+      "urgent": false,
+      "problem": "Hackathon demo: ceiling fan making a noise; please inspect the wiring and fan safely.",
+      "service": "Electrical",
+      "estimate": 650,
+      "latitude": null,
+      "location": "Ghaziabad, Uttar Pradesh",
+      "createdAt": "2026-10-10T21:19:34.539Z",
+      "longitude": null,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": null,
+      "hackathonKey": "nearfix-hackathon-request",
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1350,
+        "min": 650,
+        "service": "Electrical",
+        "inspectionFee": 149
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T21:19:34.539Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        }
+      ],
+      "hackathonSample": true
+    },
+    {
+      "id": 1791667174541,
+      "date": "2026-10-10",
+      "file": "",
+      "time": "Hackathon demo",
+      "media": [],
+      "total": 0,
+      "budget": 1100,
+      "status": "ON_THE_WAY",
+      "urgent": false,
+      "problem": "Hackathon demo: AC is running but not cooling.",
+      "service": "AC Repair",
+      "estimate": 1100,
+      "latitude": null,
+      "location": "Ghaziabad, Uttar Pradesh",
+      "createdAt": "2026-10-10T21:18:04.539Z",
+      "longitude": null,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": null,
+      "hackathonKey": "nearfix-hackathon-on-the-way",
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1800,
+        "min": 1100,
+        "service": "AC Repair",
+        "inspectionFee": 149
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T21:17:34.539Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T21:18:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ACCEPTED"
+        },
+        {
+          "at": "2026-10-10T21:19:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ON_THE_WAY"
+        }
+      ],
+      "hackathonSample": true
+    },
+    {
+      "id": 1791667174542,
+      "date": "2026-10-10",
+      "file": "",
+      "time": "Hackathon demo",
+      "media": [],
+      "total": 0,
+      "budget": 450,
+      "status": "ARRIVED",
+      "urgent": false,
+      "problem": "Hackathon demo: kitchen tap is leaking.",
+      "service": "Plumbing",
+      "estimate": 450,
+      "latitude": null,
+      "location": "Ghaziabad, Uttar Pradesh",
+      "createdAt": "2026-10-10T21:16:34.539Z",
+      "longitude": null,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": null,
+      "hackathonKey": "nearfix-hackathon-arrived-otp",
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 1150,
+        "min": 450,
+        "service": "Plumbing",
+        "inspectionFee": 149
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T21:16:34.539Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T21:17:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ACCEPTED"
+        },
+        {
+          "at": "2026-10-10T21:18:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ON_THE_WAY"
+        },
+        {
+          "at": "2026-10-10T21:19:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ARRIVED"
+        }
+      ],
+      "hackathonSample": true,
+      "arrivalVerification": {
+        "sentAt": "2026-10-10T21:19:34.539Z",
+        "status": "EXPIRED",
+        "otpHash": "925a9230b313ff4ee1940e077d638f8b65f4f5f10c2c5eb996821c7aa4b4c5dd",
+        "attempts": 0,
+        "expiresAt": "2026-10-10T21:24:34.539Z",
+        "deliveryMode": "IN_APP"
+      }
+    },
+    {
+      "id": 1791667174543,
+      "date": "2026-10-10",
+      "file": "",
+      "time": "Hackathon demo",
+      "media": [],
+      "total": 1450,
+      "budget": 1450,
+      "status": "COMPLETED",
+      "urgent": false,
+      "problem": "Hackathon demo: refrigerator needs a routine inspection.",
+      "service": "Appliance Repair",
+      "estimate": 1450,
+      "latitude": null,
+      "location": "Ghaziabad, Uttar Pradesh",
+      "createdAt": "2026-10-10T21:15:04.539Z",
+      "longitude": null,
+      "customerId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "cancellation": null,
+      "hackathonKey": "nearfix-hackathon-completed",
+      "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "estimateRange": {
+        "max": 2150,
+        "min": 1450,
+        "service": "Appliance Repair",
+        "inspectionFee": 149
+      },
+      "paymentStatus": "PENDING",
+      "statusHistory": [
+        {
+          "at": "2026-10-10T21:13:34.539Z",
+          "by": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+          "status": "REQUESTED"
+        },
+        {
+          "at": "2026-10-10T21:14:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ACCEPTED"
+        },
+        {
+          "at": "2026-10-10T21:15:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ON_THE_WAY"
+        },
+        {
+          "at": "2026-10-10T21:16:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "ARRIVED"
+        },
+        {
+          "at": "2026-10-10T21:17:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "INSPECTION"
+        },
+        {
+          "at": "2026-10-10T21:18:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "IN_PROGRESS"
+        },
+        {
+          "at": "2026-10-10T21:19:34.539Z",
+          "by": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+          "status": "COMPLETED"
+        }
+      ],
+      "hackathonSample": true
     }
   ],
+  "disputes": [],
+  "invoices": [],
+  "messages": [],
+  "payments": [],
   "services": [
     {
       "id": "s1",
       "icon": "🔌",
       "name": "Electrical",
-      "technicianType": "Electrician",
       "active": true,
+      "baseMax": 1200,
       "baseMin": 300,
-      "baseMax": 1200
+      "technicianType": "Electrician"
     },
     {
       "id": "s2",
       "icon": "🚰",
       "name": "Plumbing",
-      "technicianType": "Plumber",
       "active": true,
+      "baseMax": 1200,
       "baseMin": 250,
-      "baseMax": 1200
+      "technicianType": "Plumber"
     },
     {
       "id": "s3",
       "icon": "❄️",
       "name": "AC Repair",
-      "technicianType": "AC Technician",
       "active": true,
+      "baseMax": 2500,
       "baseMin": 500,
-      "baseMax": 2500
+      "technicianType": "AC Technician"
     },
     {
       "id": "s4",
       "icon": "🔧",
       "name": "Appliance Repair",
-      "technicianType": "Appliance Technician",
       "active": true,
+      "baseMax": 2500,
       "baseMin": 350,
-      "baseMax": 2500
+      "technicianType": "Appliance Technician"
     },
     {
       "id": "s5",
       "icon": "🪚",
       "name": "Carpentry",
-      "technicianType": "Carpenter",
       "active": true,
+      "baseMax": 1800,
       "baseMin": 400,
-      "baseMax": 1800
+      "technicianType": "Carpenter"
     },
     {
       "id": "s6",
       "icon": "🎨",
       "name": "Painting",
-      "technicianType": "Painter",
       "active": true,
+      "baseMax": 3000,
       "baseMin": 500,
-      "baseMax": 3000
+      "technicianType": "Painter"
     },
     {
       "id": "s7",
       "icon": "🧹",
       "name": "Cleaning",
-      "technicianType": "Cleaning Expert",
       "active": true,
+      "baseMax": 1500,
       "baseMin": 250,
-      "baseMax": 1500
+      "technicianType": "Cleaning Expert"
     },
     {
       "id": "s8",
       "icon": "💻",
       "name": "Computer Repair",
-      "technicianType": "Computer Technician",
       "active": true,
+      "baseMax": 2500,
       "baseMin": 400,
-      "baseMax": 2500
+      "technicianType": "Computer Technician"
     },
     {
       "id": "s9",
       "icon": "📱",
       "name": "Mobile Repair",
-      "technicianType": "Mobile Technician",
       "active": true,
+      "baseMax": 2000,
       "baseMin": 300,
-      "baseMax": 2000
+      "technicianType": "Mobile Technician"
     },
     {
       "id": "s10",
       "icon": "🔑",
       "name": "Locksmith",
-      "technicianType": "Locksmith",
       "active": true,
+      "baseMax": 1500,
       "baseMin": 350,
-      "baseMax": 1500
+      "technicianType": "Locksmith"
     },
     {
       "id": "s11",
       "icon": "🚗",
       "name": "Mechanic",
-      "technicianType": "Vehicle Mechanic",
       "active": true,
+      "baseMax": 5000,
       "baseMin": 500,
-      "baseMax": 5000
+      "technicianType": "Vehicle Mechanic"
     },
     {
       "id": "s12",
       "icon": "🛠️",
       "name": "General Repair",
-      "technicianType": "Handyman",
       "active": true,
+      "baseMax": 1500,
       "baseMin": 250,
-      "baseMax": 1500
+      "technicianType": "Handyman"
     }
   ],
-  "bookings": [
-    {
-      "id": 1791663752760,
-      "customerId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "technicianId": 1791663619256,
-      "service": "Electrical",
-      "problem": "wiring",
-      "file": "",
-      "location": "Ghaziabad, Uttar Pradesh",
-      "latitude": 0,
-      "longitude": 0,
-      "date": "2026-10-11",
-      "time": "10:00 AM – 11:00 AM",
-      "budget": 500,
-      "status": "CANCELLED",
-      "urgent": false,
-      "estimate": 400,
-      "estimateRange": {
-        "service": "Electrical",
-        "labour": {
-          "min": 140,
-          "max": 990
-        },
-        "parts": {
-          "min": 260,
-          "max": 1170
-        },
-        "inspectionFee": 99,
-        "min": 400,
-        "max": 1800,
-        "location": "Ghaziabad, Uttar Pradesh",
-        "urgent": false,
-        "platformFeePercent": 0,
-        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
-        "selectedTechnicianStartingPrice": 341,
-        "distanceFee": 42,
-        "selectedTechnicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:22:32.764Z",
-      "statusHistory": [
-        {
-          "status": "REQUESTED",
-          "at": "2026-10-10T20:22:32.765Z",
-          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
-        },
-        {
-          "status": "ACCEPTED",
-          "at": "2026-10-10T20:22:45.709Z",
-          "by": "u_43f1be95-99e7-4b25-ae8a-406023ff5175"
-        },
-        {
-          "status": "ON_THE_WAY",
-          "at": "2026-10-10T20:23:03.350Z",
-          "by": "u_43f1be95-99e7-4b25-ae8a-406023ff5175"
-        },
-        {
-          "status": "ARRIVED",
-          "at": "2026-10-10T20:23:07.853Z",
-          "by": "u_43f1be95-99e7-4b25-ae8a-406023ff5175"
-        },
-        {
-          "status": "CANCELLED",
-          "at": "2026-10-10T20:41:49.060Z",
-          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
-        }
-      ],
-      "paymentStatus": "PENDING",
-      "media": [],
-      "workVerification": {
-        "status": "PENDING",
-        "notes": "Waiting for service evidence and admin review."
-      },
-      "cancellation": {
-        "cancelledBy": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-        "role": "customer",
-        "reason": "Changed my mind",
-        "at": "2026-10-10T20:41:49.060Z"
-      },
-      "arrivalVerification": {
-        "status": "PENDING",
-        "sentAt": "2026-10-10T20:23:07.853Z",
-        "expiresAt": "2026-10-10T20:28:07.853Z",
-        "otp": "390395",
-        "attempts": 0,
-        "deliveryMode": "IN_APP"
-      }
-    },
-    {
-      "id": 1791663755059,
-      "customerId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "technicianId": 1791663619256,
-      "service": "Electrical",
-      "problem": "wiring",
-      "file": "",
-      "location": "Ghaziabad, Uttar Pradesh",
-      "latitude": 0,
-      "longitude": 0,
-      "date": "2026-10-11",
-      "time": "10:00 AM – 11:00 AM",
-      "budget": 500,
-      "status": "CANCELLED",
-      "urgent": false,
-      "estimate": 400,
-      "estimateRange": {
-        "service": "Electrical",
-        "labour": {
-          "min": 140,
-          "max": 990
-        },
-        "parts": {
-          "min": 260,
-          "max": 1170
-        },
-        "inspectionFee": 99,
-        "min": 400,
-        "max": 1800,
-        "location": "Ghaziabad, Uttar Pradesh",
-        "urgent": false,
-        "platformFeePercent": 0,
-        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
-        "selectedTechnicianStartingPrice": 341,
-        "distanceFee": 42,
-        "selectedTechnicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:22:35.059Z",
-      "statusHistory": [
-        {
-          "status": "REQUESTED",
-          "at": "2026-10-10T20:22:35.059Z",
-          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
-        },
-        {
-          "status": "ACCEPTED",
-          "at": "2026-10-10T20:22:49.420Z",
-          "by": "u_43f1be95-99e7-4b25-ae8a-406023ff5175"
-        },
-        {
-          "status": "CANCELLED",
-          "at": "2026-10-10T20:22:58.205Z",
-          "by": "u_43f1be95-99e7-4b25-ae8a-406023ff5175"
-        }
-      ],
-      "paymentStatus": "PENDING",
-      "media": [],
-      "workVerification": {
-        "status": "PENDING",
-        "notes": "Waiting for service evidence and admin review."
-      },
-      "cancellation": {
-        "cancelledBy": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-        "role": "technician",
-        "reason": "Changed my mind",
-        "at": "2026-10-10T20:22:58.205Z"
-      }
-    },
-    {
-      "id": 1791663755625,
-      "customerId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "technicianId": 1791663619256,
-      "service": "Electrical",
-      "problem": "wiring",
-      "file": "",
-      "location": "Ghaziabad, Uttar Pradesh",
-      "latitude": 0,
-      "longitude": 0,
-      "date": "2026-10-11",
-      "time": "10:00 AM – 11:00 AM",
-      "budget": 500,
-      "status": "CANCELLED",
-      "urgent": false,
-      "estimate": 400,
-      "estimateRange": {
-        "service": "Electrical",
-        "labour": {
-          "min": 140,
-          "max": 990
-        },
-        "parts": {
-          "min": 260,
-          "max": 1170
-        },
-        "inspectionFee": 99,
-        "min": 400,
-        "max": 1800,
-        "location": "Ghaziabad, Uttar Pradesh",
-        "urgent": false,
-        "platformFeePercent": 0,
-        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
-        "selectedTechnicianStartingPrice": 341,
-        "distanceFee": 42,
-        "selectedTechnicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:22:35.625Z",
-      "statusHistory": [
-        {
-          "status": "REQUESTED",
-          "at": "2026-10-10T20:22:35.625Z",
-          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
-        },
-        {
-          "status": "CANCELLED",
-          "at": "2026-10-10T20:22:51.867Z",
-          "by": "u_43f1be95-99e7-4b25-ae8a-406023ff5175"
-        }
-      ],
-      "paymentStatus": "PENDING",
-      "media": [],
-      "workVerification": {
-        "status": "PENDING",
-        "notes": "Waiting for service evidence and admin review."
-      },
-      "cancellation": {
-        "cancelledBy": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-        "role": "technician",
-        "reason": "Cancelled by user",
-        "at": "2026-10-10T20:22:51.868Z"
-      }
-    },
-    {
-      "id": 1791664894996,
-      "customerId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "technicianId": 1791663619256,
-      "service": "Electrical",
-      "problem": "wiring",
-      "file": "",
-      "location": "Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201305, India",
-      "latitude": 28.5371,
-      "longitude": 77.4536,
-      "date": "2026-10-11",
-      "time": "10:00 AM – 11:00 AM",
-      "budget": 500,
-      "status": "CANCELLED",
-      "urgent": false,
-      "estimate": 400,
-      "estimateRange": {
-        "service": "Electrical",
-        "labour": {
-          "min": 140,
-          "max": 990
-        },
-        "parts": {
-          "min": 260,
-          "max": 1170
-        },
-        "inspectionFee": 99,
-        "min": 400,
-        "max": 1800,
-        "location": "Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201305, India",
-        "urgent": false,
-        "platformFeePercent": 0,
-        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
-        "selectedTechnicianStartingPrice": 341,
-        "distanceFee": 42,
-        "selectedTechnicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:41:34.996Z",
-      "statusHistory": [
-        {
-          "status": "REQUESTED",
-          "at": "2026-10-10T20:41:34.996Z",
-          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
-        },
-        {
-          "status": "CANCELLED",
-          "at": "2026-10-10T20:44:09.772Z",
-          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
-        }
-      ],
-      "paymentStatus": "PENDING",
-      "media": [],
-      "workVerification": {
-        "status": "PENDING",
-        "notes": "Waiting for service evidence and admin review."
-      },
-      "cancellation": {
-        "cancelledBy": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-        "role": "customer",
-        "reason": "Changed my mind",
-        "at": "2026-10-10T20:44:09.772Z"
-      }
-    }
-  ],
-  "quotes": [],
-  "payments": [],
-  "invoices": [],
-  "reviews": [],
-  "messages": [],
-  "notifications": [
-    {
-      "id": "n_5e099cd6-1706-4614-9839-655242fc8be9",
-      "userId": "admin_599a627c-251a-4a08-986c-e3efb6735190",
-      "text": "Booking #894996 was cancelled by customer.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:44:09.841Z"
-    },
-    {
-      "id": "n_8b3e00ec-90e1-44f3-87c5-e0cfb27f3d1c",
-      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "text": "Booking #894996 was cancelled. Reason: Changed my mind",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:44:09.841Z"
-    },
-    {
-      "id": "n_79f1a34e-aca0-4bf5-8d50-a18ea3f92c75",
-      "userId": "admin_599a627c-251a-4a08-986c-e3efb6735190",
-      "text": "Booking #752760 was cancelled by customer.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:41:49.060Z"
-    },
-    {
-      "id": "n_6a08bb56-c318-4b43-96c5-70722da92f91",
-      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "text": "Booking #752760 was cancelled. Reason: Changed my mind",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:41:49.060Z"
-    },
-    {
-      "id": "n_02d00681-eae5-4dda-9c0d-c589b8d05ad0",
-      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "text": "New Electrical request from satyam.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:41:34.997Z"
-    },
-    {
-      "id": "n_5ba41caa-fe15-4fd1-b66f-e384721d054a",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking request sent to satya.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:41:34.997Z"
-    },
-    {
-      "id": "n_08215145-93c2-48b6-8bf2-d00647a054c1",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking #752760 is now ARRIVED.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:23:07.853Z"
-    },
-    {
-      "id": "n_2c332203-e940-442c-8893-559f83d04f5e",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Technician has arrived. Your arrival OTP for booking #752760 is 390395.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:23:07.853Z"
-    },
-    {
-      "id": "n_cd61d77b-c176-480d-bafd-92d3afab6aba",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking #752760 is now ON_THE_WAY.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:23:03.350Z"
-    },
-    {
-      "id": "n_81758e46-bee6-4ecd-b1a0-c09e56a4ffc6",
-      "userId": "admin_599a627c-251a-4a08-986c-e3efb6735190",
-      "text": "Booking #755059 was cancelled by technician.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:58.206Z"
-    },
-    {
-      "id": "n_2b268356-c6d1-4e11-b099-349ee1577764",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking #755059 was cancelled. Reason: Changed my mind",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:58.206Z"
-    },
-    {
-      "id": "n_7d88f6bd-521b-4776-84bd-1dd909db587c",
-      "userId": "admin_599a627c-251a-4a08-986c-e3efb6735190",
-      "text": "Booking #755625 was cancelled by technician.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:51.876Z"
-    },
-    {
-      "id": "n_b11967bb-c287-4f03-8b38-bfa023e144ec",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking #755625 was cancelled. Reason: Cancelled by user",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:51.869Z"
-    },
-    {
-      "id": "n_59c377ca-02da-4fa6-91fb-c181582c93c0",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking #755059 is now ACCEPTED.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:49.420Z"
-    },
-    {
-      "id": "n_d98d4f2a-4b39-43af-be18-74933ec50841",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking #752760 is now ACCEPTED.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:45.709Z"
-    },
-    {
-      "id": "n_1f617cef-9ab9-4ac6-8fa9-04484ed6b744",
-      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "text": "New Electrical request from satyam.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:35.625Z"
-    },
-    {
-      "id": "n_ec65dee9-fb66-4374-9311-0db6740bfa51",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking request sent to satya.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:35.625Z"
-    },
-    {
-      "id": "n_31167d15-f90b-4644-bde9-708558ed078c",
-      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "text": "New Electrical request from satyam.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:35.059Z"
-    },
-    {
-      "id": "n_8bdd1286-7903-41b3-88a9-440adc1074eb",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking request sent to satya.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:35.059Z"
-    },
-    {
-      "id": "n_7ed73719-81e0-4afe-8061-143c916d896e",
-      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "text": "New Electrical request from satyam.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:32.770Z"
-    },
-    {
-      "id": "n_ea2e02ce-df4f-43a2-97c7-300b0ed5fae6",
-      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "text": "Booking request sent to satya.",
-      "read": false,
-      "time": "Just now",
-      "createdAt": "2026-10-10T20:22:32.767Z"
-    }
-  ],
-  "disputes": [],
-  "verifications": [],
-  "aiAnalyses": [],
   "auditLogs": [
     {
-      "id": "audit_e8e7f0fb-87df-4dd3-a021-b04e21e790c5",
-      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "action": "REGISTER",
-      "entity": "User",
-      "entityId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "meta": {},
-      "createdAt": "2026-10-10T18:38:30.940Z"
-    },
-    {
-      "id": "audit_5e3c7b55-e852-4eb4-bc97-7e9938e1520d",
-      "actorId": "u_8ab771da-f5b7-43ef-90bf-c3a737688c4e",
-      "action": "REGISTER",
-      "entity": "User",
-      "entityId": "u_8ab771da-f5b7-43ef-90bf-c3a737688c4e",
-      "meta": {},
-      "createdAt": "2026-10-10T20:05:11.866Z"
-    },
-    {
-      "id": "audit_ca508f0b-66a3-4fb5-a939-87b5dc5d3449",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "action": "REGISTER",
-      "entity": "User",
-      "entityId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "meta": {},
-      "createdAt": "2026-10-10T20:20:19.257Z"
-    },
-    {
-      "id": "audit_c6f80626-53b0-44e6-bfe8-0fdcfa2292e0",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "action": "AVAILABILITY_UPDATE",
-      "entity": "Technician",
-      "entityId": 1791663619256,
+      "id": "audit_15fc41c9-131a-411c-9ba4-aec1de119bb6",
       "meta": {
-        "available": true
+        "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14"
       },
-      "createdAt": "2026-10-10T20:20:33.459Z"
-    },
-    {
-      "id": "audit_df35fc57-05fe-42e3-bdf6-c74e708a3344",
-      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
       "action": "CREATE",
       "entity": "Booking",
-      "entityId": 1791663752760,
-      "meta": {
-        "technicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:22:32.770Z"
+      "actorId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "entityId": 1791664646085,
+      "createdAt": "2026-10-10T20:37:26.086Z"
     },
     {
-      "id": "audit_0d6929b6-5455-40a5-8533-26bc59bac69e",
-      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "action": "CREATE",
-      "entity": "Booking",
-      "entityId": 1791663755059,
-      "meta": {
-        "technicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:22:35.059Z"
-    },
-    {
-      "id": "audit_072eb84d-4321-4b28-8aa2-2db5b50c4bfb",
-      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "action": "CREATE",
-      "entity": "Booking",
-      "entityId": 1791663755625,
-      "meta": {
-        "technicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:22:35.625Z"
-    },
-    {
-      "id": "audit_7459464e-7798-4cad-b1c8-563e50596507",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "action": "STATUS_UPDATE",
-      "entity": "Booking",
-      "entityId": 1791663752760,
+      "id": "audit_41c4dd58-8206-4d87-a3ee-f16cfe00ae92",
       "meta": {
         "status": "ACCEPTED"
       },
-      "createdAt": "2026-10-10T20:22:45.709Z"
-    },
-    {
-      "id": "audit_df991370-7e72-4d7f-accf-1057f435e526",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
       "action": "STATUS_UPDATE",
       "entity": "Booking",
-      "entityId": 1791663755059,
-      "meta": {
-        "status": "ACCEPTED"
-      },
-      "createdAt": "2026-10-10T20:22:49.420Z"
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791664646085,
+      "createdAt": "2026-10-10T20:38:06.837Z"
     },
     {
-      "id": "audit_a16cef30-3cfe-4b9d-8277-e97052739d21",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "action": "STATUS_UPDATE",
-      "entity": "Booking",
-      "entityId": 1791663755625,
-      "meta": {
-        "status": "CANCELLED"
-      },
-      "createdAt": "2026-10-10T20:22:51.868Z"
-    },
-    {
-      "id": "audit_19138b10-55c6-4f8e-85e2-79262c31e61f",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "action": "STATUS_UPDATE",
-      "entity": "Booking",
-      "entityId": 1791663755059,
-      "meta": {
-        "status": "CANCELLED"
-      },
-      "createdAt": "2026-10-10T20:22:58.206Z"
-    },
-    {
-      "id": "audit_9550028b-0c8d-4618-9eaa-c853c46c08d0",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
-      "action": "STATUS_UPDATE",
-      "entity": "Booking",
-      "entityId": 1791663752760,
+      "id": "audit_f3bde4eb-2221-4f09-b7e5-eb8261257227",
       "meta": {
         "status": "ON_THE_WAY"
       },
-      "createdAt": "2026-10-10T20:23:03.350Z"
-    },
-    {
-      "id": "audit_9c9a5233-5208-4f0a-bddd-dd3aed1e53bd",
-      "actorId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
       "action": "STATUS_UPDATE",
       "entity": "Booking",
-      "entityId": 1791663752760,
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791664646085,
+      "createdAt": "2026-10-10T20:38:13.108Z"
+    },
+    {
+      "id": "audit_896a9064-d2f0-4028-baa5-345f57038d02",
       "meta": {
         "status": "ARRIVED"
       },
-      "createdAt": "2026-10-10T20:23:07.853Z"
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791664646085,
+      "createdAt": "2026-10-10T20:38:21.899Z"
     },
     {
-      "id": "audit_ca6f36aa-08a0-4643-a35b-749d5c04ae98",
-      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+      "id": "audit_43664072-4405-4661-9653-84870be5f02f",
+      "meta": {
+        "status": "CANCELLED"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791664646085,
+      "createdAt": "2026-10-10T20:44:29.727Z"
+    },
+    {
+      "id": "audit_1aff3532-22a4-498d-8815-c8b185f78cc8",
+      "meta": {
+        "available": true
+      },
+      "action": "AVAILABILITY_UPDATE",
+      "entity": "Technician",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "createdAt": "2026-10-10T20:56:18.758Z"
+    },
+    {
+      "id": "audit_4876052e-40fe-4cc6-bc70-b7bf843c490e",
+      "meta": {
+        "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14"
+      },
       "action": "CREATE",
       "entity": "Booking",
-      "entityId": 1791664894996,
-      "meta": {
-        "technicianId": 1791663619256
-      },
-      "createdAt": "2026-10-10T20:41:34.997Z"
+      "actorId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "entityId": 1791665807565,
+      "createdAt": "2026-10-10T20:56:47.565Z"
     },
     {
-      "id": "audit_1def7c94-0192-47ea-8084-56c8d10dbd0d",
-      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
-      "action": "STATUS_UPDATE",
+      "id": "audit_eb8e9782-9b8d-4814-a359-b448d4c553f0",
+      "meta": {
+        "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14"
+      },
+      "action": "CREATE",
       "entity": "Booking",
-      "entityId": 1791663752760,
+      "actorId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "entityId": 1791665809242,
+      "createdAt": "2026-10-10T20:56:49.242Z"
+    },
+    {
+      "id": "audit_3fa92d93-5c25-41ad-b146-b20f5ec0c637",
       "meta": {
         "status": "CANCELLED"
       },
-      "createdAt": "2026-10-10T20:41:49.060Z"
-    },
-    {
-      "id": "audit_10f90c64-44bf-4169-91f0-0b78ba910b57",
-      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
       "action": "STATUS_UPDATE",
       "entity": "Booking",
-      "entityId": 1791664894996,
+      "actorId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "entityId": 1791665809242,
+      "createdAt": "2026-10-10T20:57:00.343Z"
+    },
+    {
+      "id": "audit_681dea06-0d11-4e91-a843-0aa0f96b2a0b",
+      "meta": {
+        "status": "ACCEPTED"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791665807565,
+      "createdAt": "2026-10-10T20:57:18.360Z"
+    },
+    {
+      "id": "audit_680a3c67-6a5a-4955-a6bb-e6d7c65f792b",
+      "meta": {
+        "status": "ON_THE_WAY"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791665807565,
+      "createdAt": "2026-10-10T20:57:26.851Z"
+    },
+    {
+      "id": "audit_4331bc9f-f0db-4cc9-9c2f-797f2064c51c",
+      "meta": {
+        "status": "ARRIVED"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791665807565,
+      "createdAt": "2026-10-10T20:57:33.124Z"
+    },
+    {
+      "id": "audit_4936638c-ba92-4e30-8f6c-f8cbd6e033ec",
       "meta": {
         "status": "CANCELLED"
       },
-      "createdAt": "2026-10-10T20:44:09.841Z"
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "entityId": 1791665807565,
+      "createdAt": "2026-10-10T21:05:10.993Z"
+    },
+    {
+      "id": "audit_96a968b1-784d-4a26-97fc-7d30ebc0f131",
+      "meta": {
+        "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14"
+      },
+      "action": "CREATE",
+      "entity": "Booking",
+      "actorId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "entityId": 1791666438101,
+      "createdAt": "2026-10-10T21:07:18.101Z"
+    },
+    {
+      "id": "audit_0ca3306d-d2ff-4f4b-81a7-9da4137209f9",
+      "meta": {
+        "status": "ACCEPTED"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791666438101,
+      "createdAt": "2026-10-10T21:07:33.759Z"
+    },
+    {
+      "id": "audit_28ff6125-4438-4e8c-a3eb-b13d272a191b",
+      "meta": {
+        "status": "ON_THE_WAY"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791666438101,
+      "createdAt": "2026-10-10T21:07:50.694Z"
+    },
+    {
+      "id": "audit_86b8bb8e-5a15-429a-b228-d3ed4d6361b3",
+      "meta": {
+        "status": "ARRIVED"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791666438101,
+      "createdAt": "2026-10-10T21:08:05.557Z"
+    },
+    {
+      "id": "audit_a80a0000-92e1-4e57-8d12-3445b7d007af",
+      "meta": {},
+      "action": "VERIFY_ARRIVAL_OTP",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791666438101,
+      "createdAt": "2026-10-10T21:08:39.758Z"
+    },
+    {
+      "id": "audit_1f06a245-a068-4118-a2da-829889c8cb53",
+      "meta": {
+        "technicianId": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14"
+      },
+      "action": "CREATE",
+      "entity": "Booking",
+      "actorId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "entityId": 1791666949437,
+      "createdAt": "2026-10-10T21:15:49.437Z"
+    },
+    {
+      "id": "audit_638c9c73-791e-4e02-b680-f80a6bbc4242",
+      "meta": {
+        "status": "ACCEPTED"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791666949437,
+      "createdAt": "2026-10-10T21:16:10.112Z"
+    },
+    {
+      "id": "audit_36eba393-d941-42f6-9390-3f8251f30f92",
+      "meta": {
+        "status": "ON_THE_WAY"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791666949437,
+      "createdAt": "2026-10-10T21:16:41.342Z"
+    },
+    {
+      "id": "audit_e00af7d3-21a6-4e74-8488-a51ce8889b28",
+      "meta": {
+        "status": "ARRIVED"
+      },
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "actorId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "entityId": 1791666949437,
+      "createdAt": "2026-10-10T21:17:40.880Z"
+    }
+  ],
+  "aiAnalyses": [
+    {
+      "id": "ai_b8ccf6c1-8130-4c04-b1f5-5fb7c50b4ea8",
+      "type": "chat",
+      "input": "jjhggugjhddhmfmdc",
+      "result": {
+        "mode": "local-smart-assistant",
+        "reply": "Tell me the appliance/service, the exact symptom and whether it is urgent. I can help you choose the right skill and find nearby technicians.",
+        "service": "General Repair",
+        "suggestedAction": "Find General Repair technicians near your live location."
+      },
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T21:00:57.773Z"
+    }
+  ],
+  "technicians": [
+    {
+      "id": "tech_cfbd99e1-21ae-4aa9-965e-7eba2bceab14",
+      "eta": 15,
+      "exp": 0,
+      "lat": 28.470269599518087,
+      "lng": 77.49353084356216,
+      "area": "Ghaziabad, Uttar Pradesh",
+      "jobs": 0,
+      "name": "anshu kumar mishra",
+      "price": 299,
+      "speed": 0,
+      "upiId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b@nearfix",
+      "rating": 0,
+      "skills": [],
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "heading": 0,
+      "reviews": 0,
+      "service": "Handyman",
+      "accuracy": 105,
+      "category": "General Repair",
+      "distance": 3.5,
+      "response": 0,
+      "verified": false,
+      "available": true,
+      "skillVerified": false,
+      "completionRate": 100,
+      "locationSource": "technician-gps",
+      "repeatCustomers": 0,
+      "cancellationRate": 0,
+      "identityVerified": false,
+      "locationUpdatedAt": "2026-10-10T20:57:02.958Z",
+      "experienceVerified": false
     }
   ],
   "pricingRules": [],
-  "otpChallenges": [],
-  "pendingRegistrations": [],
-  "parts": [
+  "notifications": [
     {
-      "id": "p1",
-      "barcode": "8901001000011",
-      "name": "1/2 inch Brass Ball Valve",
-      "category": "Plumbing",
-      "brand": "NearFix Supply",
-      "price": 185,
-      "unit": "piece",
-      "stock": 42,
-      "image": "assets/parts/brass-ball-valve.svg",
-      "description": "Brass quarter-turn valve for common household water lines.",
-      "compatible": [
-        "Plumbing"
-      ]
+      "id": "n_229a961a-3678-4996-9e5c-b16861ef8069",
+      "read": false,
+      "text": "Hackathon demo: the technician has arrived. Open booking details for the in-app code.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:19:34.539Z",
+      "hackathonSample": true
     },
     {
-      "id": "p2",
-      "barcode": "8901001000012",
-      "name": "Braided Water Hose 1.5m",
-      "category": "Plumbing",
-      "brand": "NearFix Supply",
-      "price": 240,
-      "unit": "piece",
-      "stock": 28,
-      "image": "assets/parts/water-hose.svg",
-      "description": "Flexible braided inlet hose with standard fittings.",
-      "compatible": [
-        "Plumbing"
-      ]
+      "id": "n_c23c8952-75b6-4582-b33c-52cf368723c4",
+      "read": false,
+      "text": "Hackathon demo: a new Electrical service request is ready.",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T21:19:34.539Z",
+      "hackathonSample": true
     },
     {
-      "id": "p3",
-      "barcode": "8901001000013",
-      "name": "16A Modular Switch",
-      "category": "Electrical",
-      "brand": "NearFix Supply",
-      "price": 95,
-      "unit": "piece",
-      "stock": 75,
-      "image": "assets/parts/modular-switch.svg",
-      "description": "16A modular switch for residential circuits.",
-      "compatible": [
-        "Electrical"
-      ]
+      "id": "n_781bc051-e207-4311-8263-67b61b2270cd",
+      "read": false,
+      "text": "Booking #949437 is now ARRIVED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:17:40.881Z"
     },
     {
-      "id": "p4",
-      "barcode": "8901001000014",
-      "name": "6A Universal Socket",
-      "category": "Electrical",
-      "brand": "NearFix Supply",
-      "price": 125,
-      "unit": "piece",
-      "stock": 63,
-      "image": "assets/parts/socket.svg",
-      "description": "Universal modular socket with safety shutters.",
-      "compatible": [
-        "Electrical"
-      ]
+      "id": "n_587daf65-fa1b-4529-9a9d-cb47f7dd9136",
+      "read": false,
+      "text": "Technician has arrived. Open this booking's details in NearFix to view the arrival verification code.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:17:40.880Z"
     },
     {
-      "id": "p5",
-      "barcode": "8901001000015",
-      "name": "AC Copper Capacitor 35+5 µF",
-      "category": "AC Repair",
-      "brand": "NearFix Supply",
-      "price": 520,
-      "unit": "piece",
-      "stock": 19,
-      "image": "assets/parts/capacitor.svg",
-      "description": "Dual-run capacitor for compatible split/window AC units.",
-      "compatible": [
-        "AC Repair"
-      ]
+      "id": "n_3919fa31-ad1f-4126-881c-e1bb81f2088e",
+      "read": false,
+      "text": "Booking #949437 is now ON_THE_WAY.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:16:41.342Z"
     },
     {
-      "id": "p6",
-      "barcode": "8901001000016",
-      "name": "AC Air Filter 1.5 Ton",
-      "category": "AC Repair",
-      "brand": "NearFix Supply",
-      "price": 310,
-      "unit": "piece",
-      "stock": 34,
-      "image": "assets/parts/ac-filter.svg",
-      "description": "Washable replacement mesh filter for common AC units.",
-      "compatible": [
-        "AC Repair"
-      ]
+      "id": "n_c4434420-5782-494a-8085-c70742c0fbf5",
+      "read": false,
+      "text": "Booking #949437 is now ACCEPTED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:16:10.112Z"
     },
     {
-      "id": "p7",
-      "barcode": "8901001000017",
-      "name": "Washing Machine Drain Pump",
-      "category": "Appliance Repair",
-      "brand": "NearFix Supply",
-      "price": 690,
-      "unit": "piece",
-      "stock": 14,
-      "image": "assets/parts/drain-pump.svg",
-      "description": "Replacement drain pump for compatible washing machines.",
-      "compatible": [
-        "Appliance Repair"
-      ]
+      "id": "n_4bed4155-1dc3-4830-a8b0-e7214b6ed214",
+      "read": false,
+      "text": "New Electrical request from satyam.",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T21:15:49.437Z"
     },
     {
-      "id": "p8",
-      "barcode": "8901001000018",
-      "name": "Laptop 65W USB-C Adapter",
-      "category": "Computer Repair",
-      "brand": "NearFix Supply",
-      "price": 1199,
-      "unit": "piece",
-      "stock": 21,
-      "image": "assets/parts/usb-c-adapter.svg",
-      "description": "65W USB-C PD adapter for compatible laptops.",
-      "compatible": [
-        "Computer Repair"
-      ]
+      "id": "n_79e2367b-9182-428c-8062-5f4b9ad0fdc6",
+      "read": false,
+      "text": "Booking request sent to anshu kumar mishra.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:15:49.437Z"
     },
     {
-      "id": "p9",
-      "barcode": "8901001000019",
-      "name": "Door Hinge Heavy Duty",
-      "category": "Carpentry",
-      "brand": "NearFix Supply",
-      "price": 160,
-      "unit": "pair",
-      "stock": 51,
-      "image": "assets/parts/door-hinge.svg",
-      "description": "Heavy-duty steel hinges for interior/exterior doors.",
-      "compatible": [
-        "Carpentry"
-      ]
+      "id": "n_94fbd2bc-3da4-4efc-aa87-a5cc639f388b",
+      "read": false,
+      "text": "Customer arrival OTP verified for booking #438101.",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T21:08:39.758Z"
     },
     {
-      "id": "p10",
-      "barcode": "8901001000020",
-      "name": "LED Bulb 12W",
-      "category": "Electrical",
-      "brand": "NearFix Supply",
-      "price": 110,
-      "unit": "piece",
-      "stock": 120,
-      "image": "assets/parts/led-bulb.svg",
-      "description": "12W energy-efficient LED bulb, warm/neutral compatible.",
-      "compatible": [
-        "Electrical"
-      ]
+      "id": "n_3339b6a0-a73b-455d-837d-079d30548aa7",
+      "read": false,
+      "text": "Arrival verified for booking #438101. Service inspection can now begin.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:08:39.758Z"
     },
     {
-      "id": "p11",
-      "barcode": "8901001000021",
-      "name": "PTFE Thread Seal Tape",
-      "category": "Plumbing",
-      "brand": "NearFix Supply",
-      "price": 35,
-      "unit": "roll",
-      "stock": 200,
-      "image": "assets/parts/ptfe-tape.svg",
-      "description": "Thread sealing tape for plumbing fittings.",
-      "compatible": [
-        "Plumbing"
-      ]
+      "id": "n_23a654a7-5fe0-4189-8642-4c4cf9dfea2d",
+      "read": false,
+      "text": "Booking #438101 is now ARRIVED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:08:05.557Z"
     },
     {
-      "id": "p12",
-      "barcode": "8901001000022",
-      "name": "Universal Extension Cord 5m",
-      "category": "Electrical",
-      "brand": "NearFix Supply",
-      "price": 349,
-      "unit": "piece",
-      "stock": 36,
-      "image": "assets/parts/extension-cord.svg",
-      "description": "5m heavy-duty extension cord with overload protection.",
-      "compatible": [
-        "Electrical"
-      ]
+      "id": "n_d5f52405-b285-453d-ba1d-e7523594887d",
+      "read": false,
+      "text": "Technician has arrived. Open this booking's details in NearFix to view the arrival verification code.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:08:05.557Z"
+    },
+    {
+      "id": "n_9e19ee45-590a-4b50-8e06-4cf4fe66083e",
+      "read": false,
+      "text": "Booking #438101 is now ON_THE_WAY.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:07:50.694Z"
+    },
+    {
+      "id": "n_cd68baab-4203-4934-ba58-c35d607949c2",
+      "read": false,
+      "text": "Booking #438101 is now ACCEPTED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:07:33.759Z"
+    },
+    {
+      "id": "n_d1fa09d8-1d6f-4e3f-b29e-0aa50200c2fc",
+      "read": false,
+      "text": "New Electrical request from satyam.",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T21:07:18.101Z"
+    },
+    {
+      "id": "n_aa4bfb20-6378-48fd-a448-05411bab1ce7",
+      "read": false,
+      "text": "Booking request sent to anshu kumar mishra.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T21:07:18.101Z"
+    },
+    {
+      "id": "n_f4ef50b4-05d3-45c8-bedb-afbab60ea43d",
+      "read": false,
+      "text": "Booking #807565 was cancelled. Reason: Changed my mind",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T21:05:10.993Z"
+    },
+    {
+      "id": "n_9977dbc6-7e06-413d-a402-98a0c65e2d1c",
+      "read": false,
+      "text": "Booking #807565 is now ARRIVED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:57:33.124Z"
+    },
+    {
+      "id": "n_279f059c-a4a4-4ce2-8c91-bf17d044fcbd",
+      "read": false,
+      "text": "Technician has arrived. Open this booking's details in NearFix to view the arrival verification code.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:57:33.124Z"
+    },
+    {
+      "id": "n_64ebe991-56b8-49fb-b81c-b45ad23fce7d",
+      "read": false,
+      "text": "Booking #807565 is now ON_THE_WAY.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:57:26.851Z"
+    },
+    {
+      "id": "n_8450c5dd-9454-491e-a474-122a7e511315",
+      "read": false,
+      "text": "Booking #807565 is now ACCEPTED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:57:18.360Z"
+    },
+    {
+      "id": "n_c7a7f16b-55ce-4aa6-96de-301f80425c34",
+      "read": false,
+      "text": "Booking #809242 was cancelled. Reason: Changed my mind",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T20:57:00.343Z"
+    },
+    {
+      "id": "n_d0b459f3-8204-429d-acef-40fe4ffaad43",
+      "read": false,
+      "text": "New Electrical request from satyam.",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T20:56:49.242Z"
+    },
+    {
+      "id": "n_54a86bc0-2256-4b0a-849d-b9fbe5f7a99a",
+      "read": false,
+      "text": "Booking request sent to anshu kumar mishra.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:56:49.242Z"
+    },
+    {
+      "id": "n_e175445f-e10e-47bd-98f0-2f5f8d53b233",
+      "read": false,
+      "text": "New Electrical request from satyam.",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T20:56:47.565Z"
+    },
+    {
+      "id": "n_46232f79-0b28-4cf5-af3d-b279d5c44d14",
+      "read": false,
+      "text": "Booking request sent to anshu kumar mishra.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:56:47.565Z"
+    },
+    {
+      "id": "n_533c7b12-b044-4c69-8249-4b5488dc3a7d",
+      "read": false,
+      "text": "Booking #646085 was cancelled. Reason: Changed my mind",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:44:29.727Z"
+    },
+    {
+      "id": "n_460a2ef6-89c1-416d-9022-68c41de7c750",
+      "read": false,
+      "text": "Booking #646085 is now ARRIVED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:38:21.899Z"
+    },
+    {
+      "id": "n_7038ebc2-acd9-4a60-a439-94f73a57f20a",
+      "read": false,
+      "text": "Technician has arrived. Open this booking's details in NearFix to view the arrival verification code.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:38:21.899Z"
+    },
+    {
+      "id": "n_1ad7fdef-7272-4f1a-bebf-1b65b369ada2",
+      "read": false,
+      "text": "Booking #646085 is now ON_THE_WAY.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:38:13.108Z"
+    },
+    {
+      "id": "n_72d46324-3411-4cb3-98a0-ad6aa795e4e7",
+      "read": false,
+      "text": "Booking #646085 is now ACCEPTED.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:38:06.837Z"
+    },
+    {
+      "id": "n_3e8dfeae-8d27-4b3c-b59e-3c9ba86ebc86",
+      "read": false,
+      "text": "New Electrical request from satyam.",
+      "time": "Just now",
+      "userId": "cba83f57-5fa3-4dc4-8051-39302bc5d09b",
+      "createdAt": "2026-10-10T20:37:26.086Z"
+    },
+    {
+      "id": "n_5d6fba67-2657-4ab7-82ce-9157478f0b0f",
+      "read": false,
+      "text": "Booking request sent to anshu kumar mishra.",
+      "time": "Just now",
+      "userId": "8d0460a8-28f9-42ab-82aa-9df2986a8b27",
+      "createdAt": "2026-10-10T20:37:26.086Z"
     }
-  ]
+  ],
+  "otpChallenges": [],
+  "verifications": [],
+  "pendingRegistrations": []
 }
