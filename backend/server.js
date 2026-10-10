@@ -11,9 +11,6 @@ const PORT = Number(process.env.PORT || 5050);
 const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY || '';
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
-const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
-const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
-const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
 const SUPABASE_URL = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_ANON_KEY = String(process.env.SUPABASE_ANON_KEY || '');
 const SUPABASE_SERVICE_ROLE_KEY = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '');
@@ -219,14 +216,6 @@ async function auth(req){
 }
 function normalizePhone(v){ return String(v||'').replace(/[^+0-9]/g,''); }
 function otpCode(){ return String(crypto.randomInt(0,1000000)).padStart(6,'0'); }
-async function sendOtpSms(phone,code){
-  if(!(TWILIO_ACCOUNT_SID&&TWILIO_AUTH_TOKEN&&TWILIO_PHONE_NUMBER)) {const error=new Error('Arrival verification SMS is not configured. Add Twilio credentials before enabling job check-in.');error.code='OTP_PROVIDER_REQUIRED';throw error;}
-  const auth=Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
-  const body=new URLSearchParams({To:phone,From:TWILIO_PHONE_NUMBER,Body:`Your NearFix verification code is ${code}. It expires in 5 minutes.`}).toString();
-  const r=await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,{method:'POST',headers:{Authorization:`Basic ${auth}`,'Content-Type':'application/x-www-form-urlencoded'},body});
-  if(!r.ok){const t=await r.text(); throw new Error(`OTP SMS failed: ${t.slice(0,180)}`);}
-  return {sent:true,mode:'twilio'};
-}
 function findUser(data,id){ return data.users.find(u=>String(u.id)===String(id)); }
 function technicianFor(data,id){ return data.technicians.find(t=>String(t.id)===String(id)); }
 function technicianForUser(data,userId){
@@ -449,8 +438,10 @@ function bookingView(data,b,viewer=null){
   const view={...b,customer:safeUser(findUser(data,b.customerId)),technician:technicianView(data,technicianFor(data,b.technicianId)),quote:data.quotes.find(q=>q.bookingId===b.id)||null,payment:data.payments.find(p=>p.bookingId===b.id)||null,invoice:data.invoices.find(i=>i.bookingId===b.id)||null,media:Array.isArray(b.media)?b.media:[]};
   if(b.arrivalVerification){
     view.arrivalVerification={...b.arrivalVerification};
-    // The arrival code is sent out-of-band and is never returned by the API.
-    delete view.arrivalVerification.otp;
+    // Only the booking's customer can see the in-app code.
+    if(!(viewer?.role==='customer' && String(viewer.id)===String(b.customerId))){
+      delete view.arrivalVerification.otp;
+    }
     delete view.arrivalVerification.otpHash;
   }
   return view;
@@ -772,7 +763,9 @@ async function api(req,res,url){
     const assignedTech=technicianFor(data,booking.technicianId);
     const isTech=me.role==='technician'&&assignedTech?.userId===me.id;
     if(!(isCustomer||isTech||me.role==='admin')) return json(res,403,{success:false,message:'Forbidden',code:'FORBIDDEN'});
-    const response={success:true,status:booking.arrivalVerification?.status||'NOT_SENT',expiresAt:booking.arrivalVerification?.expiresAt||null,verifiedAt:booking.arrivalVerification?.verifiedAt||null};
+    const arrival=booking.arrivalVerification;
+    const response={success:true,status:arrival?.status||'NOT_SENT',expiresAt:arrival?.expiresAt||null,verifiedAt:arrival?.verifiedAt||null};
+    if(isCustomer && arrival?.status==='PENDING' && arrival.otp && (!arrival.expiresAt || Date.now()<=new Date(arrival.expiresAt).getTime())) response.otp=arrival.otp;
     return json(res,200,response);
   }
   const bm=url.pathname.match(/^\/api\/bookings\/([^/]+)$/);
@@ -805,14 +798,10 @@ async function api(req,res,url){
       if(!isAdmin && isAssignedTechnician && !transitions[b.status]?.includes(body.status)) return json(res,409,{success:false,message:`Cannot move booking from ${b.status} to ${body.status}.`,code:'INVALID_TRANSITION'});
       if(isCustomer && body.status==='CANCELLED' && ['COMPLETED','CANCELLED'].includes(b.status)) return json(res,409,{success:false,message:'Completed bookings cannot be cancelled.',code:'BOOKING_CLOSED'});
       if(body.status==='ARRIVED' && isAssignedTechnician){
-        const customer=findUser(data,b.customerId);
-        const customerPhone=normalizePhone(customer?.phone);
-        if(!customerPhone)return json(res,409,{success:false,message:'The customer must add a mobile number before arrival verification can be sent.',code:'PHONE_REQUIRED'});
         const otp=otpCode();
         const expiresAt=new Date(Date.now()+OTP_TTL_MS).toISOString();
-        try{await sendOtpSms(customerPhone,otp);}catch(error){return json(res,502,{success:false,message:error.message,code:error.code||'OTP_SEND_FAILED'});}
-        b.arrivalVerification={status:'PENDING',sentAt:now(),expiresAt,otpHash:crypto.createHash('sha256').update(otp).digest('hex'),attempts:0,deliveryMode:'SMS'};
-        notify(data,b.customerId,`Technician has arrived. Check your registered mobile for the booking verification code.`);
+        b.arrivalVerification={status:'PENDING',sentAt:now(),expiresAt,otp,otpHash:crypto.createHash('sha256').update(otp).digest('hex'),attempts:0,deliveryMode:'IN_APP'};
+        notify(data,b.customerId,`Technician has arrived. Open this booking's details in NearFix to view the arrival verification code.`);
       }
       b.status=body.status; b.statusHistory=b.statusHistory||[]; b.statusHistory.push({status:body.status,at:now(),by:me.id});
       if(body.status==='CANCELLED'){
