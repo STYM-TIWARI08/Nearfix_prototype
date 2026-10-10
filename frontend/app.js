@@ -3739,6 +3739,10 @@ async function hydrateServer(){
 
 let serverSyncTimer=null;
 let activeBookingDetailsId=null;
+let serverSyncInFlight=false;
+let serverSyncKnownBookings=new Map();
+let serverSyncPrimed=false;
+let serverSyncVisibilityBound=false;
 function bookingDetailsSyncState(b){
   return JSON.stringify({
     status:b.status,
@@ -3756,11 +3760,30 @@ function bookingDetailsSyncState(b){
 }
 function startServerSync(){
   if(serverSyncTimer) clearInterval(serverSyncTimer);
-  serverSyncTimer=setInterval(async()=>{
-    if(!nfToken||!['customer','technician','admin'].includes(currentUser()?.role)) return;
+  serverSyncKnownBookings=new Map(db.bookings.map(b=>[String(b.id),b]));
+  serverSyncPrimed=false;
+  const syncNow=async()=>{
+    if(serverSyncInFlight||!nfToken||!['customer','technician','admin'].includes(currentUser()?.role)) return;
+    serverSyncInFlight=true;
     try {
+      const previous=serverSyncKnownBookings;
       const payload=await nfFetch('/api/bootstrap');
       applyServerState(payload);
+      const updated=new Map(db.bookings.map(b=>[String(b.id),b]));
+      if(serverSyncPrimed){
+        const role=currentUser()?.role;
+        if(role==='technician'){
+          const arrivals=[...updated.values()].filter(b=>b.status==='Requested'&&!previous.has(String(b.id)));
+          if(arrivals.length) toast(arrivals.length===1?'New service request received.':`${arrivals.length} new service requests received.`);
+        }else if(role==='customer'){
+          for(const booking of updated.values()){
+            const old=previous.get(String(booking.id));
+            if(old&&old.status!==booking.status){toast(`Booking #${String(booking.id).slice(-6)} update: ${booking.status}.`);break;}
+          }
+        }
+      }
+      serverSyncKnownBookings=updated;
+      serverSyncPrimed=true;
       // Keep an open booking panel in sync, while preserving its scroll position.
       const detailsPanel=modal().querySelector('[data-booking-details]');
       if(detailsPanel){
@@ -3776,8 +3799,16 @@ function startServerSync(){
       // Don't replace other dialogs: that could reset OTP input or an upload in progress.
       if(document.querySelector('.modal-box')) return;
       if(['customer','technician','admin','bookings'].includes(state.route)) render();
-    } catch(e){}
-  },3000);
+    } catch(e){} finally { serverSyncInFlight=false; }
+  };
+  void syncNow();
+  serverSyncTimer=setInterval(syncNow,3000);
+  if(!serverSyncVisibilityBound){
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible') void syncNow();
+    });
+    serverSyncVisibilityBound=true;
+  }
 }
 
 async function serverLogin(email,password){
