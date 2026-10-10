@@ -1,45 +1,33 @@
 # NearFix API
 
-- `GET /api/health`
-- `GET /api/public`
-- `POST /api/auth/login`
-- `POST /api/auth/register`
-- `GET /api/bootstrap` (authenticated)
-- `GET /api/technicians`
-- `POST /api/ai/analyze-problem`
-- `POST /api/ai/estimate-price`
-- `POST /api/matching/find`
-- `GET /api/bookings`
-- `POST /api/bookings`
-- `PATCH /api/bookings/:id`
-- `POST /api/quotes`
-- `POST /api/quotes/:id/approve`
-- `POST /api/quotes/:id/reject`
-- `POST /api/payments`
-- `POST /api/invoices`
-- `GET /api/invoices`
-- `POST /api/reviews`
-- `GET /api/messages`
-- `POST /api/messages`
-- `GET /api/notifications`
-- `PATCH /api/notifications/read`
-- `POST /api/disputes`
-- `GET /api/admin/analytics`
-- `PATCH /api/admin/technicians/:id`
-- `PATCH /api/admin/disputes/:id`
+All authenticated requests use `Authorization: Bearer <Supabase access token>`. The backend validates the token with Supabase Auth and resolves the user's role from `public.profiles`; client metadata is not used for authorization.
 
+## Authentication
 
-### Parts / barcode
+- `POST /api/auth/register` — customer or technician signup; administrator role is rejected.
+- `POST /api/auth/login` — email and password sign-in through Supabase Auth.
+- `POST /api/auth/refresh` — rotate an expired access token using the Supabase refresh token.
+- `POST /api/auth/logout` — invalidate the Supabase session.
+- `POST /api/auth/password-reset` — send the Supabase recovery email.
+- `POST /api/auth/password-update` — update a password using the recovery access token.
 
-- `GET /api/parts?q=...&barcode=...&category=...` — search the shared spare-parts catalog.
-- `GET /api/parts/:barcode` — exact barcode lookup used by the scanner.
-- `POST /api/admin/parts` — admin-only catalog item creation.
-- `PATCH /api/admin/parts/:id` — admin-only catalog update.
-- `DELETE /api/admin/parts/:id` — admin-only catalog deletion.
+## Service API
 
+- `GET /api/public`, `GET /api/technicians`, `GET /api/parts`
+- `GET /api/bootstrap`, `GET /api/bookings`, `POST /api/bookings`, `PATCH /api/bookings/:id`
+- `POST /api/quotes`, `POST /api/quotes/:id/approve`, `POST /api/quotes/:id/reject`
+- `POST /api/payments/manual`, `POST /api/payments/order`, `POST /api/payments/verify`
+- `POST /api/invoices`, `GET /api/invoices`, `POST /api/reviews`
+- `GET /api/messages`, `POST /api/messages`, `GET /api/notifications`, `PATCH /api/notifications/read`
+- `POST /api/disputes`, `GET /api/admin/analytics`, `PATCH /api/admin/technicians/:id`
 
-## Arrival OTP check-in
-- `GET /api/bookings/:id/arrival-verification` — customer can view the demo OTP when SMS is not configured; technician/admin receive status only.
-- `POST /api/bookings/:id/arrival-otp/verify` — assigned technician submits the customer's 6-digit arrival OTP. Successful verification moves the booking from `ARRIVED` to `INSPECTION`.
-- A technician cannot move an `ARRIVED` booking to `INSPECTION` directly.
-- The OTP is generated when the assigned technician marks the booking `ARRIVED`, expires after 5 minutes, and is delivered by Twilio when configured; otherwise it is shown in demo mode.
+`POST /api/payments` is disabled (410); it was the fake payment path. Cash and UPI submissions remain pending until a technician or administrator confirms receipt. Razorpay marks a payment paid only after its signature is verified.
+
+## Arrival verification
+
+- `GET /api/bookings/:id/arrival-verification` returns the authorized booking's verification status, never the code.
+- `POST /api/bookings/:id/arrival-otp/verify` is restricted to the assigned technician.
+- A technician cannot move an `ARRIVED` booking to `INSPECTION` without a valid code.
+- Codes expire after five minutes, allow five attempts and are delivered by Twilio. If Twilio or a customer phone number is missing, the job remains unadvanced.
+
+Business endpoints are currently served through the private `nearfix_state` compatibility record. The normalized tables in `docs/sql-persistence.sql` are not yet the source used by those handlers.

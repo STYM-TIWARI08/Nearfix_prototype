@@ -1,24 +1,24 @@
-# NearFix v2 Architecture
+# NearFix architecture
 
 ## Runtime
-- One Node.js process serves both the REST API and the static React-free SPA UI.
-- `start.js` launches the backend, checks `/api/health`, finds the next free port if needed, and opens the browser.
-- Core business data persists in `backend/data/data.json` for a dependency-free hackathon/demo setup.
 
-## Request flow
-Customer UI → REST API → business logic → JSON persistence → REST response → UI state.
+- Node.js serves the static SPA and REST API.
+- Supabase Auth manages credentials and sessions. The backend verifies access tokens with Supabase and resolves roles from `public.profiles`.
+- The backend stores business state in a private Supabase PostgreSQL `nearfix_state` JSONB row. It uses the service-role key server-side; browser clients have no table access.
 
-## AI
-`/api/ai/analyze-problem` detects a service, preliminary urgency, likely causes and required skill using deterministic rules. `/api/ai/estimate-price` calculates a transparent range. This is explicitly a demo fallback and is structured so an external LLM provider can be connected later.
+## Authorization
 
-## Matching
-Technician matching combines service/skill compatibility, availability, distance, reliability, rating, price compatibility and an urgency boost. The response includes a match percentage and ETA.
+- Public signup can create customer or technician profiles only.
+- A database trigger creates profiles on Auth signup. Administrator promotion is an owner-only SQL operation.
+- The SQL migration enables RLS on the profile and service tables and denies browser access to the compatibility state row.
+- API handlers additionally check the authenticated role and ownership/assignment before returning or changing private data.
 
-## Trust
-Identity, skill and experience verification are stored separately. The UI can expose individual trust indicators instead of collapsing them into one opaque score.
+## Database migration status
 
-## Payment
-The local flow uses a mock payment abstraction. It generates a transaction ID and never stores raw card data.
+`docs/sql-persistence.sql` defines normalized profiles, technician skills/areas/availability, service requests, assignments, and service history with constraints, indexes and RLS. The existing service handlers still use the JSONB compatibility record; moving those workflows to the normalized tables remains unfinished.
 
-## Production migration
-For production, replace JSON persistence with PostgreSQL/Prisma, use a real JWT/refresh-token implementation, object storage for uploads, a map provider, a real payment gateway, a real LLM provider, HTTPS, secrets management and WebSocket infrastructure.
+## External services
+
+- Arrival OTP delivery requires Twilio; the OTP is not returned from the API.
+- Online payment requires Razorpay credentials and a valid verified signature. Manual Cash/UPI submissions stay pending until confirmed.
+- The existing rules-based diagnosis and price estimate are preliminary guidance, not a verified service result.

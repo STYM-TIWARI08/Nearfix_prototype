@@ -6,20 +6,7 @@ const SERVICES = [
 ];
 
 
-const PARTS_FALLBACK = [
-  {id:'p1',barcode:'8901001000011',name:'1/2 inch Brass Ball Valve',category:'Plumbing',brand:'NearFix Supply',price:185,unit:'piece',stock:42,image:'assets/parts/brass-ball-valve.svg'},
-  {id:'p2',barcode:'8901001000012',name:'Braided Water Hose 1.5m',category:'Plumbing',brand:'NearFix Supply',price:240,unit:'piece',stock:28,image:'assets/parts/water-hose.svg'},
-  {id:'p3',barcode:'8901001000013',name:'16A Modular Switch',category:'Electrical',brand:'NearFix Supply',price:95,unit:'piece',stock:75,image:'assets/parts/modular-switch.svg'},
-  {id:'p4',barcode:'8901001000014',name:'6A Universal Socket',category:'Electrical',brand:'NearFix Supply',price:125,unit:'piece',stock:63,image:'assets/parts/socket.svg'},
-  {id:'p5',barcode:'8901001000015',name:'AC Copper Capacitor 35+5 µF',category:'AC Repair',brand:'NearFix Supply',price:520,unit:'piece',stock:19,image:'assets/parts/capacitor.svg'},
-  {id:'p6',barcode:'8901001000016',name:'AC Air Filter 1.5 Ton',category:'AC Repair',brand:'NearFix Supply',price:310,unit:'piece',stock:34,image:'assets/parts/ac-filter.svg'},
-  {id:'p7',barcode:'8901001000017',name:'Washing Machine Drain Pump',category:'Appliance Repair',brand:'NearFix Supply',price:690,unit:'piece',stock:14,image:'assets/parts/drain-pump.svg'},
-  {id:'p8',barcode:'8901001000018',name:'Laptop 65W USB-C Adapter',category:'Computer Repair',brand:'NearFix Supply',price:1199,unit:'piece',stock:21,image:'assets/parts/usb-c-adapter.svg'},
-  {id:'p9',barcode:'8901001000019',name:'Door Hinge Heavy Duty',category:'Carpentry',brand:'NearFix Supply',price:160,unit:'pair',stock:51,image:'assets/parts/door-hinge.svg'},
-  {id:'p10',barcode:'8901001000020',name:'LED Bulb 12W',category:'Electrical',brand:'NearFix Supply',price:110,unit:'piece',stock:120,image:'assets/parts/led-bulb.svg'},
-  {id:'p11',barcode:'8901001000021',name:'PTFE Thread Seal Tape',category:'Plumbing',brand:'NearFix Supply',price:35,unit:'roll',stock:200,image:'assets/parts/ptfe-tape.svg'},
-  {id:'p12',barcode:'8901001000022',name:'Universal Extension Cord 5m',category:'Electrical',brand:'NearFix Supply',price:349,unit:'piece',stock:36,image:'assets/parts/extension-cord.svg'}
-];
+const PARTS_FALLBACK = [];
 
 const DEFAULT = {
   session:null,
@@ -28,8 +15,8 @@ const DEFAULT = {
   parts:PARTS_FALLBACK,
   bookings:[],
   favourites:[],
-  messages:[{id:1,bookingId:null,from:'tech',text:'Hi! I’m available for your service request.',time:'4:28 PM'}],
-  notifications:[{id:1,text:'Welcome to NearFix — find trusted professionals nearby.',read:false,time:'Just now'}],
+  messages:[],
+  notifications:[],
   complaints:[],
   reviews:[],
   quotes:[],
@@ -61,9 +48,7 @@ const modal=()=>document.getElementById('modal-root');
 function loadDB(){
   try{
     const saved=JSON.parse(localStorage.getItem(NF_LOCAL_KEY));
-    return saved
-      ? {...DEFAULT,...saved,settings:{...DEFAULT.settings,...(saved.settings||{})}}
-      : structuredClone(DEFAULT);
+    return {...structuredClone(DEFAULT),settings:{...DEFAULT.settings,...(saved?.settings||{})}};
   }catch{
     return structuredClone(DEFAULT);
   }
@@ -190,19 +175,20 @@ function footer(){
 
       <div>
         <b>Contact</b>
-        <span>📍 Ghaziabad, Uttar Pradesh</span>
-        <span>✉ st2701846@gmail.com</span>
-        <span>☎ 8295569711</span>
+        <span>📍 Find services in your area</span>
+        <span>Use the in-app support form</span>
       </div>
     </div>
 
     <div class="container footer-bottom">
-      © 2026 NearFix · Demo application · Built for local service discovery.
+      © 2026 NearFix · Local service discovery.
     </div>
   </footer>`;
 }
 
 function home(){
+  const techs=db.techs||[];
+  const avgRating=techs.length?techs.reduce((sum,t)=>sum+Number(t.rating||0),0)/techs.length:0;
   return `${nav()}
   <main>
     <section class="hero">
@@ -255,7 +241,7 @@ function home(){
             <span class="hero-logo-subtitle">Real local-service workflow</span>
           </div>
           <div class="hero-live-card">
-            <div class="hero-live-head"><span class="live-dot"></span><b>Live service network</b><span class="badge green">Online</span></div>
+          <div class="hero-live-head"><span class="live-dot"></span><b>Nearby service network</b></div>
             <div class="hero-live-row"><span>📍</span><div><b>Real GPS matching</b><small>Customer & technician locations</small></div></div>
             <div class="hero-live-row"><span>💰</span><div><b>Fair parts pricing</b><small>Shared catalog price · itemized quote · admin review</small></div></div>
             <div class="hero-live-row"><span>🔔</span><div><b>Request lifecycle</b><small>Requested → Accepted → On the way → Completed</small></div></div>
@@ -267,10 +253,10 @@ function home(){
 
     <section class="stats-strip">
       <div class="container stats">
-        <div><b>5 km</b><span>Nearby radius</span></div>
-        <div><b>500+</b><span>Professionals</span></div>
-        <div><b>4.8★</b><span>Average rating</span></div>
-        <div><b>24/7</b><span>Quick Fix</span></div>
+        <div><b>${Number(db.settings.radius||5)} km</b><span>Search radius</span></div>
+        <div><b>${techs.length}</b><span>Listed professionals</span></div>
+        <div><b>${avgRating?`${avgRating.toFixed(1)}★`:'—'}</b><span>Average rating</span></div>
+        <div><b>${db.bookings.length}</b><span>Requests in this session</span></div>
       </div>
     </section>
 
@@ -660,20 +646,7 @@ function login(){
       <div class="role-tabs">
         <button id="login-customer" class="active" onclick="setAuthRole('customer')">Customer</button>
         <button id="login-technician" onclick="setAuthRole('technician')">Technician</button>
-        <button id="login-admin" onclick="setAuthRole('admin')">Admin</button>
       </div>
-
-      <section class="demo-login" aria-label="Demo sign-in options">
-        <div class="demo-login-heading"><b>Explore the demo</b><span>One click sign-in</span></div>
-        <div class="demo-login-buttons">
-          <button type="button" onclick="demoLogin('customer')"><span>🏠</span>Customer</button>
-          <button type="button" onclick="demoLogin('technician')"><span>🧰</span>Technician</button>
-          <button type="button" onclick="demoLogin('admin')"><span>🛡️</span>Admin</button>
-        </div>
-        <small>Demo accounts use sample data. No real customer or technician details.</small>
-      </section>
-
-      <div class="auth-divider"><span>or sign in with your account</span></div>
 
       <div class="form-field">
         <label>Email</label>
@@ -687,7 +660,7 @@ function login(){
 
       <div class="form-row">
         <label><input type="checkbox" checked> Remember me</label>
-        <button class="text-btn" onclick="toast('Demo reset link sent')">Forgot password?</button>
+        <button class="text-btn" onclick="openPasswordReset()">Forgot password?</button>
       </div>
 
       <button class="btn primary full-btn" onclick="loginSubmit()">Sign in →</button>
@@ -741,34 +714,6 @@ function loginSubmit(){
   );
 
   toast(`Welcome, ${user.name.split(' ')[0]}!`);
-}
-
-// Demo access authenticates against the same backend as regular accounts.
-async function demoLogin(role){
-  const demoAccounts={
-    customer:{email:'demo.customer@nearfix.test',password:'NearFixDemo26!'},
-    technician:{email:'demo.tech01@nearfix.test',password:'NearFixDemo26!'},
-    admin:{email:'demo.admin@nearfix.test',password:'NearFixDemo26!'}
-  };
-  const account=demoAccounts[role];
-  if(!account) return;
-  const buttons=document.querySelectorAll('.demo-login-buttons button');
-  buttons.forEach(button=>button.disabled=true);
-  try{
-    const result=await nfFetch('/api/auth/login',{method:'POST',body:JSON.stringify(account)});
-    nfToken=result.token;
-    localStorage.setItem('nearfix-token-v2',nfToken);
-    applyServerState({user:result.user});
-    // Load the selected account's bookings, technician profile, and dashboard data.
-    await hydrateServer();
-    setRoute(role);
-    startServerSync();
-    toast(`Welcome, ${result.user.name.split(' ')[0]}!`);
-  }catch(error){
-    toast(error.message.includes('Failed to fetch')?'Start NearFix with npm start, then try the demo sign-in again.':error.message);
-  }finally{
-    buttons.forEach(button=>button.disabled=false);
-  }
 }
 
 function logout(){
@@ -1074,7 +1019,7 @@ function accountPage(){
     <div class="dash-welcome"><div><span class="eyebrow">ACCOUNT & FINANCE</span><h1>${esc(u.name)}</h1><p>Profile, account details and transparent financial activity.</p></div><button class="btn secondary" onclick="openInfo('support')">Need help?</button></div>
     <div class="account-hero"><div class="account-profile"><div class="avatar large">${initials(u.name)}</div><div><h2>${esc(u.name)}</h2><p>${esc(u.email)} · ${esc(u.phone||'Mobile not added')}</p><span class="badge green">${role==='customer'?'Verified customer':role==='technician'?'Skill-first professional':'Platform administrator'}</span></div></div><div class="account-balance"><small>${role==='customer'?'Total paid':role==='technician'?'Recorded earnings':'Platform revenue'}</small><strong>${money(balance)}</strong><span>${myBookings.length} related bookings</span></div></div>
     <div class="metric-grid">${metricCard('₹','Account balance',money(balance),role==='technician'?'Available after verified payments':role==='customer'?'Verified payments to date':'Platform recorded payments')}${metricCard('📄','Invoices',db.invoices?.filter(i=>role==='admin'||i.customerId===u.id||i.technicianId===u.id).length||0,'Available records')}${metricCard('💳','Paid amount',money(role==='customer'?paid:earnings),'Verified payments')}</div>
-    <div class="dash-grid"><section class="panel"><div class="panel-head"><div><b>Account details</b><small>Identity and contact details used by NearFix.</small></div><button class="btn ghost" onclick="toast('Profile editing is available from your role dashboard.')">Edit</button></div><div class="detail-grid"><div class="panel-lite"><small>Name</small><b>${esc(u.name)}</b></div><div class="panel-lite"><small>Email</small><b>${esc(u.email)}</b></div><div class="panel-lite"><small>Mobile</small><b>${esc(u.phone||'—')}</b></div><div class="panel-lite"><small>Role</small><b>${esc(role)}</b></div></div></section><section class="panel"><div class="panel-head"><div><b>Payment methods</b><small>Demo-safe display; real payment credentials stay with the provider.</small></div></div><div class="payment-method-card"><span>UPI</span><b>${role==='technician'?(esc(db.techs.find(t=>t.userId===u.id)?.upiId||'Add UPI ID in profile')):'Available after service completion'}</b><small>${role==='technician'?'Customer payments can be routed to this account.':'Scan the payment QR or use secure checkout.'}</small></div><div class="payment-method-card"><span>Cash</span><b>Supported for completed jobs</b><small>Requires technician/admin confirmation</small></div></section></div>
+    <div class="dash-grid"><section class="panel"><div class="panel-head"><div><b>Account details</b><small>Identity and contact details used by NearFix.</small></div><button class="btn ghost" onclick="toast('Profile editing is available from your role dashboard.')">Edit</button></div><div class="detail-grid"><div class="panel-lite"><small>Name</small><b>${esc(u.name)}</b></div><div class="panel-lite"><small>Email</small><b>${esc(u.email)}</b></div><div class="panel-lite"><small>Mobile</small><b>${esc(u.phone||'—')}</b></div><div class="panel-lite"><small>Role</small><b>${esc(role)}</b></div></div></section><section class="panel"><div class="panel-head"><div><b>Payment methods</b><small>Payment credentials stay with the provider.</small></div></div><div class="payment-method-card"><span>UPI</span><b>${role==='technician'?(esc(db.techs.find(t=>t.userId===u.id)?.upiId||'Add UPI ID in profile')):'Available after service completion'}</b><small>${role==='technician'?'Customer payments can be routed to this account.':'Scan the payment QR or use secure checkout.'}</small></div><div class="payment-method-card"><span>Cash</span><b>Supported for completed jobs</b><small>Requires technician/admin confirmation</small></div></section></div>
     <section class="panel"><div class="panel-head"><div><b>Recent financial activity</b><small>Payment and invoice records connected to your account.</small></div></div>${(db.payments||[]).filter(p=>p.customerId===u.id||p.technicianId===u.id||p.techId===u.id).slice(-8).reverse().map(p=>`<div class="booking-row"><div class="booking-icon">💳</div><div class="grow"><b>${esc(p.method||'Payment')} · ${esc(p.transactionId||p.id)}</b><small>${esc(p.status||'Pending')}</small></div><strong>${money(p.amount||0)}</strong></div>`).join('')||'<p class="muted">No payment records yet.</p>'}</section>
   </div></main>${mobileBottom(role)}`;
 }
@@ -1092,6 +1037,16 @@ function technicianPage(){
   const active=db.bookings.filter(
     b=>String(b.techId)===String(myTech.id)&&!['Completed','Cancelled'].includes(b.status)
   );
+  const techHistory=db.bookings.filter(b=>String(b.techId)===String(myTech.id));
+  const weeklyJobs=Array.from({length:5},(_,index)=>{
+    const start=new Date();start.setHours(0,0,0,0);start.setDate(start.getDate()-(4-index)*7-6);
+    const end=new Date(start);end.setDate(end.getDate()+7);
+    const count=techHistory.filter(b=>{const created=new Date(b.createdAt||b.created||b.requestedAt||0);return Number.isFinite(created.getTime())&&created>=start&&created<end;}).length;
+    return {label:index===4?'Now':`W${index+1}`,count};
+  });
+  const maxWeeklyJobs=Math.max(1,...weeklyJobs.map(x=>x.count));
+  const profileFields=[myTech.name,myTech.category||myTech.service,myTech.area,(myTech.skills||[]).length,myTech.exp,myTech.phone||myTech.userId].filter(Boolean).length;
+  const profileCompleteness=Math.round(profileFields/6*100);
 
   const earnings=db.payments
     .filter(p=>String(p.techId)===String(myTech.id)&&p.status==='Paid')
@@ -1172,13 +1127,7 @@ function technicianPage(){
             </div>
           </div>
 
-          <div class="chart">
-            <div style="height:38%"><span>W1</span></div>
-            <div style="height:58%"><span>W2</span></div>
-            <div style="height:46%"><span>W3</span></div>
-            <div style="height:78%"><span>W4</span></div>
-            <div style="height:66%"><span>Now</span></div>
-          </div>
+          ${techHistory.length?`<div class="chart">${weeklyJobs.map(x=>`<div style="height:${x.count?Math.max(8,Math.round(x.count/maxWeeklyJobs*100)):0}%"><span>${x.label}</span></div>`).join('')}</div>`:'<div class="empty-inline"><p>No completed or active job history yet.</p></div>'}
         </section>
 
         <section class="panel">
@@ -1194,9 +1143,9 @@ function technicianPage(){
 
           <div class="profile-progress">
             <span>Profile completeness</span>
-            <b>92%</b>
+            <b>${profileCompleteness}%</b>
             <div class="progress">
-              <span style="width:92%"></span>
+              <span style="width:${profileCompleteness}%"></span>
             </div>
           </div>
         </section>
@@ -1267,7 +1216,7 @@ function adminPage(){
           <p>Manage users, technicians, bookings, payments and platform health.</p><small class="muted">Area: ${esc(db.adminArea||'All Areas')}</small>
         </div>
 
-        <div class="inline-actions"><button class="btn secondary" onclick="openAdminCreator()">＋ Add area admin</button><button class="btn primary" onclick="openServiceManager()">＋ Manage services</button></div>
+        <div class="inline-actions"><button class="btn primary" onclick="openServiceManager()">＋ Manage services</button></div>
       </div>
 
       <div class="metric-grid">
@@ -1294,12 +1243,21 @@ function adminPage(){
 }
 
 function adminOverview(){
+  const bookings=db.adminAllBookings||db.bookings||[];
   const counts=SERVICES
     .map(s=>({
       name:s[1],
-      n:db.bookings.filter(b=>b.service===s[1]).length
+      n:bookings.filter(b=>b.service===s[1]).length
     }))
     .sort((a,b)=>b.n-a.n);
+  const totalRequests=counts.reduce((sum,item)=>sum+item.n,0);
+  const recentTrend=Array.from({length:7},(_,offset)=>{
+    const date=new Date();date.setHours(0,0,0,0);date.setDate(date.getDate()-(6-offset));
+    const next=new Date(date);next.setDate(next.getDate()+1);
+    const count=bookings.filter(b=>{const created=new Date(b.createdAt||b.created||b.requestedAt||0);return Number.isFinite(created.getTime())&&created>=date&&created<next;}).length;
+    return {label:date.toLocaleDateString(undefined,{weekday:'short'}),count};
+  });
+  const maxRecent=Math.max(1,...recentTrend.map(x=>x.count));
 
   return `<div class="admin-grid">
 
@@ -1307,37 +1265,29 @@ function adminOverview(){
       <div class="panel-head">
         <div>
           <b>Booking trend</b>
-          <small>Demo activity</small>
+          <small>Requests created in the last seven days</small>
         </div>
         <span class="badge green">Live</span>
       </div>
 
-      <div class="chart tall">
-        <div style="height:42%"><span>Mon</span></div>
-        <div style="height:58%"><span>Tue</span></div>
-        <div style="height:51%"><span>Wed</span></div>
-        <div style="height:73%"><span>Thu</span></div>
-        <div style="height:68%"><span>Fri</span></div>
-        <div style="height:84%"><span>Sat</span></div>
-        <div style="height:62%"><span>Sun</span></div>
-      </div>
+      ${bookings.length?`<div class="chart tall">${recentTrend.map(x=>`<div style="height:${x.count?Math.max(8,Math.round(x.count/maxRecent*100)):0}%"><span>${x.label}</span></div>`).join('')}</div>`:'<div class="empty-inline"><p>No booking activity yet.</p></div>'}
     </section>
 
     <section class="panel">
       <div class="panel-head">
         <div>
           <b>Popular services</b>
-          <small>Share of demo requests</small>
+          <small>${totalRequests} total requests</small>
         </div>
       </div>
 
-      ${counts.slice(0,6).map((x,i)=>`
+      ${totalRequests?counts.filter(x=>x.n>0).slice(0,6).map(x=>`
         <div class="bar-row">
           <span>${esc(x.name)}</span>
-          <div><i style="width:${Math.max(8,40-i*6)}%"></i></div>
+          <div><i style="width:${Math.max(8,x.n/totalRequests*100)}%"></i></div>
           <b>${x.n}</b>
         </div>
-      `).join('')}
+      `).join(''):'<p class="muted">No service requests yet.</p>'}
     </section>
 
   </div>
@@ -1393,18 +1343,7 @@ function adminTab(btn,tab){
 
 function adminAdmins(){
   const admins=db.adminAllAdmins||[];
-  return `<section class="panel table-panel"><div class="panel-head"><div><b>Area administrators</b><small>Create and manage administrator accounts by service area.</small></div><button class="btn primary" onclick="openAdminCreator()">＋ Add admin</button></div><div class="table-wrap"><table><thead><tr><th>Admin</th><th>Area</th><th>Contact</th><th>Access</th></tr></thead><tbody>${admins.map(a=>`<tr><td><b>${esc(a.name)}</b><small>${esc(a.id)}</small></td><td><span class="badge green">${esc(a.area||'All Areas')}</span></td><td>${esc(a.email)}<br>${esc(a.phone||'—')}</td><td>${(a.id===currentUser()?.id)?'Current admin':'Area admin'}</td></tr>`).join('')||'<tr><td colspan="4">No area admins found.</td></tr>'}</tbody></table></div></section>`;
-}
-
-function openAdminCreator(){
-  if(currentUser()?.role!=='admin'){toast('Admin access required.');return;}
-  modal().innerHTML=`<div class="modal"><div class="modal-box"><div class="modal-head"><div><span class="eyebrow">ADMIN MANAGEMENT</span><h2>Create area admin</h2><p class="muted">The new admin can access only the selected service area.</p></div><button class="close" onclick="closeModal()">×</button></div><div class="form-grid"><div class="form-field"><label>Name</label><input id="new-admin-name" placeholder="Admin name"></div><div class="form-field"><label>Email</label><input id="new-admin-email" type="email" placeholder="admin@example.com"></div><div class="form-field"><label>Password</label><input id="new-admin-password" type="password" placeholder="Create password"></div><div class="form-field"><label>Service area</label><input id="new-admin-area" placeholder="e.g. Noida, Uttar Pradesh"></div><div class="form-field"><label>Phone (optional)</label><input id="new-admin-phone" placeholder="Mobile number"></div></div><div class="modal-footer"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="createAreaAdmin()">Create admin</button></div></div></div>`;
-}
-
-async function createAreaAdmin(){
-  const name=document.getElementById('new-admin-name')?.value.trim(); const email=document.getElementById('new-admin-email')?.value.trim(); const password=document.getElementById('new-admin-password')?.value; const area=document.getElementById('new-admin-area')?.value.trim(); const phone=document.getElementById('new-admin-phone')?.value.trim()||'';
-  if(!name||!email||!password||!area){toast('Name, email, password and service area are required.');return;}
-  try{await nfFetch('/api/admin/admins',{method:'POST',body:JSON.stringify({name,email,password,area,phone})}); closeModal(); await hydrateServer(); setRoute('admin'); toast(`Admin created for ${area}.`); }catch(e){toast(e.message);}
+  return `<section class="panel table-panel"><div class="panel-head"><div><b>Area administrators</b><small>Administrator roles are provisioned by the project owner in Supabase.</small></div></div><div class="table-wrap"><table><thead><tr><th>Admin</th><th>Area</th><th>Contact</th></tr></thead><tbody>${admins.map(a=>`<tr><td><b>${esc(a.name)}</b></td><td><span class="badge green">${esc(a.area||'All Areas')}</span></td><td>${esc(a.email)}<br>${esc(a.phone||'—')}</td></tr>`).join('')||'<tr><td colspan="3">No administrators found.</td></tr>'}</tbody></table></div></section>`;
 }
 
 function adminUsers(){
@@ -2183,12 +2122,8 @@ function bookingDetails(id){
         ${timeline(b)}
       </div>
 
-      ${!isTech && b.status==='Arrived' && b.arrivalVerification?.status==='PENDING' && b.arrivalVerification?.otp
-        ? `<div class="panel-lite arrival-otp-customer" style="margin-top:14px;text-align:center;border:1px solid rgba(34,197,94,.25);">
-             <small>ARRIVAL OTP</small>
-             <div style="font-size:30px;font-weight:800;letter-spacing:8px;margin:6px 0;">${esc(String(b.arrivalVerification.otp).padStart(6,'0'))}</div>
-             <p class="muted" style="margin:0;">Show this 6-digit code to the technician when they arrive.</p>
-           </div>`
+      ${!isTech && b.status==='Arrived' && b.arrivalVerification?.status==='PENDING'
+        ? `<div class="panel-lite arrival-otp-customer" style="margin-top:14px;text-align:center;border:1px solid rgba(34,197,94,.25);"><small>ARRIVAL VERIFICATION</small><p class="muted" style="margin:6px 0 0;">A verification code was sent to your registered mobile. Share it with the technician after confirming their arrival.</p></div>`
         : ''}
 
       ${isTech ? `<div class="booking-tech"><div class="tech-mini"><div class="avatar">${initials(b.customer?.name||'Customer')}</div><div class="grow"><b>${esc(b.customer?.name||'Customer')}</b><span>${esc(b.customer?.phone||'Phone not shared')}</span><span>${esc(b.customer?.email||'')}</span></div></div><button class="btn secondary" onclick="window.location.href='tel:${esc((b.customer?.phone||'').replace(/\s/g,''))}'">Call customer</button></div>` : `<div class="booking-tech">${techMini(t)}<button class="btn secondary" onclick="techDetails(${t.id})">View profile</button></div>`}
@@ -3240,7 +3175,7 @@ function openInfo(type){
     ],
     contact:[
       'Contact NearFix',
-      'For this demo, support is available at support@nearfix.demo and +91 98765 43210.'
+      'Use the support form in your account dashboard to contact the NearFix team.'
     ],
     verification:[
       'Technician verification',
@@ -3248,7 +3183,7 @@ function openInfo(type){
     ],
     support:[
       'NearFix support',
-      'Use the complaint form from your dashboard or contact support@nearfix.demo.'
+      'Use the complaint form from your dashboard to contact the NearFix team.'
     ]
   }[type]||[
     'NearFix',
@@ -3706,8 +3641,6 @@ window.loginSubmit=loginSubmit;
 window.setAuthRole=setAuthRole;
 window.logout=logout;
 window.createAccount=createAccount;
-window.verifyOtpFromModal=verifyOtpFromModal;
-window.resendOtp=resendOtp;
 window.signupRole=signupRole;
 window.previewUpload=previewUpload;
 window.nextBooking1=nextBooking1;
@@ -3741,11 +3674,15 @@ render();
    ========================================================= */
 const NF_API = '';
 let nfToken = localStorage.getItem('nearfix-token-v2') || '';
+let nfRefreshToken = localStorage.getItem('nearfix-refresh-token-v2') || '';
+let nfRefreshPromise=null;
 
 async function nfFetch(path, options={}) {
-  const headers = {'Content-Type':'application/json', ...(options.headers||{})};
-  if(nfToken) headers.Authorization = `Bearer ${nfToken}`;
-  const res = await fetch(`${NF_API}${path}`, {...options, headers});
+  const send=()=>{const headers={'Content-Type':'application/json',...(options.headers||{})};if(nfToken)headers.Authorization=`Bearer ${nfToken}`;return fetch(`${NF_API}${path}`,{...options,headers});};
+  let res=await send();
+  if(res.status===401&&nfRefreshToken&&!path.startsWith('/api/auth/')){
+    try{if(!nfRefreshPromise)nfRefreshPromise=(async()=>{const refreshed=await fetch('/api/auth/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:nfRefreshToken})});const session=await refreshed.json();if(!refreshed.ok||!session.token)throw new Error(session.message||'Session refresh failed.');nfToken=session.token;nfRefreshToken=session.refreshToken||nfRefreshToken;localStorage.setItem('nearfix-token-v2',nfToken);localStorage.setItem('nearfix-refresh-token-v2',nfRefreshToken);return session;})();await nfRefreshPromise;res=await send();}catch{}finally{nfRefreshPromise=null;}
+  }
   let body={};
   try { body=await res.json(); } catch {}
   if(!res.ok) throw new Error(body.message || `Request failed (${res.status})`);
@@ -3766,7 +3703,7 @@ function applyServerState(payload){
   if(payload.technicians) db.techs = payload.technicians.map(t=>({...t,techId:t.id,userId:techUserId(t)??t.userId??t.user_id}));
   if(payload.parts) db.parts = payload.parts;
   if(payload.bookings) db.bookings = payload.bookings.map(b=>({
-    ...b, id:b.id, customerId:b.customerId, techId:b.technicianId, service:b.service, problem:b.problem, file:b.file||'', media:Array.isArray(b.media)?b.media:[], arrivalVerification:b.arrivalVerification ? {...b.arrivalVerification, otp:(b.arrivalVerification.otp!=null?String(b.arrivalVerification.otp).padStart(6,'0'):undefined)} : null, cancellation:b.cancellation||null, location:b.location||'', date:b.date||'', time:b.time||'', status:nfStatus(b.status), estimate:Number(b.estimate||b.estimateRange?.min||0), estimateRange:b.estimateRange, total:b.total||b.quote?.total||0, urgent:Boolean(b.urgent), paymentStatus:b.paymentStatus, quote:b.quote||null, customer:b.customer||null, technician:b.technician||null, payment:b.payment||null, invoice:b.invoice||null
+    ...b, id:b.id, customerId:b.customerId, techId:b.technicianId, service:b.service, problem:b.problem, file:b.file||'', media:Array.isArray(b.media)?b.media:[], arrivalVerification:b.arrivalVerification ? (({otp,otpHash,...safe})=>safe)(b.arrivalVerification) : null, cancellation:b.cancellation||null, location:b.location||'', date:b.date||'', time:b.time||'', status:nfStatus(b.status), estimate:Number(b.estimate||b.estimateRange?.min||0), estimateRange:b.estimateRange, total:b.total||b.quote?.total||0, urgent:Boolean(b.urgent), paymentStatus:b.paymentStatus, quote:b.quote||null, customer:b.customer||null, technician:b.technician||null, payment:b.payment||null, invoice:b.invoice||null
   }));
   if(payload.reviews) db.reviews = payload.reviews.map(r=>({id:r.id,bookingId:r.bookingId,customerId:r.customerId,techId:r.technicianId,rating:r.rating,text:r.text,created:r.createdAt}));
   if(payload.payments) db.payments = payload.payments.map(p=>({id:p.id,bookingId:p.bookingId,techId:p.technicianId,customerId:p.customerId,amount:p.amount,status:p.status==='SUCCESS'?'Paid':p.status,method:p.method,transactionId:p.transactionId,reference:p.reference,createdAt:p.createdAt}));
@@ -3814,44 +3751,12 @@ function startServerSync(){
   },3000);
 }
 
-// OTP UI is reserved for service-arrival verification; login/register use email + password.
-let otpState=null;
-function openOtpModal({title='Verify your mobile number',subtitle='Enter the 6-digit OTP sent to your registered mobile.',phone='',demoOtp=null,onVerify,onResend}){
-  otpState={phone,demoOtp,onVerify,onResend,resendAt:Date.now()+30000};
-  modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box otp-modal">
-    <div class="modal-head"><div><span class="eyebrow">SECURE OTP VERIFICATION</span><h2>${esc(title)}</h2><p class="muted">${esc(subtitle)}</p></div><button class="close" onclick="closeModal()">×</button></div>
-    <div class="otp-destination"><span>📱</span><div><small>OTP sent to</small><b>${esc(phone||'your registered mobile')}</b></div></div>
-    ${demoOtp?`<div class="demo-otp"><span>DEMO MODE</span><b>${esc(demoOtp)}</b><small>Use this OTP locally. Configure Twilio in .env for real SMS delivery.</small></div>`:''}
-    <div class="form-field"><label>6-digit OTP</label><input id="otp-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="Enter OTP" oninput="this.value=this.value.replace(/\\D/g,'').slice(0,6)"></div>
-    <div id="otp-error" class="otp-error"></div>
-    <div class="otp-meta"><span>Expires in 5 minutes</span><button id="otp-resend" class="text-btn" onclick="resendOtp()" disabled>Resend OTP</button></div>
-    <div class="modal-footer"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="verifyOtpFromModal()">Verify & Continue →</button></div>
-  </div></div>`;
-  setTimeout(()=>{document.getElementById('otp-code')?.focus();updateOtpResend();},50);
-}
-function updateOtpResend(){
-  const btn=document.getElementById('otp-resend'); if(!btn||!otpState)return;
-  const left=Math.max(0,Math.ceil((otpState.resendAt-Date.now())/1000));
-  btn.disabled=left>0; btn.textContent=left?`Resend OTP (${left}s)`:'Resend OTP';
-  if(left>0) setTimeout(updateOtpResend,1000);
-}
-async function resendOtp(){
-  if(!otpState?.onResend)return;
-  try{ const r=await otpState.onResend(); otpState.demoOtp=r.demoOtp||null; otpState.resendAt=Date.now()+30000; const box=document.querySelector('.demo-otp'); if(r.demoOtp){ if(box)box.querySelector('b').textContent=r.demoOtp; else document.querySelector('.otp-destination')?.insertAdjacentHTML('afterend',`<div class="demo-otp"><span>DEMO MODE</span><b>${esc(r.demoOtp)}</b><small>Use this OTP locally. Configure Twilio in .env for real SMS delivery.</small></div>`);} toast('A new OTP has been sent.'); updateOtpResend(); }catch(e){toast(e.message);}
-}
-async function verifyOtpFromModal(){
-  const code=document.getElementById('otp-code')?.value.trim(); const err=document.getElementById('otp-error');
-  if(!/^\d{6}$/.test(code)){if(err)err.textContent='Enter the 6-digit OTP.';return;}
-  try{ await otpState.onVerify(code); closeModal(); }catch(e){if(err)err.textContent=e.message;}
-}
-
-async function requestLoginOtp(email,password){
-  return nfFetch('/api/auth/request-otp',{method:'POST',body:JSON.stringify({email,password})});
-}
 async function serverLogin(email,password){
   const payload=await nfFetch('/api/auth/login',{method:'POST',body:JSON.stringify({email,password})});
   nfToken=payload.token;
+  nfRefreshToken=payload.refreshToken||'';
   localStorage.setItem('nearfix-token-v2',nfToken);
+  if(nfRefreshToken)localStorage.setItem('nearfix-refresh-token-v2',nfRefreshToken);
   applyServerState(payload);
   await hydrateServer();
   startServerSync();
@@ -3860,8 +3765,11 @@ async function serverLogin(email,password){
 
 async function serverRegister(form){
   const payload=await nfFetch('/api/auth/register',{method:'POST',body:JSON.stringify(form)});
+  if(!payload.token){const error=new Error(payload.message||'Check your email to verify your account.');error.emailVerificationRequired=true;throw error;}
   nfToken=payload.token;
+  nfRefreshToken=payload.refreshToken||'';
   localStorage.setItem('nearfix-token-v2',nfToken);
+  if(nfRefreshToken)localStorage.setItem('nearfix-refresh-token-v2',nfRefreshToken);
   applyServerState(payload);
   await hydrateServer();
   startServerSync();
@@ -3902,14 +3810,33 @@ window.loginSubmit=async function(){
 };
 
 const _originalLogout=window.logout;
-window.logout=function(){ nfToken='';localStorage.removeItem('nearfix-token-v2');db.session=null;saveDB(); if(typeof _originalLogout==='function')_originalLogout(); else setRoute('home'); };
+window.logout=function(){const token=nfToken;nfToken='';nfRefreshToken='';localStorage.removeItem('nearfix-token-v2');localStorage.removeItem('nearfix-refresh-token-v2');if(token)fetch('/api/auth/logout',{method:'POST',headers:{Authorization:`Bearer ${token}`}}).catch(()=>{});db.session=null;saveDB();if(typeof _originalLogout==='function')_originalLogout();else setRoute('home');};
 
 const _originalCreateAccount=window.createAccount;
 window.createAccount=async function(){
   const name=document.getElementById('signup-name')?.value.trim(); const email=document.getElementById('signup-email')?.value.trim(); const password=document.getElementById('signup-pass')?.value; const phone=document.getElementById('signup-phone')?.value.trim()||''; const role=authRole==='technician'?'technician':'customer'; const service=document.getElementById('signup-service')?.value||'General Repair'; const area=document.getElementById('signup-city')?.value||'Ghaziabad, Uttar Pradesh';
-  if(!name||!email||!password){toast('Please complete the required fields.');return;}
-  try{const u=await serverRegister({name,email,password,phone,role,service,area,category:service});setRoute(u.role==='technician'?'technician':'customer');toast('Account created successfully.');}catch(e){toast(e.message);}
+  if(!name||!email||!phone||!password){toast('Enter your name, mobile number, email and password.');return;}
+  try{const u=await serverRegister({name,email,password,phone,role,service,area,category:service});setRoute(u.role==='technician'?'technician':'customer');toast('Account created successfully.');}catch(e){if(e.emailVerificationRequired){closeModal();toast(e.message);return;}toast(e.message);}
 };
+
+window.openPasswordReset=function(){
+  modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box auth-modal"><button class="close" onclick="closeModal()">×</button><span class="eyebrow">ACCOUNT RECOVERY</span><h2>Reset your password</h2><p class="muted">We’ll email a secure reset link if an account matches.</p><div class="form-field"><label>Email</label><input id="reset-email" type="email" value="${esc(document.getElementById('login-email')?.value||'')}" placeholder="you@example.com"></div><div class="modal-footer"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn primary" onclick="submitPasswordReset()">Send reset link</button></div></div></div>`;
+};
+window.submitPasswordReset=async function(){const email=document.getElementById('reset-email')?.value.trim();if(!email){toast('Enter your email address.');return;}try{const result=await nfFetch('/api/auth/password-reset',{method:'POST',body:JSON.stringify({email})});closeModal();toast(result.message);}catch(e){toast(e.message);}};
+async function completeAuthRedirect(){
+  if(!location.hash.includes('access_token='))return;
+  const params=new URLSearchParams(location.hash.slice(1));
+  const accessToken=params.get('access_token');const refreshToken=params.get('refresh_token')||'';const type=params.get('type');
+  history.replaceState(null,'',location.pathname+location.search);
+  if(!accessToken)return;
+  nfToken=accessToken;nfRefreshToken=refreshToken;
+  if(type==='recovery'){
+    modal().innerHTML=`<div class="modal"><div class="modal-box auth-modal"><span class="eyebrow">ACCOUNT RECOVERY</span><h2>Choose a new password</h2><p class="muted">Use at least 8 characters.</p><div class="form-field"><label>New password</label><input id="new-password" type="password" autocomplete="new-password"></div><div class="modal-footer"><button class="btn primary" onclick="completePasswordUpdate()">Update password</button></div></div></div>`;
+  }else if(refreshToken){
+    localStorage.setItem('nearfix-token-v2',nfToken);localStorage.setItem('nearfix-refresh-token-v2',refreshToken);
+  }
+}
+window.completePasswordUpdate=async function(){const password=document.getElementById('new-password')?.value||'';if(password.length<8){toast('Password must be at least 8 characters.');return;}try{const result=await nfFetch('/api/auth/password-update',{method:'POST',body:JSON.stringify({password})});nfToken='';nfRefreshToken='';localStorage.removeItem('nearfix-token-v2');localStorage.removeItem('nearfix-refresh-token-v2');closeModal();toast(result.message);}catch(e){toast(e.message);}};
 
 const _originalCreateBooking=window.createBooking;
 window.createBooking=async function(){
@@ -3931,9 +3858,7 @@ window.showArrivalOtp=async function(id){
   try{
     const r=await nfFetch(`/api/bookings/${id}/arrival-verification`);
     if(r.status==='VERIFIED'){toast('Arrival OTP already verified.');return;}
-    const b=db.bookings.find(x=>String(x.id)===String(id));
-    const demo=String(r.demoOtp||b?.arrivalVerification?.otp||'').replace(/\D/g,'').padStart(6,'0').slice(-6)||null;
-    modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box"><div class="modal-head"><div><span class="eyebrow">SECURE CHECK-IN</span><h2>Your arrival OTP</h2><p class="muted">Give this 6-digit code to the technician only after they have arrived.</p></div><button class="close" onclick="closeModal()">×</button></div><div class="arrival-otp-display">${demo?`<small>YOUR 6-DIGIT OTP</small><strong>${esc(demo)}</strong><span>No mobile number is required. Show this code to the technician after arrival.</span>`:`<small>OTP UNAVAILABLE</small><strong>------</strong><span>Refresh the booking details to receive the active 6-digit arrival code.</span>`}</div><div class="modal-footer"><button class="btn primary" onclick="closeModal()">Done</button></div></div></div>`;
+    modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box"><div class="modal-head"><div><span class="eyebrow">SECURE CHECK-IN</span><h2>Check your mobile</h2><p class="muted">Your arrival verification code was sent to the mobile number on your account. Share it with the technician only after confirming their arrival.</p></div><button class="close" onclick="closeModal()">×</button></div><div class="modal-footer"><button class="btn primary" onclick="closeModal()">Done</button></div></div></div>`;
   }catch(e){toast(e.message);}
 };
 window.verifyArrivalOtp=async function(id){
@@ -3948,7 +3873,9 @@ window.submitArrivalOtp=async function(id){
 window.advanceBooking=async function(id,status){try{if(status==='Inspection'){return window.verifyArrivalOtp(id);}await syncBookingStatus(id,status);render();toast(`Booking updated: ${status}`);}catch(e){toast(e.message);}};
 
 window.completePayment=async function(id){
-  try{const r=await nfFetch('/api/payments',{method:'POST',body:JSON.stringify({bookingId:id,method:window.__payMethod||'UPI'})});applyServerState(await nfFetch('/api/bootstrap'));closeModal();toast(`Payment successful · ${r.payment.transactionId}`);render();}catch(e){toast(e.message);}
+  const method=window.__payMethod||'UPI';
+  if(method==='Cash')return window.openManualPayment(id,'CASH');
+  return window.showOnlinePayment(id);
 };
 
 window.submitReview=async function(id){
@@ -3970,6 +3897,7 @@ window.submitComplaint=async function(){
 window.resolveComplaint=async function(id){try{await nfFetch(`/api/admin/disputes/${id}`,{method:'PATCH',body:JSON.stringify({status:'RESOLVED',resolution:'Resolved by NearFix admin'})});applyServerState(await nfFetch('/api/bootstrap'));render();toast('Dispute resolved.');}catch(e){toast(e.message);}};
 
 /* Initial server hydration. Public data is available even before login. */
+void completeAuthRedirect();
 (async()=>{
   try{
     const p=await nfFetch('/api/public'); if(p.technicians)db.techs=p.technicians; saveDB();
@@ -3978,7 +3906,7 @@ window.resolveComplaint=async function(id){try{await nfFetch(`/api/admin/dispute
       render();
       if(currentUser()?.role==='customer' && !hasUserLocation()) autoSelectCustomerLocation();
     } else render();
-  }catch(e){console.warn('NearFix API unavailable; local demo fallback active.',e.message);render();}
+  }catch(e){console.warn('NearFix API unavailable; remote data could not be loaded.',e.message);render();}
 })();
 
 /* Full quote + approval UI used by the server-backed booking flow. */
@@ -4014,7 +3942,7 @@ window.bookingDetails=async function(id){
     <div class="status-banner"><span class="status">${esc(b.status)}</span><b>${money(b.total||b.estimate||0)}</b></div>
     <div class="detail-grid"><div class="panel-lite"><small>Problem</small><p>${esc(b.problem)}</p></div><div class="panel-lite"><small>Location</small><p>📍 ${esc(b.location)}</p></div>${role==='technician'?`<div class="panel-lite"><small>Customer</small><b>${esc(b.customer?.name||'Customer')}</b><p>${esc(b.customer?.phone||'Phone not shared')} · ${esc(b.customer?.email||'')}</p></div>`:''}</div>
     <div class="timeline">${timeline(b)}</div>
-    ${role==='customer'&&b.status==='Arrived'&&b.arrivalVerification?.status==='PENDING'?`<section class="arrival-otp-card"><div><span class="eyebrow">ARRIVAL VERIFICATION</span><h3>Technician has arrived</h3><p>Your arrival OTP is shown here directly. Share it with the technician only after they have arrived.</p></div><div class="arrival-otp-display"><small>YOUR ARRIVAL OTP</small><strong>${b.arrivalVerification?.otp!=null?esc(String(b.arrivalVerification.otp).replace(/\D/g,'').padStart(6,'0').slice(-6)):'------'}</strong><span>No mobile number is required.</span></div></section>`:''}
+    ${role==='customer'&&b.status==='Arrived'&&b.arrivalVerification?.status==='PENDING'?`<section class="arrival-otp-card"><div><span class="eyebrow">ARRIVAL VERIFICATION</span><h3>Technician has arrived</h3><p>A one-time code was sent to your registered mobile. Share it only after confirming arrival.</p></div></section>`:''}
     ${t?`<div class="booking-tech">${techMini(t)}<button class="btn secondary" onclick="techDetails(${t.id})">View profile</button></div>`:''}
     ${quote?`<div class="panel-lite" style="margin-top:16px"><div class="match-title"><b>Quotation</b><span class="badge ${quote.status==='APPROVED'?'green':''}">${esc(quote.status)}</span></div><p>${esc(quote.reason||'')}</p><div class="review-grid"><div><small>Labour</small><b>${money(quote.labour)}</b></div><div><small>Parts</small><b>${money(quote.parts)}</b></div><div><small>Other</small><b>${money(quote.otherCharges)}</b></div><div><small>Total</small><b>${money(quote.total)}</b></div></div>${role==='customer'&&quote.status==='PENDING'?`<div class="modal-footer"><button class="btn ghost" onclick="approveQuote(${id},'reject')">Decline</button><button class="btn primary" onclick="approveQuote(${id},'approve')">Approve ₹${Number(quote.total).toLocaleString('en-IN')}</button></div>`:''}</div>`:''}
     <div class="modal-footer">
@@ -4080,7 +4008,7 @@ async function nfReadFile(file,maxBytes=900000){
     if(!blob||blob.size>maxBytes) throw new Error('This photo is still too large after resizing. Please choose a smaller image.');
     uploadFile=new File([blob],file.name.replace(/\.[^.]+$/,'')+'.jpg',{type:'image/jpeg',lastModified:Date.now()});
   }else if(file.size>maxBytes){
-    throw new Error('Videos must be under 900 KB for this demo. Please trim the clip and try again.');
+    throw new Error('Videos must be under 900 KB. Please trim the clip and try again.');
   }
 
   return new Promise((resolve,reject)=>{
@@ -4193,7 +4121,7 @@ bookingDetails = async function(id){
     <div class="detail-grid"><div class="panel-lite"><small>Problem reported</small><p>${esc(b.problem||'—')}</p></div><div class="panel-lite"><small>Price protection</small><p>Parts use the shared NearFix catalog. Additional work requires an itemized quotation and customer approval.</p></div>${role==='technician'?`<div class="panel-lite"><small>Customer</small><b>${esc(b.customer?.name||'Customer')}</b><p>${esc(b.customer?.phone||'Phone not shared')} · ${esc(b.customer?.email||'')}</p></div>`:''}${role==='customer'&&t?`<div class="panel-lite"><small>Assigned technician</small><b>${esc(t.name)}</b><p>${esc(t.service)} · ${t.distance??'—'} km · ★ ${t.rating}</p></div>`:''}</div>
     ${role==='customer'&&b.status==='Completed'&&!String(b.paymentStatus||'').includes('PAID')?`<section class="panel-lite"><b>Pay your technician</b><small>Choose how you want to pay for this completed service.</small><div class="payment-choice-grid payment-choice-two"><button class="pay-option" onclick="closeModal();paymentModal(${id})"><span>💵</span><b>Cash or Online</b><small>Choose payment method</small></button><button class="pay-option" onclick="closeModal();showOnlinePayment(${id})"><span>▦</span><b>Online QR</b><small>Scan and pay with UPI</small></button></div></section>`:''}
     <div class="timeline">${timeline(b)}</div>
-    ${role==='customer'&&b.status==='Arrived'&&b.arrivalVerification?.status==='PENDING'?`<section class="arrival-otp-card"><div><span class="eyebrow">ARRIVAL VERIFICATION</span><h3>Technician has arrived</h3><p>Your arrival OTP is shown here directly. Share it with the technician only after they have arrived.</p></div><div class="arrival-otp-display"><small>YOUR ARRIVAL OTP</small><strong>${b.arrivalVerification?.otp!=null?esc(String(b.arrivalVerification.otp).replace(/\D/g,'').padStart(6,'0').slice(-6)):'------'}</strong><span>No mobile number is required.</span></div></section>`:''}
+    ${role==='customer'&&b.status==='Arrived'&&b.arrivalVerification?.status==='PENDING'?`<section class="arrival-otp-card"><div><span class="eyebrow">ARRIVAL VERIFICATION</span><h3>Technician has arrived</h3><p>A one-time code was sent to your registered mobile. Share it only after confirming arrival.</p></div></section>`:''}
     ${role==='technician'&&b.status==='Arrived'?`<section class="arrival-otp-card technician"><div><span class="eyebrow">CUSTOMER CHECK-IN</span><h3>Get customer OTP</h3><p>Ask the customer for the arrival OTP. Do not start inspection until NearFix verifies it.</p></div><button class="btn primary" onclick="verifyArrivalOtp(${id})">🔐 Verify customer OTP</button></section>`:''}
     ${media.length?`<section class="evidence-section"><div class="panel-head"><div><b>Service evidence</b><small>Visible to customer, technician and admin.</small></div></div><div class="evidence-grid">${evidence}</div></section>`:''}
     ${role==='technician' && ['Arrived','Inspection','Service started','Completed'].includes(b.status)?`<section class="panel-lite evidence-upload"><b>Optional work photos</b><small>Share before/after photos with the customer and admin. Photos are optional and do not affect job completion or payment.</small><input id="evidence-file-${id}" type="file" accept="image/*,video/*"><small>Large photos compress automatically. Videos must be under 900 KB.</small><div class="inline-actions"><button class="btn secondary" onclick="uploadBookingEvidence(${id},'BEFORE')">📷 Upload before</button><button class="btn primary" onclick="uploadBookingEvidence(${id},'AFTER')">📷 Upload after/work</button></div></section>`:''}
@@ -4252,7 +4180,6 @@ window.startRazorpayPayment=async function(id){
     new window.Razorpay(options).open();
   }catch(e){toast(e.message);}
 };
-window.completeOfflinePayment=async function(id){try{const r=await nfFetch('/api/payments',{method:'POST',body:JSON.stringify({bookingId:id,method:'Offline demo'})});applyServerState(await nfFetch('/api/bootstrap'));closeModal();render();toast(`Demo payment recorded · ${r.payment.transactionId}`);}catch(e){toast(e.message);}};
 
 /* Fixed NearFix AI Guide: visible on app open, anchored bottom-right, and independent of page content. */
 function ensureAIAssistantWidget(){
@@ -4308,7 +4235,7 @@ window.aiChatAsk=async function(text){
   ensureAIAssistantWidget(); const q=String(text||'').trim(); if(!q)return; toggleAIAssistant(true);
   const log=document.getElementById('nearfix-ai-log'); const input=document.getElementById('nearfix-ai-input'); if(input)input.value='';
   log.insertAdjacentHTML('beforeend',`<div class="nf-ai-msg user">${esc(q)}</div><div class="nf-ai-msg bot ai-thinking">Thinking…</div>`); const thinking=log.querySelector('.ai-thinking');
-  try{const r=await nfFetch('/api/ai/chat',{method:'POST',body:JSON.stringify({message:q})});const svc=r.service||'General Repair';const source=r.mode==='tinyfish-agent'?'TinyFish web agent':r.mode==='tinyfish-unavailable'?'TinyFish unavailable · Local reply':'Local assistant';thinking.innerHTML=`${esc(r.reply)}<small class="nf-ai-source">${source}</small><div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${esc(svc)} technicians →</button>${nfToken?`<button onclick="state.service='${svc}';openAIAnalyzer()">Full diagnosis</button>`:''}</div>`;}catch(e){const result=localGuideResponse(q);const svc=result.service;thinking.innerHTML=`${esc(result.reply)}<small class="nf-ai-source">Offline local response · Server connect nahi hua. TinyFish ke liye project folder mein <b>npm start</b> chalayein.</small><div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${svc} technicians →</button></div>`;} thinking.classList.remove('ai-thinking'); log.scrollTop=log.scrollHeight;
+  try{const r=await nfFetch('/api/ai/chat',{method:'POST',body:JSON.stringify({message:q})});const svc=r.service||'General Repair';const source=r.mode==='tinyfish-agent'?'TinyFish web agent':r.mode==='tinyfish-unavailable'?'Rules-based guidance':'Rules-based guidance';thinking.innerHTML=`${esc(r.reply)}<small class="nf-ai-source">${source}</small><div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${esc(svc)} technicians →</button>${nfToken?`<button onclick="state.service='${svc}';openAIAnalyzer()">Full diagnosis</button>`:''}</div>`;}catch(e){thinking.innerHTML=`<b>Assistant unavailable</b><small class="nf-ai-source">${esc(e.message)} Check your connection and try again.</small>`;} thinking.classList.remove('ai-thinking'); log.scrollTop=log.scrollHeight;
 };
 
 /* Re-run render after overrides so the active screen immediately uses the production layer. */

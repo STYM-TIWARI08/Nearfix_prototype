@@ -2,12 +2,11 @@
   "name": "nearfix",
   "version": "2.1.0",
   "private": true,
-  "description": "NearFix AI-powered local service marketplace — single-command full-stack demo",
+  "description": "NearFix local service marketplace",
   "scripts": {
     "start": "node start.js",
     "dev": "node start.js",
-    "check": "node --check backend/server.js && node --check frontend/app.js && node --check start.js && node --check api/index.js && node --check api/[...path].js",
-    "reset-demo": "node scripts/reset-demo.js"
+    "check": "node --check backend/server.js && node --check frontend/app.js && node --check server.js && node --check app.js && node --check index.js && node --check start.js && node --check api/index.js && node --check api/[...path].js"
   },
   "engines": {"node": "24.x"},
   "dependencies": {

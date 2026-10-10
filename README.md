@@ -1,269 +1,53 @@
-# NearFix v2 — AI-Powered Local Service Marketplace
+# NearFix
 
-NearFix is a single-project, single-command hackathon/business demo that connects customers with nearby service professionals. The original package was mostly a polished localStorage UI with a very small backend. This v2 keeps the existing UI and moves the core business flows onto a real server-backed API.
+NearFix is a Node.js service marketplace with a browser-based customer, technician and admin interface. Authentication is provided by Supabase Auth. The backend verifies Supabase access tokens and reads account roles from the protected `profiles` table; signup metadata cannot create administrators.
 
-## What changed from the uploaded source
+## Supabase setup
 
-### Before
-- Frontend stored most users, bookings, payments, chats and complaints in browser localStorage.
-- Backend had only login, signup, technicians, bookings, reviews and notifications.
-- AI diagnosis/pricing was presented in the UI but was not a server-backed workflow.
-- No server-side quote approval flow.
-- No server-side payment/invoice/dispute/analytics workflow.
-- Technician authorization was not enforced consistently by technician identity.
+1. Create a Supabase project and open **SQL Editor**.
+2. Run [`docs/sql-persistence.sql`](docs/sql-persistence.sql) once. It creates the profiles, technician, request, assignment and service-history tables, signup trigger, indexes and RLS policies.
+3. In **Authentication → URL Configuration**, set the local Site URL to `http://localhost:5050`. Add your Vercel URL to the allowed redirect URLs. Enable email confirmation if you want new accounts to verify their email.
+4. Copy `.env.example` to `.env`, then set `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` from the Supabase project settings. The service-role secret is for the Node backend only. Never put it in frontend code or share it in a public repository.
+5. For real arrival OTP delivery, configure the Twilio variables. Arrival check-in fails safely when SMS is not configured; the code is not shown in the app or API.
 
-### Now
-- One Node.js process serves frontend + REST API.
-- JWT-style signed session tokens with role checks.
-- Server-persisted customer/technician/admin data.
-- AI Problem Analyzer with deterministic fallback mode.
-- Fair Price Engine with labour/parts/urgency logic.
-- Smart technician matching with match percentage + ETA.
-- Booking lifecycle: REQUESTED → ACCEPTED → ON_THE_WAY → ARRIVED → INSPECTION → AWAITING_APPROVAL / IN_PROGRESS → COMPLETED / CANCELLED.
-- Technician quotation creation.
-- Customer quote approval/rejection before extra work.
-- Razorpay Standard Checkout test-mode integration with server-side order creation and signature verification; offline demo fallback when keys are absent.
-- Invoice generation.
-- Reviews with structured themes/tags.
-- Booking chat + notifications.
-- Customer disputes and admin resolution.
-- Admin live analytics endpoint.
-- Separate identity/skill/experience verification fields.
-- Graceful demo mode when provider API keys are missing.
-- Existing polished UI retained instead of replacing it with a generic template.
+### Administrator provisioning
 
-## Run once
+Create the first account through the regular signup flow and verify its email. Then, in the Supabase SQL Editor as the project owner, promote that exact account:
 
-Requirements: Node.js 18+ and VS Code. Install the packages once after extracting the ZIP:
+```sql
+update public.profiles
+set role = 'admin', area = 'All Areas'
+where email = lower('verified-admin@example.com');
+```
 
-```bash
+Replace the example email with the verified administrator's address. Do not run this from the browser or grant clients permission to update `role`.
+
+## Run locally
+
+```powershell
 npm install
+Copy-Item .env.example .env
+# Edit .env with your Supabase project values
 npm start
 ```
 
-Run both commands from the extracted project folder (the folder containing `package.json`). `start.js` launches the backend, checks health, automatically finds the next free port if 5050 is busy, and opens the browser. If it does not open a tab automatically, copy the `NearFix is ready` URL printed in the terminal into your browser.
+Open the local URL printed by the server (normally `http://localhost:5050`). Syntax checks are available with `npm run check`.
 
-You do not need to start a separate frontend server. The backend serves the website and API together.
+## GitHub and Vercel
 
-## Demo accounts
+Push the project to a private GitHub repository if it contains any user-provided assets. Connect the repository to Vercel with the project root as the root directory and `npm install` / `npm start` as install and start commands where supported. For a serverless deployment, configure the same environment variables in **Vercel → Project → Settings → Environment Variables**, then redeploy. Set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` for each environment. Keep `.env` out of Git; `.gitignore` already excludes it.
 
-Use the **Explore the demo** buttons on the login screen, or use these credentials:
+## Data and migration status
 
-- Customer: `demo.customer@nearfix.test`
-- Technician: `demo.tech01@nearfix.test` (12 demo technicians are available)
-- Admin: `demo.admin@nearfix.test`
-- Shared password: `NearFixDemo26!`
+The app's existing REST/business layer persists its application state to a private PostgreSQL `nearfix_state` JSONB row through the backend service role. RLS is enabled on that private compatibility table and browser roles have no access. The migration also creates normalized, RLS-protected profile and service tables for the target data model, but the existing booking, payment, messaging and admin handlers have not yet been migrated from the compatibility JSON state to those normalized tables. Do not treat the normalized tables as the active source for those workflows yet.
 
-Seed or restore these accounts with `node scripts/seed-demo-technicians.js` if you reset the database.
+The local JSON state is an offline development fallback; it is not durable on Vercel. Configure Supabase before accepting real accounts or bookings. The repository's seeded demo accounts, technicians, booking, catalog records and demo seeding scripts have been removed. Existing Supabase state is retained except for records carrying explicit demo markers or reserved demo email domains, which the backend strips during load. Legacy password hashes are removed because Supabase Auth now owns credentials.
 
-## Hackathon demo journey
+## Current limits
 
-1. Login as Customer.
-2. Click **🤖 AI Diagnose**.
-3. Enter: `My AC is running but not cooling and making unusual noise.`
-4. Review service, urgency, likely causes and estimated price.
-5. Start booking from the AI result.
-6. Choose a nearby verified technician.
-7. Login as the matching technician account and accept the booking.
-8. Progress through On the way → Arrived → Inspection.
-9. Create a quotation.
-10. Login as Customer and approve the quotation.
-11. Technician completes the service.
-12. Technician uploads before/after work evidence.
-13. Admin reviews the evidence and verifies the job.
-14. Customer pays through the Razorpay test gateway (or records an offline demo payment).
-13. Generate invoice and submit a review.
-14. Login as Admin to inspect live analytics.
-
-For the default `technician@nearfix.demo` account, the seeded profile is Ramesh Kumar (Plumbing). For an AC demonstration, use the seeded Vikas account: `vikas@nearfix.demo` / `demo123`.
-
-## Reset demo data
-
-If you want a completely clean local database:
-
-```bash
-npm run reset-demo
-```
-
-Then run `npm start` again.
-
-## Environment
-
-Copy `.env.example` to `.env` when enabling TinyFish or the optional Razorpay test gateway. Maps/location still require no Google key.
-
-- `PORT` — optional, default 5050.
-- `JWT_SECRET` — recommended for any non-demo deployment.
-- `TINYFISH_API_KEY` — optional TinyFish Web Agent key used by diagnosis and the AI guide. Keep it in `.env`; never add it to frontend code.
-- `RAZORPAY_KEY_ID` — optional Razorpay test key ID.
-- `RAZORPAY_KEY_SECRET` — optional Razorpay test secret; server-side only.
-
-
-## Final role-separated workflow
-
-- **Customer** can discover 4–5+ nearby professionals when the selected radius contains them, create requests with issue photos/videos, cancel eligible bookings, chat with the assigned technician, track GPS, approve/reject itemized quotations, pay and review.
-- **Technician** sees only jobs assigned to their own technician profile. They receive customer requests, accept/reject pending requests, cancel eligible jobs with a reason, update job status in order, share live GPS, upload before/after evidence, create catalog-backed quotations and view customer contact details for assigned jobs.
-- **Admin** has a separate control center with platform-wide users, technicians, bookings, customer ratings, quotes, payments, invoices, messages, notifications, disputes, AI analyses, audit logs and parts. Admin can review optional job media, price exceptions and technician profile verification.
-- A technician account cannot create a customer booking or send a request to another technician.
-- Booking status notifications are delivered to the correct opposite party: customer → assigned technician, technician → customer.
-- Technician status changes are server-authorized so a technician can update only their assigned job and only through the valid lifecycle.
-- Technician availability and profile edits are server-persisted rather than local-only.
-
-## Important implementation limitation
-
-This is a lightweight hackathon/demo build with the TinyFish SDK as its only required runtime package. It uses JSON persistence rather than PostgreSQL/Prisma. Real production deployment should migrate persistence to PostgreSQL/Prisma, store photos/videos in object storage instead of JSON, add HTTPS, refresh-token rotation, WebSockets, production secrets management, a dedicated routing/geocoding provider, and Razorpay webhooks/payment-status reconciliation. The included Razorpay flow is intentionally test-mode ready.
-
-The AI assistant is a backend-backed chat endpoint with a deterministic local fallback. When `TINYFISH_API_KEY` is configured, the backend streams a TinyFish web agent to research repair guidance and provide preliminary context. It is still not a substitute for a real appliance inspection.
-
-## Project structure
-
-```text
-NearFix/
-├── frontend/
-│   ├── index.html
-│   ├── app.js
-│   ├── styles.css
-│   └── assets/
-├── backend/
-│   ├── server.js
-│   └── data/data.json
-├── docs/
-│   ├── architecture.md
-│   └── api.md
-├── scripts/
-│   └── reset-demo.js
-├── .env.example
-├── .gitignore
-├── package.json
-├── start.js
-└── README.md
-```
-
-## Verification performed
-
-The final source was syntax-checked and the core end-to-end API flow was exercised locally: authentication, AI analysis, matching, booking, technician status changes, quotation, customer approval, completion, payment, review, invoice and admin analytics.
-
-
-## Real Location + Free OpenStreetMap Stack
-
-NearFix does not require a Google Maps API key or Google Cloud billing for its map/location demo. It uses:
-
-- Browser W3C Geolocation API for customer and technician GPS (permission required).
-- Leaflet for the interactive map UI.
-- OpenStreetMap tiles for map data.
-- OSRM for road routes, distance and ETA.
-- Nominatim reverse geocoding for converting GPS coordinates to a readable address during low-volume demos.
-
-### Run
-
-1. Copy `.env.example` to `.env`.
-2. Keep Google Maps keys out of the project — they are not needed.
-3. Optional: add Razorpay TEST keys to `.env` to enable secure checkout.
-4. Run `npm start` (no separate frontend/backend process).
-5. Open the URL printed by `npm start`.
-6. Customer: click **Use current location** and allow location access.
-7. Technician: open the technician dashboard and click **Share GPS**.
-8. Customer: when the booking reaches **On the way**, open **Live Map** to see the technician and road route.
-
-### Important public-service note
-
-The public OpenStreetMap tile service, Nominatim service and OSRM demo router are community/public infrastructure with usage policies and rate limits. They are suitable for a hackathon/demo with low traffic, not as a guaranteed production backend. For production scale, use a hosted routing/geocoding provider or self-host these services while retaining the same NearFix frontend/backend interfaces.
-
-Do not scrape or bulk-query public services. Cache results and throttle requests.
-
-## Trust and pricing rules
-
-- Customer issue media is attached to the booking so the assigned technician and admin can review the reported problem.
-- Technician can optionally upload before/after/service photos for customer and admin reference.
-- Work completion does not require admin evidence review. Once a job is completed, the customer can rate the service; the rating appears in the admin Customer ratings tab.
-- Completed bookings offer Cash and Online (UPI QR) payment choices. Choosing Online reveals the assigned technician's QR and a transaction reference field.
-- Spare-part quote items are resolved against the shared NearFix catalog on the server; the technician-supplied unit price is not trusted.
-- Quote responses include a pricing audit with catalog total, markup percentage and review warnings.
-- Platform fee is configured as 0% in the demo so the customer sees the service/parts charges separately.
-- Eligible cancellations store a reason and are surfaced to both parties; already-paid bookings are flagged for admin refund review.
-
-## Razorpay test checkout
-
-The frontend uses Razorpay Standard Checkout only when `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are configured. The backend creates the order and verifies the returned signature before marking a payment successful. This follows Razorpay's recommended server-side order and signature-verification flow.
-
-Do not put the secret key in frontend JavaScript or commit `.env`. For production, also enable Razorpay webhooks and reconcile payment/order status before treating a payment as final.
-
-## Arrival OTP verification
-NearFix does not use OTP for login. The security OTP is specifically a service-arrival handover step: when the assigned technician marks a booking ARRIVED, NearFix generates a 6-digit OTP for the customer. The customer shares it with the technician; only after server-side OTP verification can the technician move the job into INSPECTION. OTPs expire after 5 minutes, allow up to 5 attempts, and have a 30-second resend cooldown.
-
-For local/offline demo mode, no SMS provider is required: the generated OTP is displayed inside the secure demo verification dialog. For real SMS delivery, configure the optional Twilio variables in `.env`:
-
-- `TWILIO_ACCOUNT_SID`
-- `TWILIO_AUTH_TOKEN`
-- `TWILIO_PHONE_NUMBER`
-
-Do not commit real credentials. Use a secrets manager/environment variables in production.
-
-## NearFix differentiators
-The product flow includes five core differentiators: (1) Skill Passport with skill/identity/experience verification, (2) AI preliminary problem diagnosis with photo/problem context and price range, (3) fair-price/itemized quotation checks against the shared parts catalog, (4) optional before/after work photos and customer ratings, and (5) location-aware technician matching with real browser GPS, technician GPS sharing, nearby results and road routing via OpenStreetMap/Leaflet/OSRM.
-
-## Final business workflow
-
-The final build is role-separated and uses a customer-to-technician service lifecycle:
-
-Customer → Request → Technician Accept/Reject → On the Way → Arrived → Customer Arrival OTP → Inspection → Itemized Fair Quote → Customer Approval → Service → Optional Work Photos → Cash or Online UPI Payment → Invoice → Customer Rating.
-
-### Role boundaries
-- Customer: discovery, location matching, booking, cancellation, AI guide, barcode/parts price check, approvals, payment and invoices.
-- Technician: assigned customer jobs only, live GPS, arrival Arrival OTP verification, inspection, catalog-based parts, quotations, evidence and payment confirmation.
-- Admin: platform operations, user/technician/booking/parts/payment management, customer ratings, disputes, analytics and audit data. Job evidence does not need admin verification. No barcode camera scanner is exposed to the admin role.
-
-### Skill-first model
-NearFix does not require a degree field to match a technician. Profiles emphasize practical skills, verified work, experience, response/completion metrics and customer reviews. The demo seed contains at least five field-specific technician profiles for each service category so location-aware discovery can return 5–10 profiles where available.
-
-### Payment verification
-- Razorpay test checkout is available when `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are configured.
-- Online UPI requires a transaction/reference ID and can appear in the technician/admin confirmation queue.
-- Cash is customer-confirmed in the demo: pressing **I have paid cash** immediately marks the payment `PAID`, generates an invoice and requires no further payment verification.
-- Successful cash and gateway payments generate an invoice if one does not already exist.
-
-### Customer AI Guide
-The customer dashboard includes an AI guide that can route the customer to the relevant service or full AI diagnosis flow. TinyFish is prompted to respond in the language used by the customer, including Hindi and Hinglish. The local fallback also has Hindi and Hinglish replies for common repair categories.
-
-
-## Vercel deployment
-
-This project is configured for Vercel:
-- `api/[...path].js` is the Vercel Node.js Function entry point and handles every `/api/*` request.
-- `backend/server.js` exports the request handler and only starts a local HTTP server when run directly.
-- `vercel.json` routes `/api/*` to the function and frontend/static assets to `frontend/`.
-- Node.js is pinned to `24.x`, matching Vercel's current Node.js runtime.
-- Demo data is written to `/tmp` on Vercel. `/tmp` is ephemeral, so use a real database (Postgres/Supabase/Neon/etc.) for persistent production data.
-
-For deployment, import the repository root (the folder containing `vercel.json`, `package.json`, `api/`, `frontend/`, and `backend/`). No custom build command is required.
-
-## Persistent SQL database
-
-NearFix can persist the complete application state in Supabase PostgreSQL.
-1. Create a Supabase project.
-2. Run `docs/sql-persistence.sql` in the SQL Editor.
-3. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Vercel Environment Variables.
-4. Redeploy.
-
-The backend keeps the existing JSON file as a local fallback, but when these two variables are present the SQL database becomes the persistent source of truth for users, technicians, admins, bookings, OTP challenges, payments, reviews, messages, notifications and other application data.
-
-## Persistent database setup (Vercel + Supabase)
-
-NearFix can persist the complete application state in Supabase PostgreSQL without changing the existing UI or API model.
-
-1. Create a Supabase project.
-2. Open **SQL Editor** and run `docs/sql-persistence.sql`.
-3. In Vercel → Project → Settings → Environment Variables, add:
-   - `SUPABASE_URL` = your Supabase project URL
-   - `SUPABASE_SERVICE_ROLE_KEY` = your Supabase service-role key
-   - `JWT_SECRET` = a long random secret
-4. Redeploy the Vercel project.
-
-When these variables are present, NearFix loads and saves users, technicians, admins, bookings, OTP challenges, payments, reviews, messages, notifications, disputes, parts, and other application state in PostgreSQL. The browser's local storage is only a local cache; the server/database is the persistent source of truth after login.
-
-### Login persistence
-
-Customer and technician registration/login continue to use the existing email + password UI. Passwords are now stored as salted `scrypt` hashes instead of plain text. Existing plain-text accounts are automatically migrated to hashes on first load. The existing 7-day signed session token remains in the browser so a refresh does not require creating the account again.
-
-### Admin accounts
-
-An admin can be created from the existing **Add area admin** flow. An optional master admin can also be configured with `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`, and `ADMIN_AREA`. Admin passwords are hashed before being stored.
+- The full booking/service/payment API has not been migrated to normalized Postgres rows. This is a remaining production task.
+- The supplied local data contained seeded demo accounts only. If an existing Supabase `nearfix_state` row contains real users or bookings, migrate their user IDs to Supabase Auth and update dependent references before deploying; that live-data migration was not possible without the project credentials. Users will need Supabase Auth accounts and password resets.
+- RLS policy SQL was reviewed but could not be exercised against a live Supabase project from this workspace.
+- Password reset email delivery and email verification behavior depend on the Supabase project's Auth provider and URL settings.
+- Arrival OTP delivery requires configured Twilio credentials.
+- Razorpay requires valid server-side test/live credentials. No payment is marked successful by the removed demo endpoint.

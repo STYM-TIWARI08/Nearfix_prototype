@@ -7,13 +7,7 @@ const ROOT = path.resolve(__dirname, '..');
 const FRONTEND = path.join(ROOT, 'frontend');
 const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'nearfix-data') : path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'data.json');
-const SOURCE_DATA_FILE = path.join(__dirname, 'data', 'data.json');
 const PORT = Number(process.env.PORT || 5050);
-const JWT_SECRET = process.env.JWT_SECRET || 'nearfix-local-demo-secret-change-me';
-const ADMIN_EMAIL = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-const ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD || '');
-const ADMIN_NAME = String(process.env.ADMIN_NAME || 'NearFix Admin').trim();
-const ADMIN_AREA = String(process.env.ADMIN_AREA || 'All Areas').trim();
 const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY || '';
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || '';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || '';
@@ -21,10 +15,11 @@ const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
 const SUPABASE_URL = String(process.env.SUPABASE_URL || '').replace(/\/$/, '');
+const SUPABASE_ANON_KEY = String(process.env.SUPABASE_ANON_KEY || '');
 const SUPABASE_SERVICE_ROLE_KEY = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 const SQL_PERSISTENCE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+const SUPABASE_AUTH_ENABLED = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY && SUPABASE_SERVICE_ROLE_KEY);
 const OTP_TTL_MS = 5 * 60 * 1000;
-const OTP_RESEND_MS = 30 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
 // Keep the public AI guide useful without an account while limiting anonymous API usage.
 const guestAiBuckets = new Map();
@@ -58,56 +53,50 @@ const SERVICES = [
 ];
 
 
-const PARTS_CATALOG = [
-  {id:'p1',barcode:'8901001000011',name:'1/2 inch Brass Ball Valve',category:'Plumbing',brand:'NearFix Supply',price:185,unit:'piece',stock:42,image:'assets/parts/brass-ball-valve.svg',description:'Brass quarter-turn valve for common household water lines.',compatible:['Plumbing']},
-  {id:'p2',barcode:'8901001000012',name:'Braided Water Hose 1.5m',category:'Plumbing',brand:'NearFix Supply',price:240,unit:'piece',stock:28,image:'assets/parts/water-hose.svg',description:'Flexible braided inlet hose with standard fittings.',compatible:['Plumbing']},
-  {id:'p3',barcode:'8901001000013',name:'16A Modular Switch',category:'Electrical',brand:'NearFix Supply',price:95,unit:'piece',stock:75,image:'assets/parts/modular-switch.svg',description:'16A modular switch for residential circuits.',compatible:['Electrical']},
-  {id:'p4',barcode:'8901001000014',name:'6A Universal Socket',category:'Electrical',brand:'NearFix Supply',price:125,unit:'piece',stock:63,image:'assets/parts/socket.svg',description:'Universal modular socket with safety shutters.',compatible:['Electrical']},
-  {id:'p5',barcode:'8901001000015',name:'AC Copper Capacitor 35+5 µF',category:'AC Repair',brand:'NearFix Supply',price:520,unit:'piece',stock:19,image:'assets/parts/capacitor.svg',description:'Dual-run capacitor for compatible split/window AC units.',compatible:['AC Repair']},
-  {id:'p6',barcode:'8901001000016',name:'AC Air Filter 1.5 Ton',category:'AC Repair',brand:'NearFix Supply',price:310,unit:'piece',stock:34,image:'assets/parts/ac-filter.svg',description:'Washable replacement mesh filter for common AC units.',compatible:['AC Repair']},
-  {id:'p7',barcode:'8901001000017',name:'Washing Machine Drain Pump',category:'Appliance Repair',brand:'NearFix Supply',price:690,unit:'piece',stock:14,image:'assets/parts/drain-pump.svg',description:'Replacement drain pump for compatible washing machines.',compatible:['Appliance Repair']},
-  {id:'p8',barcode:'8901001000018',name:'Laptop 65W USB-C Adapter',category:'Computer Repair',brand:'NearFix Supply',price:1199,unit:'piece',stock:21,image:'assets/parts/usb-c-adapter.svg',description:'65W USB-C PD adapter for compatible laptops.',compatible:['Computer Repair']},
-  {id:'p9',barcode:'8901001000019',name:'Door Hinge Heavy Duty',category:'Carpentry',brand:'NearFix Supply',price:160,unit:'pair',stock:51,image:'assets/parts/door-hinge.svg',description:'Heavy-duty steel hinges for interior/exterior doors.',compatible:['Carpentry']},
-  {id:'p10',barcode:'8901001000020',name:'LED Bulb 12W',category:'Electrical',brand:'NearFix Supply',price:110,unit:'piece',stock:120,image:'assets/parts/led-bulb.svg',description:'12W energy-efficient LED bulb, warm/neutral compatible.',compatible:['Electrical']},
-  {id:'p11',barcode:'8901001000021',name:'PTFE Thread Seal Tape',category:'Plumbing',brand:'NearFix Supply',price:35,unit:'roll',stock:200,image:'assets/parts/ptfe-tape.svg',description:'Thread sealing tape for plumbing fittings.',compatible:['Plumbing']},
-  {id:'p12',barcode:'8901001000022',name:'Universal Extension Cord 5m',category:'Electrical',brand:'NearFix Supply',price:349,unit:'piece',stock:36,image:'assets/parts/extension-cord.svg',description:'5m heavy-duty extension cord with overload protection.',compatible:['Electrical']}
-];
-
 const seed = {
-  // No demo accounts are created by default. Add real users through registration
-  // or configure an administrator with ADMIN_EMAIL / ADMIN_PASSWORD.
+  // Accounts are provisioned through Supabase Auth. The database starts empty.
   users: [],
   technicians: [],
   services: SERVICES.map((s,i)=>({id:`s${i+1}`,icon:s[0],name:s[1],technicianType:s[2],active:true,baseMin:[300,250,500,350,400,500,250,400,300,350,500,250][i],baseMax:[1200,1200,2500,2500,1800,3000,1500,2500,2000,1500,5000,1500][i]})),
-  bookings: [], quotes: [], payments: [], invoices: [], reviews: [], messages: [], notifications: [], disputes: [], verifications: [], aiAnalyses: [], auditLogs: [], pricingRules: [], otpChallenges: [], pendingRegistrations: [], parts: PARTS_CATALOG.map(clone)
+  bookings: [], quotes: [], payments: [], invoices: [], reviews: [], messages: [], notifications: [], disputes: [], verifications: [], aiAnalyses: [], auditLogs: [], pricingRules: [], otpChallenges: [], pendingRegistrations: [], parts: []
 };
 
 function clone(v){ return JSON.parse(JSON.stringify(v)); }
 
-// Passwords are stored as salted scrypt hashes. Plain-text passwords are
-// automatically migrated the first time the application loads them.
-function hashPassword(password){
-  const salt=crypto.randomBytes(16).toString('hex');
-  const derived=crypto.scryptSync(String(password),salt,64,{N:16384,r:8,p:1}).toString('hex');
-  return `scrypt$16384$8$1$${salt}$${derived}`;
+function removeDemoState(data){
+  const users=Array.isArray(data.users)?data.users:[];
+  const demoUsers=new Set(users.filter(u=>u.demoProfile||/^demo[-_]/i.test(String(u.id||''))||/@(?:nearfix\.(?:test|demo)|yourdomain\.com)$/i.test(String(u.email||''))).map(u=>String(u.id)));
+  const techs=Array.isArray(data.technicians)?data.technicians:[];
+  const demoTechs=new Set(techs.filter(t=>t.demoProfile||demoUsers.has(String(t.userId))||/^demo[-_]/i.test(String(t.id||''))).map(t=>String(t.id)));
+  const demoBookings=new Set((data.bookings||[]).filter(b=>demoUsers.has(String(b.customerId))||demoTechs.has(String(b.technicianId))).map(b=>String(b.id)));
+  let changed=demoUsers.size>0||demoTechs.size>0||demoBookings.size>0;
+  if(demoUsers.size)data.users=users.filter(u=>!demoUsers.has(String(u.id)));
+  if(demoTechs.size)data.technicians=techs.filter(t=>!demoTechs.has(String(t.id)));
+  if(Array.isArray(data.parts)){
+    const fixtureBarcodes=new Set(Array.from({length:12},(_,index)=>`89010010000${String(index+11).padStart(2,'0')}`));
+    const before=data.parts.length;
+    data.parts=data.parts.filter(part=>!(fixtureBarcodes.has(String(part.barcode))&&/^p(?:[1-9]|1[0-2])$/.test(String(part.id))));
+    if(data.parts.length!==before)changed=true;
+  }
+  const relatedKeys=['userId','customerId','technicianId','actorId','senderId','recipientId','createdBy'];
+  for(const key of ['bookings','quotes','payments','invoices','reviews','messages','notifications','disputes','verifications','aiAnalyses','auditLogs','otpChallenges','pendingRegistrations']){
+    if(!Array.isArray(data[key]))continue;
+    const before=data[key].length;
+    data[key]=data[key].filter(row=>!demoBookings.has(String(row.bookingId||row.requestId||''))&&!relatedKeys.some(field=>demoUsers.has(String(row[field]||''))||demoTechs.has(String(row[field]||''))));
+    if(data[key].length!==before)changed=true;
+  }
+  return changed;
 }
-function verifyPassword(password,stored){
-  if(!stored) return false;
-  if(!String(stored).startsWith('scrypt$')) return String(stored)===String(password);
-  const parts=String(stored).split('$');
-  if(parts.length!==6) return false;
-  const [,N,r,p,salt,hash]=parts;
-  try{
-    const derived=crypto.scryptSync(String(password),salt,64,{N:Number(N),r:Number(r),p:Number(p)}).toString('hex');
-    return crypto.timingSafeEqual(Buffer.from(derived,'hex'),Buffer.from(hash,'hex'));
-  }catch{return false;}
-}
-function migratePasswords(data){
+function removeApplicationCredentials(data){
   let changed=false;
-  (data.users||[]).forEach(u=>{
-    if(u.passwordHash){ if(u.password!==undefined){delete u.password;changed=true;} return; }
-    if(u.password!==undefined){ u.passwordHash=hashPassword(u.password); delete u.password; changed=true; }
-  });
+  for(const user of data.users||[]){
+    if(Object.prototype.hasOwnProperty.call(user,'password')){delete user.password;changed=true;}
+    if(Object.prototype.hasOwnProperty.call(user,'passwordHash')){delete user.passwordHash;changed=true;}
+  }
+  for(const booking of data.bookings||[]){
+    const verification=booking.arrivalVerification;
+    if(verification?.otp){delete verification.otp;verification.status='EXPIRED';changed=true;}
+  }
   return changed;
 }
 
@@ -115,14 +104,6 @@ function ensureDb(){
   fs.mkdirSync(DATA_DIR,{recursive:true});
   if(!fs.existsSync(DATA_FILE)){
     let fresh=clone(seed);
-    // On Vercel, use the repository's data.json as the editable initial dataset.
-    // This lets the owner replace the initial customers/technicians without hardcoded demo accounts.
-    if(DATA_FILE!==SOURCE_DATA_FILE && fs.existsSync(SOURCE_DATA_FILE)){
-      try{
-        const source=JSON.parse(fs.readFileSync(SOURCE_DATA_FILE,'utf8'));
-        if(source && typeof source==='object') fresh=source;
-      }catch{}
-    }
     fs.writeFileSync(DATA_FILE, JSON.stringify(fresh,null,2));
   }
 
@@ -131,30 +112,16 @@ function ensureDb(){
     if(!Array.isArray(data.users)) data.users=[];
     if(!Array.isArray(data.technicians)) data.technicians=[];
     if(!Array.isArray(data.services)) data.services=clone(seed.services);
-    if(!Array.isArray(data.parts)) data.parts=clone(PARTS_CATALOG);
+    if(!Array.isArray(data.parts)) data.parts=[];
+    const removedDemoData=removeDemoState(data);
+    const removedCredentials=removeApplicationCredentials(data);
+    if(removedDemoData||removedCredentials)save(data);
     if(!Array.isArray(data.otpChallenges)) data.otpChallenges=[];
     if(!Array.isArray(data.pendingRegistrations)) data.pendingRegistrations=[];
-    const passwordMigrationChanged=migratePasswords(data);
-
-    // Optional real admin configured through Vercel environment variables.
-    if(ADMIN_EMAIL && ADMIN_PASSWORD){
-      let admin=data.users.find(u=>u.role==='admin');
-      if(!admin){
-        admin={id:'admin_'+crypto.randomUUID(),role:'admin',name:ADMIN_NAME,email:ADMIN_EMAIL,passwordHash:hashPassword(ADMIN_PASSWORD),phone:'',area:ADMIN_AREA};
-        data.users.push(admin);
-      }else{
-        admin.email=ADMIN_EMAIL;
-        if(!verifyPassword(ADMIN_PASSWORD,admin.passwordHash)){ admin.passwordHash=hashPassword(ADMIN_PASSWORD); }
-        admin.name=ADMIN_NAME;
-        admin.area=ADMIN_AREA;
-      }
-    }
-
     data.technicians.forEach(t=>{
       if(!t.upiId)t.upiId=`${String(t.name||'technician').toLowerCase().replace(/[^a-z0-9]+/g,'.').replace(/^\.|\.$/g,'')}.${t.id}@nearfix`;
     });
-    if(passwordMigrationChanged || (ADMIN_EMAIL && ADMIN_PASSWORD)) save(data);
-    else save(data);
+    save(data);
     return data;
   } catch {
     const fresh=clone(seed);
@@ -187,12 +154,12 @@ async function loadPersistentState(){
     if(Array.isArray(rows)&&rows[0]?.state){
       const remote=rows[0].state;
       if(remote && typeof remote==='object'){
-        const changed=migratePasswords(remote);
+        const removedDemoData=removeDemoState(remote);
+        const removedCredentials=removeApplicationCredentials(remote);
+        const cleaned=removedDemoData||removedCredentials;
+        if(cleaned)await sqlRequest('nearfix_state',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:1,state:remote,updated_at:now()})});
         fs.mkdirSync(DATA_DIR,{recursive:true});
         fs.writeFileSync(DATA_FILE,JSON.stringify(remote,null,2));
-        if(changed){
-          await sqlRequest('nearfix_state',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:1,state:remote,updated_at:now()})});
-        }
         return remote;
       }
     }
@@ -204,8 +171,8 @@ async function loadPersistentState(){
     });
     return local;
   }catch(e){
-    console.warn('NearFix SQL load fallback:',e.message);
-    return db();
+    console.error('NearFix Supabase read failed:',e.message);
+    throw e;
   }
 }
 
@@ -228,42 +195,37 @@ function now(){ return new Date().toISOString(); }
 function safeUser(u){ if(!u) return null; const {password,passwordHash,...rest}=u; return rest; }
 function json(res,status,body,headers={}){ res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'Content-Type, Authorization','Access-Control-Allow-Methods':'GET,POST,PATCH,PUT,DELETE,OPTIONS',...headers}); res.end(JSON.stringify(body)); }
 function readBody(req){ return new Promise((resolve,reject)=>{ let raw=''; req.on('data',c=>{raw+=c;if(raw.length>4e6) reject(new Error('Payload too large'));}); req.on('end',()=>{if(!raw)return resolve({});try{resolve(JSON.parse(raw));}catch(e){reject(new Error('Invalid JSON'));}}); req.on('error',reject); }); }
-function sign(value){ return crypto.createHmac('sha256',JWT_SECRET).update(value).digest('base64url'); }
-function tokenFor(u){ const payload=Buffer.from(JSON.stringify({id:u.id,role:u.role,exp:Date.now()+7*86400000})).toString('base64url'); return `${payload}.${sign(payload)}`; }
-function auth(req){
-  const h=req.headers.authorization||''; if(!h.startsWith('Bearer ')) return null;
-  const [payload,sig]=h.slice(7).split('.'); if(!payload||!sig||!crypto.timingSafeEqual(Buffer.from(sig),Buffer.from(sign(payload)))) return null;
-  try { const p=JSON.parse(Buffer.from(payload,'base64url').toString()); if(p.exp<Date.now()) return null; return p; } catch { return null; }
+async function supabaseAuthRequest(pathname, options={}){
+  if(!SUPABASE_AUTH_ENABLED) throw new Error('Supabase Auth is not configured. Set SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY.');
+  const response=await fetch(`${SUPABASE_URL}/auth/v1/${pathname}`,{...options,headers:{apikey:SUPABASE_ANON_KEY,'Content-Type':'application/json',...(options.headers||{})}});
+  const payload=await response.json().catch(()=>({}));
+  if(!response.ok){const error=new Error(payload.msg||payload.message||payload.error_description||payload.error||'Supabase authentication failed.');error.status=response.status;throw error;}
+  return payload;
 }
-function requireAuth(req,res,roles){ const me=auth(req); if(!me){json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});return null;} if(roles&&!roles.includes(me.role)){json(res,403,{success:false,message:'Forbidden',code:'FORBIDDEN'});return null;} return me; }
+async function profileForAuthUser(userId){
+  const rows=await sqlRequest(`profiles?id=eq.${encodeURIComponent(userId)}&select=id,role,full_name,email,phone,area`);
+  return Array.isArray(rows)?rows[0]||null:null;
+}
+async function auth(req){
+  const h=req.headers.authorization||''; if(!h.startsWith('Bearer ')) return null;
+  try{
+    const token=h.slice(7);
+    const user=await supabaseAuthRequest('user',{headers:{Authorization:`Bearer ${token}`}});
+    if(!user?.id) return null;
+    const profile=await profileForAuthUser(user.id);
+    if(!profile || !['customer','technician','admin'].includes(profile.role)) return null;
+    return {id:user.id,role:profile.role,email:profile.email||user.email,name:profile.full_name||user.user_metadata?.full_name||user.email,phone:profile.phone||'',area:profile.area||''};
+  }catch{return null;}
+}
 function normalizePhone(v){ return String(v||'').replace(/[^+0-9]/g,''); }
 function otpCode(){ return String(crypto.randomInt(0,1000000)).padStart(6,'0'); }
-function hashOtp(code){ return crypto.createHash('sha256').update(String(code)).digest('hex'); }
 async function sendOtpSms(phone,code){
-  if(!(TWILIO_ACCOUNT_SID&&TWILIO_AUTH_TOKEN&&TWILIO_PHONE_NUMBER)) return {sent:false,mode:'demo',message:'SMS provider not configured'};
+  if(!(TWILIO_ACCOUNT_SID&&TWILIO_AUTH_TOKEN&&TWILIO_PHONE_NUMBER)) {const error=new Error('Arrival verification SMS is not configured. Add Twilio credentials before enabling job check-in.');error.code='OTP_PROVIDER_REQUIRED';throw error;}
   const auth=Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
   const body=new URLSearchParams({To:phone,From:TWILIO_PHONE_NUMBER,Body:`Your NearFix verification code is ${code}. It expires in 5 minutes.`}).toString();
   const r=await fetch(`https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,{method:'POST',headers:{Authorization:`Basic ${auth}`,'Content-Type':'application/x-www-form-urlencoded'},body});
   if(!r.ok){const t=await r.text(); throw new Error(`OTP SMS failed: ${t.slice(0,180)}`);}
   return {sent:true,mode:'twilio'};
-}
-async function issueOtp(data,{purpose,phone,userId=null,email='',payload=null}){
-  const normalized=normalizePhone(phone); if(!normalized) throw new Error('A valid mobile number is required for OTP verification.');
-  const existing=data.otpChallenges.find(x=>x.purpose===purpose&&x.phone===normalized&&!x.verified);
-  if(existing && Date.now()-new Date(existing.createdAt).getTime()<OTP_RESEND_MS) { const wait=Math.ceil((OTP_RESEND_MS-(Date.now()-new Date(existing.createdAt).getTime()))/1000); const err=new Error(`Please wait ${wait}s before requesting another OTP.`); err.code='OTP_COOLDOWN'; throw err; }
-  const code=otpCode(); const row={id:id('otp'),purpose,phone:normalized,email,userId,codeHash:hashOtp(code),createdAt:now(),expiresAt:new Date(Date.now()+OTP_TTL_MS).toISOString(),attempts:0,verified:false,payload:payload||null};
-  data.otpChallenges=data.otpChallenges.filter(x=>!(x.purpose===purpose&&x.phone===normalized&&!x.verified)); data.otpChallenges.push(row);
-  const delivery=await sendOtpSms(normalized,code);
-  if(delivery.mode==='demo') row.demoCode=code;
-  return {row,delivery,demoOtp:delivery.mode==='demo'?code:null};
-}
-function verifyOtp(data,{purpose,phone,code}){
-  const normalized=normalizePhone(phone); const row=[...(data.otpChallenges||[])].reverse().find(x=>x.purpose===purpose&&x.phone===normalized&&!x.verified);
-  if(!row) return {ok:false,message:'OTP not found. Request a new code.',code:'OTP_NOT_FOUND'};
-  if(Date.now()>new Date(row.expiresAt).getTime()) return {ok:false,message:'OTP expired. Request a new code.',code:'OTP_EXPIRED'};
-  if(row.attempts>=OTP_MAX_ATTEMPTS) return {ok:false,message:'Too many incorrect attempts. Request a new OTP.',code:'OTP_LOCKED'};
-  row.attempts+=1; if(hashOtp(code)!==row.codeHash) return {ok:false,message:`Incorrect OTP. ${Math.max(0,OTP_MAX_ATTEMPTS-row.attempts)} attempts left.`,code:'OTP_INVALID'};
-  row.verified=true; row.verifiedAt=now(); return {ok:true,row};
 }
 function findUser(data,id){ return data.users.find(u=>String(u.id)===String(id)); }
 function technicianFor(data,id){ return data.technicians.find(t=>String(t.id)===String(id)); }
@@ -375,7 +337,7 @@ function priceEstimate(data,service,problem='',location='',urgent=false){
   if(/gas|compressor|motor|board|pcb|major/.test(text)){min+=300;max+=1800;}
   if(/leak|wiring|installation|replacement|repair/.test(text)){min+=100;max+=600;}
   if(urgent){min=Math.round(min*1.15);max=Math.round(max*1.25);}
-  const policy=pricingPolicy(data,service); return {service:service||'General Repair',labour:{min:Math.round(min*.35),max:Math.round(Math.min(max*.55,policy.baseMax))},parts:{min:Math.round(min*.65),max:Math.round(max*.65)},inspectionFee:policy.inspectionFee,min,max,location:location||'Demo area',urgent,platformFeePercent:0,disclaimer:'NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.'};
+  const policy=pricingPolicy(data,service); return {service:service||'General Repair',labour:{min:Math.round(min*.35),max:Math.round(Math.min(max*.55,policy.baseMax))},parts:{min:Math.round(min*.65),max:Math.round(max*.65)},inspectionFee:policy.inspectionFee,min,max,location:location||'your service area',urgent,platformFeePercent:0,disclaimer:'NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.'};
 }
 function analyzeProblem(data,problem,service,urgent=false){
   const text=String(problem||'').toLowerCase();
@@ -409,7 +371,7 @@ function analyzeProblem(data,problem,service,urgent=false){
       localizedAction=urgency==='High'?'Jaldi verified technician se baat karein aur unsafe DIY work avoid karein.':translation[2];
     }
   }
-  return {service:detected,summary:language==='English'?(problem||'General service request'):localizedSummary,possibleCauses:causes,requiredSkill:skill,urgency,estimatedRange:`₹${estimate.min.toLocaleString('en-IN')}–₹${estimate.max.toLocaleString('en-IN')}`,recommendedNextAction:language==='English'?(urgency==='High'?'Arrange a verified technician promptly and avoid unsafe DIY work.':'Book a suitable verified technician for inspection.'):localizedAction,preliminary:true,mode:TINYFISH_API_KEY?'tinyfish-agent':'demo-fallback'};
+  return {service:detected,summary:language==='English'?(problem||'General service request'):localizedSummary,possibleCauses:causes,requiredSkill:skill,urgency,estimatedRange:`₹${estimate.min.toLocaleString('en-IN')}–₹${estimate.max.toLocaleString('en-IN')}`,recommendedNextAction:language==='English'?(urgency==='High'?'Arrange a verified technician promptly and avoid unsafe DIY work.':'Book a suitable verified technician for inspection.'):localizedAction,preliminary:true,mode:TINYFISH_API_KEY?'tinyfish-agent':'rule-based-assistant'};
 }
 
 // Keep output in Devanagari Hindi or Latin-script Hinglish when that is how the customer writes.
@@ -487,8 +449,9 @@ function bookingView(data,b,viewer=null){
   const view={...b,customer:safeUser(findUser(data,b.customerId)),technician:technicianView(data,technicianFor(data,b.technicianId)),quote:data.quotes.find(q=>q.bookingId===b.id)||null,payment:data.payments.find(p=>p.bookingId===b.id)||null,invoice:data.invoices.find(i=>i.bookingId===b.id)||null,media:Array.isArray(b.media)?b.media:[]};
   if(b.arrivalVerification){
     view.arrivalVerification={...b.arrivalVerification};
-    // The arrival code is visible only to the customer for this booking.
-    if(!(viewer?.role==='customer' && viewer.id===b.customerId)) delete view.arrivalVerification.otp;
+    // The arrival code is sent out-of-band and is never returned by the API.
+    delete view.arrivalVerification.otp;
+    delete view.arrivalVerification.otpHash;
   }
   return view;
 }
@@ -522,7 +485,7 @@ async function api(req,res,url){
   if(req.method==='OPTIONS') return json(res,204,{});
   await loadPersistentState();
   const data=db();
-  if(req.method==='GET'&&url.pathname==='/api/health') return json(res,200,{ok:true,service:'NearFix API',version:'2.3.0',mode:TINYFISH_API_KEY?'tinyfish-agent':'local-smart-assistant',time:now()});
+  if(req.method==='GET'&&url.pathname==='/api/health') return json(res,200,{ok:true,service:'NearFix API',version:'2.4.0',authConfigured:SUPABASE_AUTH_ENABLED,persistentStorageConfigured:SQL_PERSISTENCE_ENABLED,mode:TINYFISH_API_KEY?'tinyfish-agent':'rule-based-assistant',time:now()});
   if(req.method==='GET'&&url.pathname==='/api/public') return json(res,200,{success:true,services:data.services,technicians:techniciansView(data,data.technicians)});
 
   if(req.method==='GET'&&url.pathname==='/api/parts'){
@@ -542,48 +505,47 @@ async function api(req,res,url){
   }
 
 
-  if(req.method==='POST'&&url.pathname==='/api/auth/request-otp'){
-    const b=await readBody(req); const email=String(b.email||'').trim().toLowerCase(); const password=String(b.password||'');
-    const u=data.users.find(x=>x.email.toLowerCase()===email);
-    if(!u||!verifyPassword(password,u.passwordHash||u.password)) return json(res,401,{success:false,message:'Invalid email or password',code:'INVALID_CREDENTIALS'});
-    const phone=normalizePhone(u.phone); if(!phone) return json(res,400,{success:false,message:'No mobile number is registered for this account.',code:'PHONE_REQUIRED'});
-    try { const issued=await issueOtp(data,{purpose:'LOGIN',phone,userId:u.id,email}); await savePersistent(data); return json(res,200,{success:true,message:`OTP sent to ${phone.slice(0,3)}******${phone.slice(-2)}.`,phone,challengeId:issued.row.id,deliveryMode:issued.delivery.mode,demoOtp:issued.demoOtp,expiresInSeconds:300}); }
-    catch(e){ return json(res,e.code==='OTP_COOLDOWN'?429:502,{success:false,message:e.message,code:e.code||'OTP_SEND_FAILED'}); }
-  }
-  if(req.method==='POST'&&url.pathname==='/api/auth/verify-otp'){
-    const b=await readBody(req); const result=verifyOtp(data,{purpose:'LOGIN',phone:b.phone,code:b.code}); if(!result.ok)return json(res,400,{success:false,message:result.message,code:result.code}); const u=findUser(data,result.row.userId); if(!u)return json(res,404,{success:false,message:'User not found',code:'NOT_FOUND'}); await savePersistent(data); return json(res,200,{success:true,token:tokenFor(u),user:safeUser(u)});
-  }
-  if(req.method==='POST'&&url.pathname==='/api/auth/register/request-otp'){
-    const b=await readBody(req); const name=String(b.name||'').trim(),email=String(b.email||'').trim().toLowerCase(),password=String(b.password||''),phone=normalizePhone(b.phone),role=String(b.role||'customer');
-    if(!name||!email||!password||!phone||!['customer','technician'].includes(role)) return json(res,400,{success:false,message:'Name, email, password, mobile and valid role are required.',code:'VALIDATION'});
-    if(data.users.some(x=>x.email.toLowerCase()===email)) return json(res,409,{success:false,message:'Email already registered.',code:'DUPLICATE_EMAIL'});
-    const pending={name,email,passwordHash:hashPassword(password),phone,role,service:b.service||'Handyman',area:b.area||'Ghaziabad, Uttar Pradesh',category:b.category||b.service||'General Repair'};
-    data.pendingRegistrations=data.pendingRegistrations||[]; data.pendingRegistrations=data.pendingRegistrations.filter(x=>x.email!==email); data.pendingRegistrations.push({id:id('pending'),...pending,createdAt:now()});
-    try { const issued=await issueOtp(data,{purpose:'REGISTER',phone,email,payload:pending}); await savePersistent(data); return json(res,200,{success:true,message:`Verification OTP sent to ${phone.slice(0,3)}******${phone.slice(-2)}.`,phone,deliveryMode:issued.delivery.mode,demoOtp:issued.demoOtp,expiresInSeconds:300}); }
-    catch(e){ data.pendingRegistrations=data.pendingRegistrations.filter(x=>x.email!==email); await savePersistent(data); return json(res,e.code==='OTP_COOLDOWN'?429:502,{success:false,message:e.message,code:e.code||'OTP_SEND_FAILED'}); }
-  }
-  if(req.method==='POST'&&url.pathname==='/api/auth/register/verify-otp'){
-    const b=await readBody(req); const pending=[...(data.pendingRegistrations||[])].reverse().find(x=>x.email===String(b.email||'').trim().toLowerCase()); if(!pending)return json(res,404,{success:false,message:'Registration session expired. Please start again.',code:'REGISTRATION_NOT_FOUND'});
-    const result=verifyOtp(data,{purpose:'REGISTER',phone:pending.phone,code:b.code}); if(!result.ok)return json(res,400,{success:false,message:result.message,code:result.code});
-    const u={id:id('u'),role:pending.role,name:pending.name,email:pending.email,passwordHash:pending.passwordHash,phone:pending.phone,area:pending.area||'Ghaziabad, Uttar Pradesh',phoneVerified:true,verifiedAt:now()}; data.users.push(u);
-    if(u.role==='technician') data.technicians.push({id:Date.now(),userId:u.id,name:u.name,service:pending.service,category:pending.category,rating:0,reviews:0,exp:0,distance:3.5,price:299,available:false,jobs:0,verified:false,identityVerified:false,skillVerified:false,experienceVerified:false,response:0,completionRate:100,cancellationRate:0,repeatCustomers:0,eta:15,area:pending.area,skills:[],upiId:String(pending.upiId||`${u.id}@nearfix`)});
-    data.pendingRegistrations=data.pendingRegistrations.filter(x=>x.id!==pending.id); audit(data,u,'REGISTER_VERIFIED','User',u.id); await savePersistent(data); return json(res,201,{success:true,token:tokenFor(u),user:safeUser(u)});
-  }
-
   if(req.method==='POST'&&url.pathname==='/api/auth/login'){
-    const b=await readBody(req); const u=data.users.find(x=>x.email.toLowerCase()===String(b.email||'').toLowerCase());
-    if(!u||!verifyPassword(b.password,u.passwordHash||u.password)) return json(res,401,{success:false,message:'Invalid email or password',code:'INVALID_CREDENTIALS'});
-    return json(res,200,{success:true,token:tokenFor(u),user:safeUser(u)});
+    try{
+      const b=await readBody(req); const session=await supabaseAuthRequest('token?grant_type=password',{method:'POST',body:JSON.stringify({email:b.email,password:b.password})});
+      const profile=await profileForAuthUser(session.user?.id); if(!profile)return json(res,403,{success:false,message:'Account profile is not ready. Verify your email or contact support.',code:'PROFILE_NOT_READY'});
+      const user={id:profile.id,role:profile.role,name:profile.full_name,email:profile.email,phone:profile.phone||'',area:profile.area||''};
+      const old=data.users.find(x=>x.id===user.id); if(old)Object.assign(old,user);else data.users.push(user);
+      await savePersistent(data);
+      return json(res,200,{success:true,token:session.access_token,refreshToken:session.refresh_token,expiresIn:session.expires_in,user});
+    }catch(e){return json(res,e.status||503,{success:false,message:e.message,code:'AUTH_FAILED'});}
   }
   if(req.method==='POST'&&url.pathname==='/api/auth/register'){
-    const b=await readBody(req); if(!b.name||!b.email||!b.password||!['customer','technician'].includes(b.role)) return json(res,400,{success:false,message:'Name, email, password and role are required',code:'VALIDATION'});
-    if(data.users.some(x=>x.email.toLowerCase()===String(b.email).toLowerCase())) return json(res,409,{success:false,message:'Email already registered',code:'DUPLICATE_EMAIL'});
-    const u={id:id('u'),role:b.role,name:String(b.name).trim(),email:String(b.email).trim().toLowerCase(),passwordHash:hashPassword(b.password),phone:String(b.phone||''),area:String(b.area||'Ghaziabad, Uttar Pradesh').trim()}; data.users.push(u);
-    if(u.role==='technician') data.technicians.push({id:Date.now(),userId:u.id,name:u.name,service:b.service||'Handyman',category:b.category||'General Repair',rating:0,reviews:0,exp:Number(b.exp||0),distance:3.5,price:299,available:false,jobs:0,verified:false,identityVerified:false,skillVerified:false,experienceVerified:false,response:0,completionRate:100,cancellationRate:0,repeatCustomers:0,eta:15,area:b.area||'Ghaziabad, Uttar Pradesh',skills:Array.isArray(b.skills)?b.skills:[],upiId:String(b.upiId||`${u.id}@nearfix`)});
-    audit(data,u,'REGISTER','User',u.id); await savePersistent(data); return json(res,201,{success:true,token:tokenFor(u),user:safeUser(u)});
+    try{
+      const b=await readBody(req); const name=String(b.name||'').trim(),email=String(b.email||'').trim().toLowerCase(),password=String(b.password||''),role=String(b.role||'customer'),phone=normalizePhone(b.phone);
+      if(!name||!email||password.length<8||phone.replace(/\D/g,'').length<7||!['customer','technician'].includes(role))return json(res,400,{success:false,message:'Name, valid email, mobile number, password of at least 8 characters and customer or technician role are required.',code:'VALIDATION'});
+      const result=await supabaseAuthRequest('signup',{method:'POST',body:JSON.stringify({email,password,data:{full_name:name,role,phone,area:String(b.area||''),service:String(b.service||''),category:String(b.category||'')}})});
+      const authUser=result.user||result;
+      const profile=authUser?.id?await profileForAuthUser(authUser.id):null;
+      if(profile){const user={id:profile.id,role:profile.role,name:profile.full_name,email:profile.email,phone:profile.phone||'',area:profile.area||''};data.users.push(user);await savePersistent(data);return json(res,201,{success:true,token:result.access_token||null,refreshToken:result.refresh_token||null,expiresIn:result.expires_in||null,user,emailVerificationRequired:!result.access_token});}
+      return json(res,201,{success:true,token:result.access_token||null,refreshToken:result.refresh_token||null,expiresIn:result.expires_in||null,emailVerificationRequired:true,message:'Check your email to verify your NearFix account.'});
+    }catch(e){return json(res,e.status||503,{success:false,message:e.message,code:'REGISTRATION_FAILED'});}
+  }
+  if(req.method==='POST'&&url.pathname==='/api/auth/refresh'){
+    try{const b=await readBody(req);if(!b.refreshToken)return json(res,400,{success:false,message:'Refresh token is required.',code:'VALIDATION'});const session=await supabaseAuthRequest('token?grant_type=refresh_token',{method:'POST',body:JSON.stringify({refresh_token:b.refreshToken})});const profile=await profileForAuthUser(session.user?.id);if(!profile)return json(res,401,{success:false,message:'Account profile is unavailable.',code:'PROFILE_NOT_READY'});return json(res,200,{success:true,token:session.access_token,refreshToken:session.refresh_token,expiresIn:session.expires_in,user:{id:profile.id,role:profile.role,name:profile.full_name,email:profile.email,phone:profile.phone||'',area:profile.area||''}});}catch(e){return json(res,e.status||401,{success:false,message:e.message,code:'REFRESH_FAILED'});}
+  }
+  if(req.method==='POST'&&url.pathname==='/api/auth/password-reset'){
+    try{const b=await readBody(req);if(!b.email)return json(res,400,{success:false,message:'Email is required.',code:'VALIDATION'});await supabaseAuthRequest('recover',{method:'POST',body:JSON.stringify({email:String(b.email).trim().toLowerCase()})});return json(res,200,{success:true,message:'If an account exists for that email, a password reset link has been sent.'});}catch(e){return json(res,e.status||503,{success:false,message:e.message,code:'PASSWORD_RESET_FAILED'});}
+  }
+  if(req.method==='POST'&&url.pathname==='/api/auth/password-update'){
+    const h=req.headers.authorization||'';if(!h.startsWith('Bearer '))return json(res,401,{success:false,message:'Use the password reset link from your email.',code:'UNAUTHORIZED'});
+    try{const b=await readBody(req);if(String(b.password||'').length<8)return json(res,400,{success:false,message:'Password must be at least 8 characters.',code:'VALIDATION'});await supabaseAuthRequest('user',{method:'PUT',headers:{Authorization:h},body:JSON.stringify({password:String(b.password)})});return json(res,200,{success:true,message:'Password updated. You can now sign in.'});}catch(e){return json(res,e.status||400,{success:false,message:e.message,code:'PASSWORD_UPDATE_FAILED'});}
+  }
+  if(req.method==='POST'&&url.pathname==='/api/auth/logout'){
+    const h=req.headers.authorization||'';if(!h.startsWith('Bearer '))return json(res,200,{success:true});try{await supabaseAuthRequest('logout',{method:'POST',headers:{Authorization:h}});}catch{}return json(res,200,{success:true});
   }
 
-  const me=auth(req);
+  const me=await auth(req);
+  if(me){
+    const profile={id:me.id,role:me.role,name:me.name,email:me.email,phone:me.phone,area:me.area};
+    const stored=findUser(data,me.id);
+    if(stored)Object.assign(stored,profile);else data.users.push(profile);
+  }
   if(req.method==='GET'&&url.pathname==='/api/config'){
     return json(res,200,{
       success:true,
@@ -647,7 +609,7 @@ async function api(req,res,url){
         if(['Low','Medium','High'].includes(research.urgency)) result.urgency=research.urgency;
         if(research.recommendedNextAction) result.recommendedNextAction=String(research.recommendedNextAction);
         result.mode='tinyfish-agent';
-      }catch(error){console.error('TinyFish diagnosis failed:',error.message); result.mode='demo-fallback';}
+      }catch(error){console.error('TinyFish diagnosis failed:',error.message); result.mode='rule-based-assistant';}
     }
     const row={id:id('ai'),userId:me.id,type:'problem',input:b.problem,result,createdAt:now()}; data.aiAnalyses.push(row); audit(data,me,'AI_ANALYZE','AIAnalysis',row.id); await savePersistent(data); return json(res,200,{success:true,analysis:result,analysisId:row.id});
   }
@@ -684,7 +646,7 @@ async function api(req,res,url){
   }
 
   if(req.method==='POST'&&url.pathname==='/api/ai/estimate-price'){
-    if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); const b=await readBody(req); const result=priceEstimate(data,b.service,b.problem,b.location,b.urgent); const row={id:id('ai'),userId:me.id,type:'price',input:b,result,createdAt:now()}; data.aiAnalyses.push(row); await savePersistent(data); return json(res,200,{success:true,estimate:result,mode:TINYFISH_API_KEY?'tinyfish-agent':'demo-fallback'});
+    if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); const b=await readBody(req); const result=priceEstimate(data,b.service,b.problem,b.location,b.urgent); const row={id:id('ai'),userId:me.id,type:'price',input:b,result,createdAt:now()}; data.aiAnalyses.push(row); await savePersistent(data); return json(res,200,{success:true,estimate:result,mode:TINYFISH_API_KEY?'tinyfish-agent':'rule-based-assistant'});
   }
   if(req.method==='POST'&&url.pathname==='/api/matching/find'){
     if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); const b=await readBody(req); return json(res,200,{success:true,matches:matchTechs(data,b).slice(0,8)});
@@ -698,7 +660,7 @@ async function api(req,res,url){
   }
 
   if(req.method==='PATCH'&&url.pathname==='/api/location/customer'){
-    const me=auth(req);
+    const me=await auth(req);
     if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});
     const body=await readBody(req);
     const lat=Number(body.latitude), lng=Number(body.longitude);
@@ -734,7 +696,7 @@ async function api(req,res,url){
     audit(data,me,'PROFILE_UPDATE','Technician',t.id); await savePersistent(data); return json(res,200,{success:true,technician:technicianView(data,t),user:safeUser(findUser(data,me.id))});
   }
   if(req.method==='PATCH'&&url.pathname==='/api/technicians/me/location'){
-    const me=auth(req);
+    const me=await auth(req);
     if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});
     if(me.role!=='technician') return json(res,403,{success:false,message:'Technician access required',code:'FORBIDDEN'});
     const body=await readBody(req);
@@ -788,7 +750,9 @@ async function api(req,res,url){
     if(arrival.attempts>=OTP_MAX_ATTEMPTS) return json(res,400,{success:false,message:'Too many incorrect attempts. Ask the customer to refresh/request a new arrival code.',code:'OTP_LOCKED'});
     const body=await readBody(req);
     arrival.attempts+=1;
-    if(String(body.otp||'').trim()!==String(arrival.otp)) { await savePersistent(data); return json(res,400,{success:false,message:`Incorrect OTP. ${Math.max(0,OTP_MAX_ATTEMPTS-arrival.attempts)} attempts left.`,code:'OTP_INVALID'}); }
+    const submittedHash=crypto.createHash('sha256').update(String(body.otp||'').trim()).digest();
+    const expectedHash=Buffer.from(String(arrival.otpHash||''),'hex');
+    if(expectedHash.length!==submittedHash.length||!crypto.timingSafeEqual(submittedHash,expectedHash)) { await savePersistent(data); return json(res,400,{success:false,message:`Incorrect OTP. ${Math.max(0,OTP_MAX_ATTEMPTS-arrival.attempts)} attempts left.`,code:'OTP_INVALID'}); }
     booking.arrivalVerification={status:'VERIFIED',verifiedAt:now(),verifiedBy:me.id};
     booking.status='INSPECTION';
     booking.statusHistory=booking.statusHistory||[];
@@ -809,7 +773,6 @@ async function api(req,res,url){
     const isTech=me.role==='technician'&&assignedTech?.userId===me.id;
     if(!(isCustomer||isTech||me.role==='admin')) return json(res,403,{success:false,message:'Forbidden',code:'FORBIDDEN'});
     const response={success:true,status:booking.arrivalVerification?.status||'NOT_SENT',expiresAt:booking.arrivalVerification?.expiresAt||null,verifiedAt:booking.arrivalVerification?.verifiedAt||null};
-    if(isCustomer&&booking.arrivalVerification?.status==='PENDING'&&booking.arrivalVerification?.expiresAt&&Date.now()<new Date(booking.arrivalVerification.expiresAt).getTime()&&booking.arrivalVerification.otp) response.demoOtp=booking.arrivalVerification.otp;
     return json(res,200,response);
   }
   const bm=url.pathname.match(/^\/api\/bookings\/([^/]+)$/);
@@ -843,12 +806,13 @@ async function api(req,res,url){
       if(isCustomer && body.status==='CANCELLED' && ['COMPLETED','CANCELLED'].includes(b.status)) return json(res,409,{success:false,message:'Completed bookings cannot be cancelled.',code:'BOOKING_CLOSED'});
       if(body.status==='ARRIVED' && isAssignedTechnician){
         const customer=findUser(data,b.customerId);
-        // Arrival OTP is generated for the booking itself. The customer sees it
-        // directly inside booking details; a phone number is not required.
+        const customerPhone=normalizePhone(customer?.phone);
+        if(!customerPhone)return json(res,409,{success:false,message:'The customer must add a mobile number before arrival verification can be sent.',code:'PHONE_REQUIRED'});
         const otp=otpCode();
         const expiresAt=new Date(Date.now()+OTP_TTL_MS).toISOString();
-        b.arrivalVerification={status:'PENDING',sentAt:now(),expiresAt,otp,attempts:0,deliveryMode:'IN_APP'};
-        notify(data,b.customerId,`Technician has arrived. Your arrival OTP for booking #${String(b.id).slice(-6)} is ${otp}.`);
+        try{await sendOtpSms(customerPhone,otp);}catch(error){return json(res,502,{success:false,message:error.message,code:error.code||'OTP_SEND_FAILED'});}
+        b.arrivalVerification={status:'PENDING',sentAt:now(),expiresAt,otpHash:crypto.createHash('sha256').update(otp).digest('hex'),attempts:0,deliveryMode:'SMS'};
+        notify(data,b.customerId,`Technician has arrived. Check your registered mobile for the booking verification code.`);
       }
       b.status=body.status; b.statusHistory=b.statusHistory||[]; b.statusHistory.push({status:body.status,at:now(),by:me.id});
       if(body.status==='CANCELLED'){
@@ -913,7 +877,7 @@ async function api(req,res,url){
     return json(res,200,{success:true,bookingId:booking.id,amount,upiId,payee,upiUri,qrImageUrl,paymentStatus:booking.paymentStatus||'PENDING'});
   }
   if(req.method==='GET'&&url.pathname==='/api/payment/config'){
-    return json(res,200,{success:true,enabled:Boolean(RAZORPAY_KEY_ID&&RAZORPAY_KEY_SECRET),keyId:RAZORPAY_KEY_ID||null,provider:'Razorpay',mode:RAZORPAY_KEY_ID&&RAZORPAY_KEY_SECRET?'test-ready':'demo-only'});
+    return json(res,200,{success:true,enabled:Boolean(RAZORPAY_KEY_ID&&RAZORPAY_KEY_SECRET),keyId:RAZORPAY_KEY_ID||null,provider:'Razorpay',mode:RAZORPAY_KEY_ID&&RAZORPAY_KEY_SECRET?'test-ready':'unavailable'});
   }
   if(req.method==='POST'&&url.pathname==='/api/payments/order'){
     if(!me||me.role!=='customer')return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'});
@@ -945,19 +909,10 @@ async function api(req,res,url){
     const existing=data.payments.find(p=>String(p.bookingId)===String(booking.id)&&['SUCCESS','PENDING_CONFIRMATION'].includes(p.status));
     if(existing?.status==='SUCCESS'||(existing&&existing.method!=='CASH'))return json(res,409,{success:false,message:'A payment is already pending or completed for this booking.',code:'PAYMENT_EXISTS'});
     const amount=Number(booking.total||booking.estimate||0);
-    // Cash is customer-confirmed in this demo, so it is recorded as paid immediately.
     const p=existing||{id:id('pay'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,amount,method,transactionId:`NFX-${Date.now().toString(36).toUpperCase()}`,createdAt:now()};
-    p.method=method;p.amount=amount;p.reference=String(b.reference||'');p.status=method==='CASH'?'SUCCESS':'PENDING_CONFIRMATION';
+    p.method=method;p.amount=amount;p.reference=String(b.reference||'');p.status='PENDING_CONFIRMATION';p.verification={status:'PENDING',verifiedBy:null,verifiedAt:null};
     if(!existing)data.payments.push(p);
-    if(method==='CASH'){
-      booking.paymentStatus='PAID';booking.paidAt=now();
-      const quote=data.quotes.find(x=>String(x.bookingId)===String(booking.id));
-      if(!data.invoices.some(i=>String(i.bookingId)===String(booking.id)))data.invoices.push({id:id('inv'),number:`NFX-${new Date().getFullYear()}-${String(data.invoices.length+1).padStart(5,'0')}`,bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,service:booking.service,labour:Number(quote?.labour||Math.round(amount*.35)),parts:Number(quote?.parts||Math.round(amount*.65)),platformFee:0,total:amount,paymentStatus:'PAID',createdAt:now()});
-      const techUser=technicianFor(data,booking.technicianId)?.userId;if(techUser)notify(data,techUser,`Customer marked cash received for completed booking #${String(booking.id).slice(-6)}.`);
-      notify(data,me.id,`Cash payment recorded for booking #${String(booking.id).slice(-6)}. Invoice generated.`);
-      audit(data,me,'CASH_PAYMENT_RECEIVED','Payment',p.id,{amount});await savePersistent(data);return json(res,201,{success:true,message:'Cash payment marked paid. The booking is complete and the invoice is ready.',payment:p});
-    }
-    p.verification={status:'PENDING',verifiedBy:null,verifiedAt:null};booking.paymentStatus='PENDING_CONFIRMATION';notify(data,technicianFor(data,booking.technicianId)?.userId,`Online payment confirmation required for booking #${String(booking.id).slice(-6)}.`);const admin=data.users.find(u=>u.role==='admin');if(admin)notify(data,admin.id,`Online payment pending verification for booking #${String(booking.id).slice(-6)}.`);audit(data,me,'PAYMENT_SUBMITTED','Payment',p.id,{method:p.method});await savePersistent(data);return json(res,201,{success:true,message:'Online payment submitted for confirmation.',payment:p});
+    booking.paymentStatus='PENDING_CONFIRMATION';notify(data,technicianFor(data,booking.technicianId)?.userId,`${method==='CASH'?'Customer reported cash paid':'Online payment'} awaits confirmation for booking #${String(booking.id).slice(-6)}.`);const admin=data.users.find(u=>u.role==='admin');if(admin)notify(data,admin.id,`Payment confirmation pending for booking #${String(booking.id).slice(-6)}.`);audit(data,me,'PAYMENT_SUBMITTED','Payment',p.id,{method:p.method});await savePersistent(data);return json(res,201,{success:true,message:method==='CASH'?'Cash payment reported. The technician must confirm receipt.':'Online payment submitted for confirmation.',payment:p});
   }
   const manualVerifyMatch=url.pathname.match(/^\/api\/payments\/([^/]+)\/verify$/);
   if(manualVerifyMatch&&req.method==='PATCH'){
@@ -970,9 +925,7 @@ async function api(req,res,url){
     notify(data,p.customerId,`Payment verified for booking #${String(p.bookingId).slice(-6)}. Invoice generated.`); if(booking?.technicianId){const techUser=technicianFor(data,booking.technicianId)?.userId;if(techUser)notify(data,techUser,`Payment verified for booking #${String(p.bookingId).slice(-6)}. Invoice generated.`);} audit(data,me,'PAYMENT_VERIFIED','Payment',p.id,{method:p.method}); await savePersistent(data); return json(res,200,{success:true,message:'Payment verified and invoice generated.',payment:p});
   }
 
-  if(req.method==='POST'&&url.pathname==='/api/payments'){
-    if(!me||me.role!=='customer')return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'}); const b=await readBody(req); const booking=data.bookings.find(x=>x.id===b.bookingId); if(!booking||booking.customerId!==me.id)return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'}); if(booking.status!=='COMPLETED')return json(res,409,{success:false,message:'Payment unlocks after service completion.',code:'PAYMENT_LOCKED'}); const amount=Number(booking.total||booking.estimate||0); const p={id:id('pay'),bookingId:booking.id,customerId:booking.customerId,technicianId:booking.technicianId,amount,method:b.method||'Cash',status:'SUCCESS',transactionId:`NFX${Date.now().toString(36).toUpperCase()}`,createdAt:now(),mode:'offline-demo'}; data.payments.push(p);booking.paymentStatus='PAID'; notify(data,technicianFor(data,booking.technicianId)?.userId,`Payment recorded for booking ${String(booking.id).slice(-6)}.`); audit(data,me,'PAYMENT_SUCCESS','Payment',p.id,{amount,mode:'offline-demo'});await savePersistent(data);return json(res,201,{success:true,payment:p});
-  }
+  if(req.method==='POST'&&url.pathname==='/api/payments')return json(res,410,{success:false,message:'This payment endpoint is disabled. Use a configured payment provider or submit a customer-reported cash payment.',code:'PAYMENT_ENDPOINT_DISABLED'});
   if(req.method==='GET'&&url.pathname==='/api/invoices'){
     if(!me)return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'}); return json(res,200,{success:true,invoices:data.invoices.filter(i=>me.role==='admin'||i.customerId===me.id||i.technicianId===me.id)});
   }
@@ -1002,17 +955,7 @@ async function api(req,res,url){
     if(!me||me.role!=='customer')return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'});const b=await readBody(req);const d={id:id('dsp'),bookingId:b.bookingId||null,customerId:me.id,technicianId:b.technicianId||null,reason:b.reason||'Other',subject:b.subject||'Service issue',details:b.details||'',status:'OPEN',createdAt:now(),messages:[]};data.disputes.push(d);audit(data,me,'CREATE','Dispute',d.id);await savePersistent(data);return json(res,201,{success:true,dispute:d});
   }
 
-  if(req.method==='POST'&&url.pathname==='/api/admin/admins'){
-    if(!me||me.role!=='admin') return json(res,403,{success:false,message:'Admin access required',code:'FORBIDDEN'});
-    const b=await readBody(req);
-    const name=String(b.name||'').trim(), email=String(b.email||'').trim().toLowerCase(), password=String(b.password||''), area=String(b.area||'').trim();
-    if(!name||!email||!password||!area) return json(res,400,{success:false,message:'Name, email, password and service area are required',code:'VALIDATION'});
-    if(data.users.some(u=>u.email.toLowerCase()===email)) return json(res,409,{success:false,message:'Email already registered',code:'DUPLICATE_EMAIL'});
-    if(!adminHasAreaAccess(me,area)) return json(res,403,{success:false,message:'You can only create admins inside your assigned area.',code:'AREA_FORBIDDEN'});
-    const admin={id:id('admin'),role:'admin',name,email,passwordHash:hashPassword(password),phone:String(b.phone||''),area};
-    data.users.push(admin); audit(data,me,'CREATE','Admin',admin.id,{area}); await savePersistent(data);
-    return json(res,201,{success:true,admin:safeUser(admin)});
-  }
+  if(req.method==='POST'&&url.pathname==='/api/admin/admins')return json(res,410,{success:false,message:'Provision administrators in Supabase using the documented owner-only SQL process.',code:'ADMIN_PROVISIONING_DISABLED'});
 
   if(req.method==='POST'&&url.pathname==='/api/admin/parts'){
     if(!me||me.role!=='admin')return json(res,403,{success:false,message:'Admin access required',code:'FORBIDDEN'});
