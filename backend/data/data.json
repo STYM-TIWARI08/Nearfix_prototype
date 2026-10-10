@@ -17,6 +17,15 @@
       "passwordHash": "scrypt$16384$8$1$b4ba68f55c1bf2b1b3dc677812242ed1$acc68365df32fce295a3619cfb6ef76a10fd212cd4b8768aee7db45c89ff99c3ad245edf363df9226862b8182196288e29a5ab8b783e89fedd718582bb437f1f",
       "phone": "8295569711",
       "area": "Ghaziabad, Uttar Pradesh"
+    },
+    {
+      "id": "u_8ab771da-f5b7-43ef-90bf-c3a737688c4e",
+      "role": "customer",
+      "name": "satyam tiwari",
+      "email": "st201846@gmail.com",
+      "passwordHash": "scrypt$16384$8$1$11e5ecfeba55f70bd0c898f3819f56b8$ae7ae0addfd95e7adeeb3112263d6a4239c41189946c6b6749f08d61008a5962ac733191252ec174c7fe72850ebc70c7453ce787383512cc851f19034b451b33",
+      "phone": "8295569711",
+      "area": "Ghaziabad, Uttar Pradesh"
     }
   ],
   "technicians": [],
@@ -149,6 +158,15 @@
       "entityId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
       "meta": {},
       "createdAt": "2026-10-10T18:38:30.940Z"
+    },
+    {
+      "id": "audit_5e3c7b55-e852-4eb4-bc97-7e9938e1520d",
+      "actorId": "u_8ab771da-f5b7-43ef-90bf-c3a737688c4e",
+      "action": "REGISTER",
+      "entity": "User",
+      "entityId": "u_8ab771da-f5b7-43ef-90bf-c3a737688c4e",
+      "meta": {},
+      "createdAt": "2026-10-10T20:05:11.866Z"
     }
   ],
   "pricingRules": [],
