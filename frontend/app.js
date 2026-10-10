@@ -1561,10 +1561,6 @@ function favouritesPage(){
 }
 
 function startBooking(service='Plumbing',techId=null){
-  if(techId!=null && tech(techId)?.showcaseOnly){
-    toast('This is a showcase profile for the demo. Please choose an active technician to book.');
-    return;
-  }
   if(!currentUser()){
     openLoginPrompt();
     return;
@@ -2862,9 +2858,9 @@ function techDetails(id){
       '<p class="muted">No customer reviews yet.</p>'}
 
       <div class="modal-footer">
-        ${t.showcaseOnly
-          ? '<span class="muted">Demo listing only · no technician account is connected.</span>'
-          : `<button class="btn secondary" onclick="openChat(null)">💬 Chat</button><button class="btn primary" onclick="closeModal();startBooking('${esc(t.category)}',${t.id})">Book Technician →</button>`}
+        ${t.showcaseOnly?'<span class="muted">Showcase profile: a demo booking can be created, but no sample technician login is connected.</span>':''}
+        ${t.showcaseOnly?'':`<button class="btn secondary" onclick="openChat(null)">💬 Chat</button>`}
+        <button class="btn primary" onclick="closeModal();startBooking('${esc(t.category)}',${t.id})">Book now →</button>
       </div>
 
     </div>
@@ -3904,7 +3900,7 @@ window.createBooking=async function(){
   if(!u||!d||!t){toast('Please select a valid service and technician.');return;}
   try{
     const r=await nfFetch('/api/bookings',{method:'POST',body:JSON.stringify({technicianId:t.id,service:d.service,problem:d.problem,file:d.file||'',location:d.location,date:d.date,time:d.time,budget:d.budget,radius:db.settings.radius,urgent:state.quick,latitude:db.settings.userLat,longitude:db.settings.userLng})});
-    applyServerState(await nfFetch('/api/bootstrap')); closeModal();setRoute('bookings');toast(`Booking #${String(r.booking.id).slice(-6)} created. Technician notified.`);state.quick=false;
+    applyServerState(await nfFetch('/api/bootstrap')); closeModal();setRoute('bookings');toast(t.showcaseOnly?`Demo booking #${String(r.booking.id).slice(-6)} created. A sample technician cannot accept it.`:`Booking #${String(r.booking.id).slice(-6)} created. Technician notified.`);state.quick=false;
   }catch(e){toast(e.message);if(typeof _originalCreateBooking==='function')_originalCreateBooking();}
 };
 
@@ -4116,7 +4112,7 @@ techCard = function(t){
     <div class="trust-row"><span class="badge green">${esc(reason)}</span>${t.skillVerified||t.verified?'<span class="badge">Skill checked</span>':''}<span class="badge">No degree required · Skill first</span></div>
     <div class="skills">${(t.skills||[]).slice(0,4).map(s=>`<span>${esc(s)}</span>`).join('')}</div>
     <div class="tech-bottom"><div><small>Transparent starting price</small><strong>${money(t.price)}</strong><small>No hidden platform fee</small></div><span class="jobs">${t.jobs||0} jobs · ${t.response||0}% response</span></div>
-    <div class="card-actions"><button class="btn ghost" onclick="techDetails(${t.id})">Full profile</button>${t.showcaseOnly?'<button class="btn secondary" disabled title="Showcase listing only">Demo listing</button>':`<button class="btn primary" onclick="startBooking('${esc(t.category)}',${t.id})">Book technician</button>`}</div>
+    <div class="card-actions"><button class="btn ghost" onclick="techDetails(${t.id})">Full profile</button><button class="btn primary" onclick="startBooking('${esc(t.category)}',${t.id})">Book now</button></div>
   </article>`;
 };
 
@@ -4140,7 +4136,7 @@ window.createBooking=async function(){
   if(!u||u.role!=='customer'||!d||!t){toast('Please select a valid technician from the customer booking flow.');return;}
   try{
     const r=await nfFetch('/api/bookings',{method:'POST',body:JSON.stringify({technicianId:t.id,service:d.service,problem:d.problem,file:d.file||'',media:d.media||[],location:d.location,date:d.date,time:d.time,budget:d.budget,radius:db.settings.radius,urgent:state.quick,latitude:db.settings.userLat,longitude:db.settings.userLng})});
-    applyServerState(await nfFetch('/api/bootstrap')); closeModal(); setRoute('bookings'); toast(`Booking #${String(r.booking.id).slice(-6)} sent to ${t.name}.`); state.quick=false;
+    applyServerState(await nfFetch('/api/bootstrap')); closeModal(); setRoute('bookings'); toast(t.showcaseOnly?`Demo booking #${String(r.booking.id).slice(-6)} created. A sample technician cannot accept it.`:`Booking #${String(r.booking.id).slice(-6)} sent to ${t.name}.`); state.quick=false;
   }catch(e){toast(e.message);}
 };
 
