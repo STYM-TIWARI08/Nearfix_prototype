@@ -203,7 +203,7 @@
       "date": "2026-10-11",
       "time": "10:00 AM – 11:00 AM",
       "budget": 500,
-      "status": "ARRIVED",
+      "status": "CANCELLED",
       "urgent": false,
       "estimate": 400,
       "estimateRange": {
@@ -248,6 +248,11 @@
           "status": "ARRIVED",
           "at": "2026-10-10T20:23:07.853Z",
           "by": "u_43f1be95-99e7-4b25-ae8a-406023ff5175"
+        },
+        {
+          "status": "CANCELLED",
+          "at": "2026-10-10T20:41:49.060Z",
+          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
         }
       ],
       "paymentStatus": "PENDING",
@@ -256,7 +261,12 @@
         "status": "PENDING",
         "notes": "Waiting for service evidence and admin review."
       },
-      "cancellation": null,
+      "cancellation": {
+        "cancelledBy": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+        "role": "customer",
+        "reason": "Changed my mind",
+        "at": "2026-10-10T20:41:49.060Z"
+      },
       "arrivalVerification": {
         "status": "PENDING",
         "sentAt": "2026-10-10T20:23:07.853Z",
@@ -396,6 +406,69 @@
         "reason": "Cancelled by user",
         "at": "2026-10-10T20:22:51.868Z"
       }
+    },
+    {
+      "id": 1791664894996,
+      "customerId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+      "technicianId": 1791663619256,
+      "service": "Electrical",
+      "problem": "wiring",
+      "file": "",
+      "location": "Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201305, India",
+      "latitude": 28.5371,
+      "longitude": 77.4536,
+      "date": "2026-10-11",
+      "time": "10:00 AM – 11:00 AM",
+      "budget": 500,
+      "status": "CANCELLED",
+      "urgent": false,
+      "estimate": 400,
+      "estimateRange": {
+        "service": "Electrical",
+        "labour": {
+          "min": 140,
+          "max": 990
+        },
+        "parts": {
+          "min": 260,
+          "max": 1170
+        },
+        "inspectionFee": 99,
+        "min": 400,
+        "max": 1800,
+        "location": "Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201305, India",
+        "urgent": false,
+        "platformFeePercent": 0,
+        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
+        "selectedTechnicianStartingPrice": 341,
+        "distanceFee": 42,
+        "selectedTechnicianId": 1791663619256
+      },
+      "createdAt": "2026-10-10T20:41:34.996Z",
+      "statusHistory": [
+        {
+          "status": "REQUESTED",
+          "at": "2026-10-10T20:41:34.996Z",
+          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
+        },
+        {
+          "status": "CANCELLED",
+          "at": "2026-10-10T20:44:09.772Z",
+          "by": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d"
+        }
+      ],
+      "paymentStatus": "PENDING",
+      "media": [],
+      "workVerification": {
+        "status": "PENDING",
+        "notes": "Waiting for service evidence and admin review."
+      },
+      "cancellation": {
+        "cancelledBy": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+        "role": "customer",
+        "reason": "Changed my mind",
+        "at": "2026-10-10T20:44:09.772Z"
+      }
     }
   ],
   "quotes": [],
@@ -404,6 +477,54 @@
   "reviews": [],
   "messages": [],
   "notifications": [
+    {
+      "id": "n_5e099cd6-1706-4614-9839-655242fc8be9",
+      "userId": "admin_599a627c-251a-4a08-986c-e3efb6735190",
+      "text": "Booking #894996 was cancelled by customer.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T20:44:09.841Z"
+    },
+    {
+      "id": "n_8b3e00ec-90e1-44f3-87c5-e0cfb27f3d1c",
+      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
+      "text": "Booking #894996 was cancelled. Reason: Changed my mind",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T20:44:09.841Z"
+    },
+    {
+      "id": "n_79f1a34e-aca0-4bf5-8d50-a18ea3f92c75",
+      "userId": "admin_599a627c-251a-4a08-986c-e3efb6735190",
+      "text": "Booking #752760 was cancelled by customer.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T20:41:49.060Z"
+    },
+    {
+      "id": "n_6a08bb56-c318-4b43-96c5-70722da92f91",
+      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
+      "text": "Booking #752760 was cancelled. Reason: Changed my mind",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T20:41:49.060Z"
+    },
+    {
+      "id": "n_02d00681-eae5-4dda-9c0d-c589b8d05ad0",
+      "userId": "u_43f1be95-99e7-4b25-ae8a-406023ff5175",
+      "text": "New Electrical request from satyam.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T20:41:34.997Z"
+    },
+    {
+      "id": "n_5ba41caa-fe15-4fd1-b66f-e384721d054a",
+      "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+      "text": "Booking request sent to satya.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T20:41:34.997Z"
+    },
     {
       "id": "n_08215145-93c2-48b6-8bf2-d00647a054c1",
       "userId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
@@ -665,6 +786,39 @@
         "status": "ARRIVED"
       },
       "createdAt": "2026-10-10T20:23:07.853Z"
+    },
+    {
+      "id": "audit_ca6f36aa-08a0-4643-a35b-749d5c04ae98",
+      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+      "action": "CREATE",
+      "entity": "Booking",
+      "entityId": 1791664894996,
+      "meta": {
+        "technicianId": 1791663619256
+      },
+      "createdAt": "2026-10-10T20:41:34.997Z"
+    },
+    {
+      "id": "audit_1def7c94-0192-47ea-8084-56c8d10dbd0d",
+      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "entityId": 1791663752760,
+      "meta": {
+        "status": "CANCELLED"
+      },
+      "createdAt": "2026-10-10T20:41:49.060Z"
+    },
+    {
+      "id": "audit_10f90c64-44bf-4169-91f0-0b78ba910b57",
+      "actorId": "u_a26b5fe2-5c1b-4536-8994-3b7eb470da2d",
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "entityId": 1791664894996,
+      "meta": {
+        "status": "CANCELLED"
+      },
+      "createdAt": "2026-10-10T20:44:09.841Z"
     }
   ],
   "pricingRules": [],
