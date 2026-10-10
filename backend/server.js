@@ -687,13 +687,12 @@ async function api(req,res,url){
     audit(data,me,'PROFILE_UPDATE','Technician',t.id); await savePersistent(data); return json(res,200,{success:true,technician:technicianView(data,t),user:safeUser(findUser(data,me.id))});
   }
   if(req.method==='PATCH'&&url.pathname==='/api/technicians/me/location'){
-    const me=await auth(req);
     if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});
     if(me.role!=='technician') return json(res,403,{success:false,message:'Technician access required',code:'FORBIDDEN'});
     const body=await readBody(req);
     const lat=Number(body.lat), lng=Number(body.lng);
     if(!validCoords(lat,lng)) return json(res,400,{success:false,message:'Valid latitude and longitude are required',code:'INVALID_COORDINATES'});
-    const t=data.technicians.find(x=>x.userId===me.id);
+    const t=ensureTechnicianProfile(data,me);
     if(!t) return json(res,404,{success:false,message:'Technician profile not found',code:'NOT_FOUND'});
     t.lat=lat; t.lng=lng;
     t.accuracy=Number.isFinite(Number(body.accuracy))?Number(body.accuracy):null;

@@ -1067,14 +1067,14 @@ function technicianPage(){
 
         <button
           class="availability-toggle ${myTech.available?'on':''}"
-          onclick="toggleAvailability(${myTech.id})"
+          onclick="toggleAvailability('${esc(myTech.id)}')"
         >
           <span></span>
           ${myTech.available?'Available':'Offline'}
         </button>
         <button
           class="btn secondary"
-          onclick="startTechnicianLocationSharing(${myTech.id})"
+          onclick="startTechnicianLocationSharing('${esc(myTech.id)}')"
         >
           📍 ${technicianWatchId===null?'Share GPS':'Stop GPS'}
         </button>
@@ -1435,7 +1435,7 @@ function adminOffers(){
 }
 
 function mobileBottom(role){
-  if(role==='technician') return `<div class="mobile-bottom"><button onclick="setRoute('technician')">⌂<small>Dashboard</small></button><button onclick="setRoute('bookings')">📥<small>Jobs</small></button><button class="mobile-book" onclick="startTechnicianLocationSharing(techForUser()?.id)">📍</button><button onclick="openNotifications()">🔔<small>Alerts</small></button><button onclick="openMoreMenu()">☰<small>More</small></button></div>`;
+  if(role==='technician') return `<div class="mobile-bottom"><button onclick="setRoute('technician')">⌂<small>Dashboard</small></button><button onclick="setRoute('bookings')">📥<small>Jobs</small></button><button class="mobile-book" onclick="startTechnicianLocationSharing('${esc(techForUser()?.id||'')}')">📍</button><button onclick="openNotifications()">🔔<small>Alerts</small></button><button onclick="openMoreMenu()">☰<small>More</small></button></div>`;
   if(role==='admin') return `<div class="mobile-bottom"><button onclick="setRoute('admin')">⌂<small>Dashboard</small></button><button onclick="adminTab(null,'users')">👥<small>Users</small></button><button class="mobile-book" onclick="adminTab(null,'bookings')">▣</button><button onclick="setRoute('parts')">🧰<small>Parts</small></button><button onclick="openMoreMenu()">☰<small>More</small></button></div>`;
   return `<div class="mobile-bottom"><button onclick="setRoute('customer')">⌂<small>Home</small></button><button onclick="setRoute('find')">⌕<small>Find</small></button><button class="mobile-book" onclick="startBooking('Plumbing')">＋</button><button onclick="setRoute('bookings')">▣<small>Bookings</small></button><button onclick="openMoreMenu()">☰<small>More</small></button></div>`;
 }
