@@ -589,7 +589,7 @@ function techCard(t){
       <div class="grow">
         <h3>
           ${esc(t.name)}
-          ${t.verified?'<span class="verified">✓ Verified</span>':''}
+          ${t.demoProfile?'<span class="demo-profile">Demo profile</span>':t.verified?'<span class="verified">✓ Verified</span>':''}
         </h3>
         <p>${esc(t.service)} · ${t.exp}+ years experience</p>
         <div class="rating">★ ${t.rating} <small>(${t.reviews} reviews)</small></div>
@@ -663,6 +663,18 @@ function login(){
         <button id="login-admin" onclick="setAuthRole('admin')">Admin</button>
       </div>
 
+      <section class="demo-login" aria-label="Demo sign-in options">
+        <div class="demo-login-heading"><b>Explore the demo</b><span>One click sign-in</span></div>
+        <div class="demo-login-buttons">
+          <button type="button" onclick="demoLogin('customer')"><span>🏠</span>Customer</button>
+          <button type="button" onclick="demoLogin('technician')"><span>🧰</span>Technician</button>
+          <button type="button" onclick="demoLogin('admin')"><span>🛡️</span>Admin</button>
+        </div>
+        <small>Demo accounts use sample data. No real customer or technician details.</small>
+      </section>
+
+      <div class="auth-divider"><span>or sign in with your account</span></div>
+
       <div class="form-field">
         <label>Email</label>
         <input id="login-email" type="email" placeholder="you@example.com">
@@ -729,6 +741,34 @@ function loginSubmit(){
   );
 
   toast(`Welcome, ${user.name.split(' ')[0]}!`);
+}
+
+// Demo access authenticates against the same backend as regular accounts.
+async function demoLogin(role){
+  const demoAccounts={
+    customer:{email:'demo.customer@nearfix.test',password:'NearFixDemo26!'},
+    technician:{email:'demo.tech01@nearfix.test',password:'NearFixDemo26!'},
+    admin:{email:'demo.admin@nearfix.test',password:'NearFixDemo26!'}
+  };
+  const account=demoAccounts[role];
+  if(!account) return;
+  const buttons=document.querySelectorAll('.demo-login-buttons button');
+  buttons.forEach(button=>button.disabled=true);
+  try{
+    const result=await nfFetch('/api/auth/login',{method:'POST',body:JSON.stringify(account)});
+    nfToken=result.token;
+    localStorage.setItem('nearfix-token-v2',nfToken);
+    applyServerState({user:result.user});
+    // Load the selected account's bookings, technician profile, and dashboard data.
+    await hydrateServer();
+    setRoute(role);
+    startServerSync();
+    toast(`Welcome, ${result.user.name.split(' ')[0]}!`);
+  }catch(error){
+    toast(error.message.includes('Failed to fetch')?'Start NearFix with npm start, then try the demo sign-in again.':error.message);
+  }finally{
+    buttons.forEach(button=>button.disabled=false);
+  }
 }
 
 function logout(){
@@ -2914,8 +2954,9 @@ async function toggleAvailability(id){
 async function toggleVerification(id){
   const t=(db.adminAllTechnicians||[]).find(x=>String(x.id)===String(id))||tech(id); if(!t){toast('Technician not found.');return;}
   try{
+    const scrollY=window.scrollY;
     const r=await nfFetch(`/api/admin/technicians/${id}`,{method:'PATCH',body:JSON.stringify({verified:!t.verified})});
-    Object.assign(t,r.technician); applyServerState(await nfFetch('/api/bootstrap')); render(); toast(t.verified?'Technician verified.':'Verification removed.');
+    Object.assign(t,r.technician); applyServerState(await nfFetch('/api/bootstrap')); render(); window.scrollTo({top:scrollY,behavior:'instant'}); toast(t.verified?'Technician verified.':'Verification removed.');
   }catch(e){toast(e.message);}
 }
 
@@ -3755,15 +3796,9 @@ function startServerSync(){
     try {
       const payload=await nfFetch('/api/bootstrap');
       applyServerState(payload);
-      // Keep an already-open booking details panel in sync without requiring a refresh.
-      // This is especially important when a technician accepts a customer's request.
-      if(activeBookingDetailsId!==null && document.querySelector('.modal-box')){
-        const openBooking=db.bookings.find(b=>String(b.id)===String(activeBookingDetailsId));
-        const otpModalOpen=Boolean(document.getElementById('arrival-otp-code'));
-        if(openBooking && typeof bookingDetails==='function' && !otpModalOpen) bookingDetails(activeBookingDetailsId);
-      } else if(['customer','technician','admin','bookings'].includes(state.route)) {
-        render();
-      }
+      // Don't replace an open dialog: doing so resets scroll and clears file inputs mid-upload.
+      if(document.querySelector('.modal-box')) return;
+      if(['customer','technician','admin','bookings'].includes(state.route)) render();
     } catch(e){}
   },3000);
 }
@@ -4010,14 +4045,38 @@ window.loadLiveAdminAnalytics=async function(){
    - Razorpay test-gateway ready checkout
    ========================================================= */
 
-function nfReadFile(file,maxBytes=900000){
+async function nfReadFile(file,maxBytes=900000){
+  if(!file) return null;
+  let uploadFile=file;
+
+  // Phone photos are often several megabytes; resize them before base64 upload.
+  if(file.size>maxBytes&&file.type.startsWith('image/')){
+    if(typeof createImageBitmap!=='function') throw new Error('This browser cannot resize the photo. Please choose an image under 900 KB.');
+    let bitmap;
+    try{bitmap=await createImageBitmap(file);}catch{throw new Error('Could not open this image. Please choose a JPG, PNG, or WebP photo.');}
+    const scale=Math.min(1,1440/Math.max(bitmap.width,bitmap.height));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(bitmap.width*scale));
+    canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+    canvas.getContext('2d')?.drawImage(bitmap,0,0,canvas.width,canvas.height);
+    bitmap.close?.();
+    let quality=.84;
+    let blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
+    while(blob&&blob.size>maxBytes&&quality>.48){
+      quality-=.1;
+      blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',quality));
+    }
+    if(!blob||blob.size>maxBytes) throw new Error('This photo is still too large after resizing. Please choose a smaller image.');
+    uploadFile=new File([blob],file.name.replace(/\.[^.]+$/,'')+'.jpg',{type:'image/jpeg',lastModified:Date.now()});
+  }else if(file.size>maxBytes){
+    throw new Error('Videos must be under 900 KB for this demo. Please trim the clip and try again.');
+  }
+
   return new Promise((resolve,reject)=>{
-    if(!file) return resolve(null);
-    if(file.size>maxBytes) return reject(new Error('Please keep each photo/video under about 900 KB for this demo.'));
     const reader=new FileReader();
-    reader.onload=()=>resolve({name:file.name,type:file.type,size:file.size,data:String(reader.result||'')});
+    reader.onload=()=>resolve({name:uploadFile.name,type:uploadFile.type,size:uploadFile.size,data:String(reader.result||'')});
     reader.onerror=()=>reject(new Error('Could not read the selected file.'));
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(uploadFile);
   });
 }
 
@@ -4092,11 +4151,32 @@ window.confirmCancelBooking=async function(id){
 /* Evidence upload for technician/customer; admin can see and verify. */
 window.uploadBookingEvidence=async function(id,type='WORK_EVIDENCE'){
   const input=document.getElementById(`evidence-file-${id}`); if(!input?.files?.[0]){toast('Choose a photo/video first.');return;}
-  try{const media=await nfReadFile(input.files[0]); await nfFetch(`/api/bookings/${id}/media`,{method:'POST',body:JSON.stringify({type,data:media.data,name:media.name})});applyServerState(await nfFetch('/api/bootstrap'));bookingDetails(id);toast('Evidence uploaded. Admin can review it now.');}catch(e){toast(e.message);}
+  const uploadBox=input.closest('.evidence-upload');
+  const buttons=[...(uploadBox?.querySelectorAll('button')||[])];
+  buttons.forEach(button=>{button.disabled=true;button.dataset.originalLabel=button.textContent;button.textContent='Uploading…';});
+  try{
+    const media=await nfReadFile(input.files[0]);
+    await nfFetch(`/api/bookings/${id}/media`,{method:'POST',body:JSON.stringify({type,data:media.data,name:media.name})});
+    applyServerState(await nfFetch('/api/bootstrap'));
+    const scrollTop=modal().querySelector('.modal-box')?.scrollTop||0;
+    bookingDetails(id);
+    const updatedModal=modal().querySelector('.modal-box');
+    if(updatedModal) updatedModal.scrollTop=scrollTop;
+    toast('Evidence uploaded. Admin can review it now.');
+  }catch(e){toast(e.message);}
+  finally{buttons.forEach(button=>{button.disabled=false;if(button.dataset.originalLabel)button.textContent=button.dataset.originalLabel;});}
 };
 window.verifyBookingEvidence=async function(id,approved){
   const note=document.getElementById(`verify-note-${id}`)?.value.trim()||'';
-  try{await nfFetch(`/api/admin/bookings/${id}/verify`,{method:'PATCH',body:JSON.stringify({approved,notes:note})});applyServerState(await nfFetch('/api/bootstrap'));bookingDetails(id);toast(approved?'Work verified. Customer can pay.':'Evidence rejected; technician needs to resubmit.');}catch(e){toast(e.message);}
+  try{
+    await nfFetch(`/api/admin/bookings/${id}/verify`,{method:'PATCH',body:JSON.stringify({approved,notes:note})});
+    applyServerState(await nfFetch('/api/bootstrap'));
+    const scrollTop=modal().querySelector('.modal-box')?.scrollTop||0;
+    bookingDetails(id);
+    const updatedModal=modal().querySelector('.modal-box');
+    if(updatedModal) updatedModal.scrollTop=scrollTop;
+    toast(approved?'Work verified. Customer can pay.':'Evidence rejected; technician needs to resubmit.');
+  }catch(e){toast(e.message);}
 };
 
 /* Replace booking details with a trust-first workflow. */
@@ -4117,7 +4197,7 @@ bookingDetails = async function(id){
     ${role==='customer'&&b.status==='Arrived'&&b.arrivalVerification?.status==='PENDING'?`<section class="arrival-otp-card"><div><span class="eyebrow">ARRIVAL VERIFICATION</span><h3>Technician has arrived</h3><p>Your arrival OTP is shown here directly. Share it with the technician only after they have arrived.</p></div><div class="arrival-otp-display"><small>YOUR ARRIVAL OTP</small><strong>${b.arrivalVerification?.otp!=null?esc(String(b.arrivalVerification.otp).replace(/\D/g,'').padStart(6,'0').slice(-6)):'------'}</strong><span>No mobile number is required.</span></div></section>`:''}
     ${role==='technician'&&b.status==='Arrived'?`<section class="arrival-otp-card technician"><div><span class="eyebrow">CUSTOMER CHECK-IN</span><h3>Get customer OTP</h3><p>Ask the customer for the arrival OTP. Do not start inspection until NearFix verifies it.</p></div><button class="btn primary" onclick="verifyArrivalOtp(${id})">🔐 Verify customer OTP</button></section>`:''}
     ${media.length?`<section class="evidence-section"><div class="panel-head"><div><b>Service evidence</b><small>Visible to customer, technician and admin.</small></div></div><div class="evidence-grid">${evidence}</div></section>`:''}
-    ${role==='technician' && ['Arrived','Inspection','Service started','Completed'].includes(b.status)?`<section class="panel-lite evidence-upload"><b>Upload work evidence</b><small>Send a clear before/after/service photo. Admin reviews it before payment release.</small><input id="evidence-file-${id}" type="file" accept="image/*,video/*"><div class="inline-actions"><button class="btn secondary" onclick="uploadBookingEvidence(${id},'BEFORE')">📷 Upload before</button><button class="btn primary" onclick="uploadBookingEvidence(${id},'AFTER')">📷 Upload after/work</button></div></section>`:''}
+    ${role==='technician' && ['Arrived','Inspection','Service started','Completed'].includes(b.status)?`<section class="panel-lite evidence-upload"><b>Upload work evidence</b><small>Send a clear before/after/service photo. Admin reviews it before payment release.</small><input id="evidence-file-${id}" type="file" accept="image/*,video/*"><small>Large photos compress automatically. Videos must be under 900 KB.</small><div class="inline-actions"><button class="btn secondary" onclick="uploadBookingEvidence(${id},'BEFORE')">📷 Upload before</button><button class="btn primary" onclick="uploadBookingEvidence(${id},'AFTER')">📷 Upload after/work</button></div></section>`:''}
     ${role==='admin'?`<section class="panel-lite"><div class="panel-head"><div><b>Admin verification</b><small>Review work photos and verify the completed job.</small></div><span class="badge ${verification.status==='VERIFIED'?'green':''}">${esc(verification.status)}</span></div>${media.length?`<div class="evidence-grid">${evidence}</div>`:'<p class="muted">No evidence uploaded yet.</p>'}<textarea id="verify-note-${id}" placeholder="Verification note / reason">${esc(verification.notes||'')}</textarea><div class="inline-actions"><button class="btn danger" onclick="verifyBookingEvidence(${id},false)">Reject / Request resubmission</button><button class="btn primary" onclick="verifyBookingEvidence(${id},true)">✓ Verify work</button></div></section>`:''}
     ${quote?`<section class="panel-lite"><div class="match-title"><b>Itemized quotation</b><span class="badge ${quote.status==='APPROVED'?'green':''}">${esc(quote.status)}</span></div><p>${esc(quote.reason||'')}</p><div class="review-grid"><div><small>Labour</small><b>${money(quote.labour)}</b></div><div><small>Catalog parts</small><b>${money(quote.parts)}</b></div><div><small>Other</small><b>${money(quote.otherCharges)}</b></div><div><small>Total</small><b>${money(quote.total)}</b></div></div>${quote.pricingAudit?`<div class="price-audit ${quote.pricingAudit.requiresAdminReview?'warn':'ok'}"><b>${quote.pricingAudit.requiresAdminReview?'⚠️ Admin price review required':'✓ Within shared catalog reference'}</b><small>Parts reference: ${money(quote.pricingAudit.catalogPartsTotal)} · markup: ${Number(quote.pricingAudit.markupPercent||0).toFixed(1)}%</small>${(quote.pricingAudit.warnings||[]).map(w=>`<span>${esc(w)}</span>`).join('')}</div>`:''}${role==='customer'&&quote.status==='PENDING'?`<div class="modal-footer"><button class="btn ghost" onclick="approveQuote(${id},'reject')">Decline</button><button class="btn primary" onclick="approveQuote(${id},'approve')">Approve ₹${Number(quote.total).toLocaleString('en-IN')}</button></div>`:''}</section>`:''}
     ${b.cancellation?`<div class="location-note"><span>✕</span><div><b>Cancelled</b><small>${esc(b.cancellation.reason||'No reason')} · ${esc(b.cancellation.role||'user')}</small>${b.refundStatus?`<small>Refund: ${esc(b.refundStatus)}</small>`:''}</div></div>`:''}
@@ -4210,14 +4290,15 @@ window.openCustomerAIChat=function(){ toggleAIAssistant(true); };
 // Lightweight offline chat responses also follow Hindi, Hinglish, or English input.
 function localGuideResponse(message){
   const devanagari=/[\u0900-\u097F]/.test(message);
-  const hinglish=/\b(hai|hain|hoon|nahi|nahin|kya|kaise|mera|meri|mujhe|chahiye|karna|yeh|iska|batao)\b/i.test(message);
+  const hinglish=/\b(hai|hain|hoon|h|ho|gya|gaya|gayi|kharab|khrab|nahi|nahin|kya|kaise|mera|meri|mujhe|chahiye|karna|kar|kr+|rha|rhe|rhi|rhh?|yeh|iska|isse|batao)\b/i.test(message);
   const language=devanagari?'Hindi':hinglish?'Hinglish':'English';
   const text=message.toLowerCase(); let service='General Repair';
   if(/ac|air conditioner|cooling|एसी|ठंडा|कूलिंग/i.test(text)) service='AC Repair';
-  else if(/pipe|leak|tap|water|plumb|पानी|लीक|नल|पाइप|टपक/i.test(text)) service='Plumbing';
-  else if(/switch|spark|wire|electric|fan|mcb|socket|बिजली|स्विच|चिंगारी|तार|पंखा|सॉकेट/i.test(text)) service='Electrical';
+  else if(/switch|spark|wire|wiring|current|electric|fan|mcb|socket|बिजली|स्विच|चिंगारी|तार|पंखा|सॉकेट/i.test(text)) service='Electrical';
+  else if(/pipe|leak|tap|nal|water|plumb|drain|faucet|toilet|sink|khrab|kharab|खराब|पानी|लीक|नल|पाइप|टपक/i.test(text)) service='Plumbing';
   else if(/washing|fridge|microwave|appliance|फ्रिज|वॉशिंग|माइक्रोवेव|उपकरण/i.test(text)) service='Appliance Repair';
   const replies={
+    English:{'General Repair':'Tell me what is broken and what symptoms you notice.','AC Repair':'This sounds like an AC issue. Is it leaking water, not cooling, or making an unusual noise? Please don’t open the unit; an AC technician can inspect it safely.','Plumbing':'This sounds like a plumbing issue. Is the tap leaking, blocked, or difficult to turn? If water is actively leaking, close the nearest valve if it is safe.','Electrical':'This sounds like an electrical wiring issue. If there is active current leakage, sparks, or a burning smell, keep away and switch off the main breaker only if you can do so safely. Do not touch the wiring; contact a verified electrician.','Appliance Repair':'This sounds like an appliance repair issue. Tell me the appliance and its exact symptom; share the model number if available.'},
     Hindi:{'General Repair':'कृपया बताइए कौन-सी चीज़ खराब है और क्या लक्षण दिख रहे हैं।','AC Repair':'यह AC की समस्या लगती है। Panel खुद न खोलें; सुरक्षित जाँच के लिए technician को बुलाएँ।','Plumbing':'यह plumbing की समस्या लगती है। अगर सुरक्षित हो तो पानी का valve बंद करें और plumber को बुलाएँ।','Electrical':'यह electrical समस्या हो सकती है। Spark हो तो सुरक्षित होने पर circuit बंद करें; live wire को न छुएँ।','Appliance Repair':'यह appliance repair का मामला हो सकता है। Technician को model number और photo भेजें।'},
     Hinglish:{'General Repair':'Kaunsi cheez kharab hai aur exact symptom kya hai? Main sahi technician dhoondhne mein help karunga.','AC Repair':'Yeh AC issue lag raha hai. Panel khud na kholein; technician ko dikhayein.','Plumbing':'Yeh plumbing problem lagti hai. Agar safe ho to paani ka valve band karein aur plumber ko bulaein.','Electrical':'Yeh electrical issue ho sakta hai. Spark ho to safe hone par circuit band karein; live wire touch na karein.','Appliance Repair':'Yeh appliance repair ka issue lagta hai. Technician ko model number aur photo bhejein.'}
   };
@@ -4227,7 +4308,7 @@ window.aiChatAsk=async function(text){
   ensureAIAssistantWidget(); const q=String(text||'').trim(); if(!q)return; toggleAIAssistant(true);
   const log=document.getElementById('nearfix-ai-log'); const input=document.getElementById('nearfix-ai-input'); if(input)input.value='';
   log.insertAdjacentHTML('beforeend',`<div class="nf-ai-msg user">${esc(q)}</div><div class="nf-ai-msg bot ai-thinking">Thinking…</div>`); const thinking=log.querySelector('.ai-thinking');
-  try{if(nfToken){const r=await nfFetch('/api/ai/chat',{method:'POST',body:JSON.stringify({message:q})});const svc=r.service||'General Repair';thinking.innerHTML=`${esc(r.reply)}<div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${esc(svc)} technicians →</button><button onclick="state.service='${svc}';openAIAnalyzer()">Full diagnosis</button></div>`;}else{const result=localGuideResponse(q);const svc=result.service;thinking.innerHTML=`${esc(result.reply)}<div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${svc} technicians →</button></div>`;}}catch(e){thinking.innerHTML=`${esc(e.message||'AI assistant is temporarily unavailable.')}<div class="nf-ai-actions"><button onclick="setRoute('find');toggleAIAssistant(false)">Browse technicians</button></div>`;} thinking.classList.remove('ai-thinking'); log.scrollTop=log.scrollHeight;
+  try{const r=await nfFetch('/api/ai/chat',{method:'POST',body:JSON.stringify({message:q})});const svc=r.service||'General Repair';const source=r.mode==='tinyfish-agent'?'TinyFish web agent':r.mode==='tinyfish-unavailable'?'TinyFish unavailable · Local reply':'Local assistant';thinking.innerHTML=`${esc(r.reply)}<small class="nf-ai-source">${source}</small><div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${esc(svc)} technicians →</button>${nfToken?`<button onclick="state.service='${svc}';openAIAnalyzer()">Full diagnosis</button>`:''}</div>`;}catch(e){const result=localGuideResponse(q);const svc=result.service;thinking.innerHTML=`${esc(result.reply)}<small class="nf-ai-source">Offline local response · Server connect nahi hua. TinyFish ke liye project folder mein <b>npm start</b> chalayein.</small><div class="nf-ai-actions"><button onclick="state.service='${svc}';setRoute('find');toggleAIAssistant(false)">Find ${svc} technicians →</button></div>`;} thinking.classList.remove('ai-thinking'); log.scrollTop=log.scrollHeight;
 };
 
 /* Re-run render after overrides so the active screen immediately uses the production layer. */

@@ -3,11 +3,11 @@
     {
       "id": "admin_c674d333-383b-4166-ba77-9603383724a3",
       "role": "admin",
-      "name": "Owner Admin",
-      "email": "owner@nearfix.test",
+      "name": "NearFix Admin",
+      "email": "admin@yourdomain.com",
       "phone": "",
       "area": "All Areas",
-      "passwordHash": "scrypt$16384$8$1$90d7425b4d47d1be442e81641a36e7cb$54dce0881806e80d7ad4bee5317ee39d21b6f0b2cb1b2f02fb99120f91fd63ac18e82e3512ad2009f535780c2442f765bd423bef010b7d29c89a40f2ec97acc6"
+      "passwordHash": "scrypt$16384$8$1$375ccef0dff98e23614d6bbf2b679bd4$4debb7e91f9a8b578a609d217208871f3c921739195a74213d2dc269ac3a0504b6b72455dd44a9a34a15f97759746af7f462829f3fb17b52c09a9cee1b91c26d"
     },
     {
       "id": "admin_c5ae1698-a7f9-4caf-807e-a7eabf8667c9",
@@ -17,9 +17,529 @@
       "phone": "",
       "area": "Ghaziabad, Uttar Pradesh",
       "passwordHash": "scrypt$16384$8$1$6e7b4a645cc5e9e648dbe3c9aae4744d$4fb85e962cfc386bfecacacdedf95e68f5f4d34c7808127a3e1e7f6d75768cdf3335b6edf0b84f8f356ab84ebb42db5a8c19002e35a0c729242149f18a09701f"
+    },
+    {
+      "id": "demo-tech-user-01",
+      "role": "technician",
+      "name": "Amit Verma",
+      "email": "demo.tech01@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$e3d5071dcd0a874b0ba39c3f06ff9448$66eb52df22dfe594640a77959b19f8ad2a0fc860e9b43952842b2c60f32fccbb3fc7b28b4aa5224bf075ea59b7dd95aa90aa706343b97b627e46e3b4589f1bd9",
+      "phone": "",
+      "area": "Indirapuram, Ghaziabad",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-02",
+      "role": "technician",
+      "name": "Ramesh Chauhan",
+      "email": "demo.tech02@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$06cdaf9910a94de8cdd1db57b28947a8$eb8af29562bbf5895c8afd73576429fbaebb1bc31b4a8f35feac3fbddb3f15c62dfb072728862dfebcf348c6e8046893c899b9bd52b6d3d26c325a695ea7f53c",
+      "phone": "",
+      "area": "Vaishali, Ghaziabad",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-03",
+      "role": "technician",
+      "name": "Sandeep Kumar",
+      "email": "demo.tech03@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$d2ef2dca1c0b5c48402d4d20af287c9d$667902754b2cb1a09405d9611e6f3d79b3611dcdc392cb727f228f94b0b8028a7018b7539b04c70dcddac98e5693fa7e4aaf290a7d9acc9ceaeaa9fc8990398a",
+      "phone": "",
+      "area": "Sector 62, Noida",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-04",
+      "role": "technician",
+      "name": "Prakash Singh",
+      "email": "demo.tech04@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$c7773ec29050d64b2da7b4a1274b3cd0$d575c3f07996faeeea0e308a7dde325c84efe4993daff4f3c986899bcbd472ab614c6271b1725f2cfe1fb3c80b6f9f975af4bec8513816c03238fcc1db9719d5",
+      "phone": "",
+      "area": "Crossings Republik, Ghaziabad",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-05",
+      "role": "technician",
+      "name": "Faizan Ali",
+      "email": "demo.tech05@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$b22c55a3bed2280f509fe518b3b52bd4$660bf40fe9b4d9fc384f4d4d3b1fbfd370509ac89818fd49a40dbf8ca331b91bd4c1f95c621b46380b5795f7ce67178f03dc1fa1cf3eddbbd090b66bf8865299",
+      "phone": "",
+      "area": "Vasundhara, Ghaziabad",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-06",
+      "role": "technician",
+      "name": "Rajesh Sharma",
+      "email": "demo.tech06@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$2286589d6546109bd2ec9fb45a817001$8e06df2f4921ca8238dd72cc3c194be51fe723c8f05069f9027c6d91451f5d83e3d46817f70a93296af4d75c398104fde16a0b1fb656de17090557b0341bad09",
+      "phone": "",
+      "area": "Sector 50, Noida",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-07",
+      "role": "technician",
+      "name": "Meena Kumari",
+      "email": "demo.tech07@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$75e967111f460ce36e34284ef42830a7$9fbc2b2176bb042a15186e0b75f2fb27ee398559be6d50ca15eeb7b895ce7ab1ef07940ece6348a846244c92e34cf6a3ea1c200fb98551aeb954525558880381",
+      "phone": "",
+      "area": "Kaushambi, Ghaziabad",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-08",
+      "role": "technician",
+      "name": "Karan Singh",
+      "email": "demo.tech08@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$beed013dd2d53844781385e4cd00a39d$6923c6969795eb5b66f787f0a14fdfbffe29e9afcea4b8ae45ba005f03b666873b75e30301144465d290373fb398661b58df7cd0da63e8a4afec078ccdb6b1c8",
+      "phone": "",
+      "area": "Sector 63, Noida",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-09",
+      "role": "technician",
+      "name": "Akash Gupta",
+      "email": "demo.tech09@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$3f4dba83c9b009e3f03ec1e6ee2c55e6$adbd491624dc98b41d728b37c7470c48a1cf262cabb6346883e42e29d0a581956f3d237c024ff85007a21e1fcfc1ad6765e5577af9a403b0b574a005746aafdf",
+      "phone": "",
+      "area": "Raj Nagar, Ghaziabad",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-10",
+      "role": "technician",
+      "name": "Irfan Khan",
+      "email": "demo.tech10@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$77df0ba55fd346a9c83604d33bfd0ff2$871066683e1d981ccaa747924536662cfae7851dfea937785696c3a6208d97574133a541ea596dd4b8a52c1092666ffe1b055ea1261650b540e116f0c7567699",
+      "phone": "",
+      "area": "Sector 18, Noida",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-11",
+      "role": "technician",
+      "name": "Mohit Yadav",
+      "email": "demo.tech11@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$9220a5b566a77c7a05b5f25d7fe5dbc0$b667a2218335e2d4a5ce73416cff714e711b66ed5aca389e90259b70de3033603c2b9566c87f756061000e98bb59dedac9c6761ba01d4ef5793af55966bcde5a",
+      "phone": "",
+      "area": "Sector 15, Noida",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-tech-user-12",
+      "role": "technician",
+      "name": "Nitin Rawat",
+      "email": "demo.tech12@nearfix.test",
+      "passwordHash": "scrypt$16384$8$1$4a3a72dec781aa348ad1c7fd13f8fb11$812b047163551143a760784ef9105aab43ebe1d213d8a36c5e594d36e30321fd232a957a27281ceaa60650dcfc3e84df979f16a0b0c07105d2cb8b11832dad33",
+      "phone": "",
+      "area": "Shipra Suncity, Ghaziabad",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-customer-user",
+      "role": "customer",
+      "name": "Demo Customer",
+      "email": "demo.customer@nearfix.test",
+      "phone": "",
+      "area": "Ghaziabad, Uttar Pradesh",
+      "passwordHash": "scrypt$16384$8$1$920f4a6f955e5602284238add5b3afb3$5c0a99311535bed2152233933feaaa4d2668a9ef49065f45a60771a63be929f2e7d5f0dc80a019ed0c2e4311b52fc84afa327cdd8cb29bf2c86b38b7819b0bf0",
+      "demoProfile": true
+    },
+    {
+      "id": "demo-admin-user",
+      "role": "admin",
+      "name": "Demo Administrator",
+      "email": "demo.admin@nearfix.test",
+      "phone": "",
+      "area": "All Areas",
+      "passwordHash": "scrypt$16384$8$1$fcbf36a0395ce6dccf063419b89da48b$ceeb2cc0a9913b427bd366787021546b52aa508ecf032ae1dae9216790e2a8c76562ae703910ff3329f8f9941c59d12c360b6da2e92653779c460b2fa3ec43e0",
+      "demoProfile": true
     }
   ],
-  "technicians": [],
+  "technicians": [
+    {
+      "id": 7101,
+      "userId": "demo-tech-user-01",
+      "name": "Amit Verma",
+      "service": "Electrician",
+      "category": "Electrical",
+      "area": "Indirapuram, Ghaziabad",
+      "exp": 7,
+      "rating": 4.8,
+      "reviews": 86,
+      "distance": 2.1,
+      "price": 349,
+      "available": true,
+      "response": 96,
+      "jobs": 214,
+      "eta": 18,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Home wiring",
+        "Switches and sockets",
+        "MCB repair"
+      ],
+      "upiId": "demo.tech01@nearfix",
+      "demoProfile": true,
+      "lat": 28.4700947,
+      "lng": 77.4934566,
+      "accuracy": 141,
+      "heading": 0,
+      "speed": 0,
+      "locationUpdatedAt": "2026-10-10T11:30:11.112Z",
+      "locationSource": "technician-gps"
+    },
+    {
+      "id": 7102,
+      "userId": "demo-tech-user-02",
+      "name": "Ramesh Chauhan",
+      "service": "Plumber",
+      "category": "Plumbing",
+      "area": "Vaishali, Ghaziabad",
+      "exp": 9,
+      "rating": 4.7,
+      "reviews": 112,
+      "distance": 3.4,
+      "price": 299,
+      "available": true,
+      "response": 94,
+      "jobs": 286,
+      "eta": 22,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Tap repair",
+        "Pipe leakage",
+        "Bathroom fittings"
+      ],
+      "upiId": "demo.tech02@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7103,
+      "userId": "demo-tech-user-03",
+      "name": "Sandeep Kumar",
+      "service": "AC Technician",
+      "category": "AC Repair",
+      "area": "Sector 62, Noida",
+      "exp": 8,
+      "rating": 4.9,
+      "reviews": 98,
+      "distance": 6.8,
+      "price": 499,
+      "available": true,
+      "response": 97,
+      "jobs": 241,
+      "eta": 30,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "AC servicing",
+        "Cooling issues",
+        "Installation"
+      ],
+      "upiId": "demo.tech03@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7104,
+      "userId": "demo-tech-user-04",
+      "name": "Prakash Singh",
+      "service": "Appliance Technician",
+      "category": "Appliance Repair",
+      "area": "Crossings Republik, Ghaziabad",
+      "exp": 6,
+      "rating": 4.8,
+      "reviews": 73,
+      "distance": 4.2,
+      "price": 399,
+      "available": true,
+      "response": 92,
+      "jobs": 167,
+      "eta": 25,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Mixer grinder",
+        "Washing machine",
+        "Refrigerator"
+      ],
+      "upiId": "demo.tech04@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7105,
+      "userId": "demo-tech-user-05",
+      "name": "Faizan Ali",
+      "service": "Carpenter",
+      "category": "Carpentry",
+      "area": "Vasundhara, Ghaziabad",
+      "exp": 10,
+      "rating": 4.9,
+      "reviews": 134,
+      "distance": 3.8,
+      "price": 449,
+      "available": true,
+      "response": 95,
+      "jobs": 302,
+      "eta": 24,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Furniture repair",
+        "Door fitting",
+        "Cabinet work"
+      ],
+      "upiId": "demo.tech05@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7106,
+      "userId": "demo-tech-user-06",
+      "name": "Rajesh Sharma",
+      "service": "Painter",
+      "category": "Painting",
+      "area": "Sector 50, Noida",
+      "exp": 12,
+      "rating": 4.6,
+      "reviews": 65,
+      "distance": 7.6,
+      "price": 549,
+      "available": false,
+      "response": 88,
+      "jobs": 193,
+      "eta": 40,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Interior painting",
+        "Wall preparation",
+        "Waterproof coating"
+      ],
+      "upiId": "demo.tech06@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7107,
+      "userId": "demo-tech-user-07",
+      "name": "Meena Kumari",
+      "service": "Cleaning Expert",
+      "category": "Cleaning",
+      "area": "Kaushambi, Ghaziabad",
+      "exp": 5,
+      "rating": 4.8,
+      "reviews": 91,
+      "distance": 2.7,
+      "price": 299,
+      "available": true,
+      "response": 98,
+      "jobs": 228,
+      "eta": 20,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Deep cleaning",
+        "Kitchen cleaning",
+        "Bathroom cleaning"
+      ],
+      "upiId": "demo.tech07@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7108,
+      "userId": "demo-tech-user-08",
+      "name": "Karan Singh",
+      "service": "Computer Technician",
+      "category": "Computer Repair",
+      "area": "Sector 63, Noida",
+      "exp": 7,
+      "rating": 4.7,
+      "reviews": 58,
+      "distance": 7.2,
+      "price": 399,
+      "available": true,
+      "response": 91,
+      "jobs": 142,
+      "eta": 35,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Laptop repair",
+        "Wi-Fi setup",
+        "Software troubleshooting"
+      ],
+      "upiId": "demo.tech08@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7109,
+      "userId": "demo-tech-user-09",
+      "name": "Akash Gupta",
+      "service": "Mobile Technician",
+      "category": "Mobile Repair",
+      "area": "Raj Nagar, Ghaziabad",
+      "exp": 4,
+      "rating": 4.6,
+      "reviews": 49,
+      "distance": 5.1,
+      "price": 299,
+      "available": true,
+      "response": 90,
+      "jobs": 118,
+      "eta": 28,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Screen replacement",
+        "Charging repair",
+        "Phone diagnostics"
+      ],
+      "upiId": "demo.tech09@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7110,
+      "userId": "demo-tech-user-10",
+      "name": "Irfan Khan",
+      "service": "Locksmith",
+      "category": "Locksmith",
+      "area": "Sector 18, Noida",
+      "exp": 11,
+      "rating": 4.8,
+      "reviews": 77,
+      "distance": 8.4,
+      "price": 349,
+      "available": false,
+      "response": 89,
+      "jobs": 205,
+      "eta": 45,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Door locks",
+        "Lock replacement",
+        "Emergency opening"
+      ],
+      "upiId": "demo.tech10@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7111,
+      "userId": "demo-tech-user-11",
+      "name": "Mohit Yadav",
+      "service": "Vehicle Mechanic",
+      "category": "Mechanic",
+      "area": "Sector 15, Noida",
+      "exp": 8,
+      "rating": 4.7,
+      "reviews": 83,
+      "distance": 8.1,
+      "price": 499,
+      "available": true,
+      "response": 93,
+      "jobs": 176,
+      "eta": 38,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Two-wheeler repair",
+        "Battery check",
+        "Basic servicing"
+      ],
+      "upiId": "demo.tech11@nearfix",
+      "demoProfile": true
+    },
+    {
+      "id": 7112,
+      "userId": "demo-tech-user-12",
+      "name": "Nitin Rawat",
+      "service": "Handyman",
+      "category": "General Repair",
+      "area": "Shipra Suncity, Ghaziabad",
+      "exp": 6,
+      "rating": 4.5,
+      "reviews": 42,
+      "distance": 3.2,
+      "price": 299,
+      "available": true,
+      "response": 87,
+      "jobs": 105,
+      "eta": 23,
+      "completionRate": 96,
+      "cancellationRate": 2,
+      "repeatCustomers": 18,
+      "verified": true,
+      "identityVerified": false,
+      "skillVerified": false,
+      "experienceVerified": false,
+      "skills": [
+        "Minor home repairs",
+        "Fixture installation",
+        "Assembly"
+      ],
+      "upiId": "demo.tech12@nearfix",
+      "demoProfile": true
+    }
+  ],
   "services": [
     {
       "id": "s1",
@@ -130,13 +650,171 @@
       "baseMax": 1500
     }
   ],
-  "bookings": [],
+  "bookings": [
+    {
+      "id": 1791630995376,
+      "customerId": "demo-customer-user",
+      "technicianId": 7101,
+      "service": "Electrical",
+      "problem": "wiring in home",
+      "file": "",
+      "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+      "latitude": 28.47024015,
+      "longitude": 77.49381745,
+      "date": "2026-10-11",
+      "time": "5:00 PM – 6:00 PM",
+      "budget": 500,
+      "status": "IN_PROGRESS",
+      "urgent": false,
+      "estimate": 400,
+      "estimateRange": {
+        "service": "Electrical",
+        "labour": {
+          "min": 140,
+          "max": 990
+        },
+        "parts": {
+          "min": 260,
+          "max": 1170
+        },
+        "inspectionFee": 99,
+        "min": 400,
+        "max": 1800,
+        "location": "KCC Institute, APJ Abdul Kalam Road, Knowledge Park III, Shafipur, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh, 201310, India",
+        "urgent": false,
+        "platformFeePercent": 0,
+        "disclaimer": "NearFix shows a range before booking. Final charges must be itemized and approved; catalog parts use shared reference prices and no hidden platform fee is added.",
+        "selectedTechnicianStartingPrice": 374,
+        "distanceFee": 25,
+        "selectedTechnicianId": 7101
+      },
+      "createdAt": "2026-10-10T11:16:35.376Z",
+      "statusHistory": [
+        {
+          "status": "REQUESTED",
+          "at": "2026-10-10T11:16:35.376Z",
+          "by": "demo-customer-user"
+        },
+        {
+          "status": "ACCEPTED",
+          "at": "2026-10-10T11:16:50.910Z",
+          "by": "demo-tech-user-01"
+        },
+        {
+          "status": "ON_THE_WAY",
+          "at": "2026-10-10T11:17:06.743Z",
+          "by": "demo-tech-user-01"
+        },
+        {
+          "status": "ARRIVED",
+          "at": "2026-10-10T11:17:19.960Z",
+          "by": "demo-tech-user-01"
+        },
+        {
+          "status": "INSPECTION",
+          "at": "2026-10-10T11:17:41.208Z",
+          "by": "demo-tech-user-01",
+          "via": "ARRIVAL_OTP"
+        },
+        {
+          "status": "IN_PROGRESS",
+          "at": "2026-10-10T11:18:19.184Z",
+          "by": "demo-tech-user-01"
+        }
+      ],
+      "paymentStatus": "PENDING",
+      "media": [],
+      "workVerification": {
+        "status": "PENDING",
+        "notes": "Waiting for service evidence and admin review."
+      },
+      "cancellation": null,
+      "arrivalVerification": {
+        "status": "VERIFIED",
+        "verifiedAt": "2026-10-10T11:17:41.207Z",
+        "verifiedBy": "demo-tech-user-01"
+      }
+    }
+  ],
   "quotes": [],
   "payments": [],
   "invoices": [],
   "reviews": [],
   "messages": [],
-  "notifications": [],
+  "notifications": [
+    {
+      "id": "n_6dff1b03-69c4-4912-9c3f-903ee9be41a1",
+      "userId": "demo-customer-user",
+      "text": "Booking #995376 is now IN_PROGRESS.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:18:19.184Z"
+    },
+    {
+      "id": "n_ec8f4b41-c35d-47db-bfbd-48500b83f0db",
+      "userId": "demo-tech-user-01",
+      "text": "Customer arrival OTP verified for booking #995376.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:17:41.208Z"
+    },
+    {
+      "id": "n_dd9d1a12-7ea1-4e72-a9fb-b5e13c552f4e",
+      "userId": "demo-customer-user",
+      "text": "Arrival verified for booking #995376. Service inspection can now begin.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:17:41.208Z"
+    },
+    {
+      "id": "n_f41e18e7-5800-45d2-9658-a7e951bcb1da",
+      "userId": "demo-customer-user",
+      "text": "Booking #995376 is now ARRIVED.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:17:19.960Z"
+    },
+    {
+      "id": "n_eb2089da-da68-49c7-ac22-cc79b8c2cc3e",
+      "userId": "demo-customer-user",
+      "text": "Technician has arrived. Your arrival OTP for booking #995376 is 860079.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:17:19.960Z"
+    },
+    {
+      "id": "n_15147109-22e6-4888-8ca0-f3030eafe1cb",
+      "userId": "demo-customer-user",
+      "text": "Booking #995376 is now ON_THE_WAY.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:17:06.743Z"
+    },
+    {
+      "id": "n_f9d5acab-0f2b-4e74-9489-aa6d173755f8",
+      "userId": "demo-customer-user",
+      "text": "Booking #995376 is now ACCEPTED.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:16:50.910Z"
+    },
+    {
+      "id": "n_bf17d5b9-8285-4bbd-8a83-ebf68afc6519",
+      "userId": "demo-tech-user-01",
+      "text": "New Electrical request from Demo Customer.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:16:35.377Z"
+    },
+    {
+      "id": "n_6ca605e7-2053-42be-8078-a635a656d9d6",
+      "userId": "demo-customer-user",
+      "text": "Booking request sent to Amit Verma.",
+      "read": false,
+      "time": "Just now",
+      "createdAt": "2026-10-10T11:16:35.377Z"
+    }
+  ],
   "disputes": [],
   "verifications": [],
   "aiAnalyses": [],
@@ -151,6 +829,202 @@
         "area": "Ghaziabad, Uttar Pradesh"
       },
       "createdAt": "2026-09-22T15:28:57.037Z"
+    },
+    {
+      "id": "audit_37bb7614-f53c-4a70-ac4c-dba95d6da054",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7101",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:08:49.559Z"
+    },
+    {
+      "id": "audit_575c660c-14a7-4041-8cef-c3982b85b956",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7103",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:08:51.626Z"
+    },
+    {
+      "id": "audit_58eceef4-d6d3-4815-bd90-f43f79153c04",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7104",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:08:52.718Z"
+    },
+    {
+      "id": "audit_63cc4ce4-08c9-4389-a9db-c3790ebcbb6f",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7102",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:08:56.463Z"
+    },
+    {
+      "id": "audit_22245b34-39a4-4dd0-8f48-e7586882dfb2",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7105",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:08:57.994Z"
+    },
+    {
+      "id": "audit_c9ddb854-c8ac-4b98-9ed5-43104460a49d",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7106",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:09:08.141Z"
+    },
+    {
+      "id": "audit_49006a4b-2ebd-41f0-a906-9cd1d8d25a57",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7107",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:09:09.934Z"
+    },
+    {
+      "id": "audit_9e000ab5-f637-4239-90ff-03f1d7ec6139",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7108",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:09:15.079Z"
+    },
+    {
+      "id": "audit_66a2e2c7-ad20-4061-9d9c-054eaf400045",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7109",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:09:16.164Z"
+    },
+    {
+      "id": "audit_8d0ead84-5a5f-40f8-a0d4-ad8f1c9f2274",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7110",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:09:17.576Z"
+    },
+    {
+      "id": "audit_dc6ae28a-bdad-4ef9-8b71-1be6f0e38c98",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7111",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:09:18.834Z"
+    },
+    {
+      "id": "audit_682cd0b2-c74b-4c32-9e2d-df2290453ba2",
+      "actorId": "demo-admin-user",
+      "action": "VERIFY",
+      "entity": "Technician",
+      "entityId": "7112",
+      "meta": {
+        "verified": true
+      },
+      "createdAt": "2026-10-10T11:09:21.086Z"
+    },
+    {
+      "id": "audit_1e2c63b3-bd0e-4d15-9ab3-15f36fa1e605",
+      "actorId": "demo-customer-user",
+      "action": "CREATE",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "technicianId": 7101
+      },
+      "createdAt": "2026-10-10T11:16:35.377Z"
+    },
+    {
+      "id": "audit_666c01e4-f4fe-4869-a79d-146a00c5f031",
+      "actorId": "demo-tech-user-01",
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "status": "ACCEPTED"
+      },
+      "createdAt": "2026-10-10T11:16:50.910Z"
+    },
+    {
+      "id": "audit_9762f461-d343-4e4b-8aa0-e240632f3726",
+      "actorId": "demo-tech-user-01",
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "status": "ON_THE_WAY"
+      },
+      "createdAt": "2026-10-10T11:17:06.743Z"
+    },
+    {
+      "id": "audit_0027251b-acc5-4d88-b23b-e9f5e885b4c9",
+      "actorId": "demo-tech-user-01",
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "status": "ARRIVED"
+      },
+      "createdAt": "2026-10-10T11:17:19.960Z"
+    },
+    {
+      "id": "audit_b5e7d6fd-2f27-4221-9f75-2c3966744c3d",
+      "actorId": "demo-tech-user-01",
+      "action": "VERIFY_ARRIVAL_OTP",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {},
+      "createdAt": "2026-10-10T11:17:41.208Z"
+    },
+    {
+      "id": "audit_8371c9dd-675b-4a02-acc1-9b763a09479e",
+      "actorId": "demo-tech-user-01",
+      "action": "STATUS_UPDATE",
+      "entity": "Booking",
+      "entityId": 1791630995376,
+      "meta": {
+        "status": "IN_PROGRESS"
+      },
+      "createdAt": "2026-10-10T11:18:19.184Z"
     }
   ],
   "pricingRules": [],

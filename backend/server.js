@@ -26,6 +26,23 @@ const SQL_PERSISTENCE_ENABLED = Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KE
 const OTP_TTL_MS = 5 * 60 * 1000;
 const OTP_RESEND_MS = 30 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
+// Keep the public AI guide useful without an account while limiting anonymous API usage.
+const guestAiBuckets = new Map();
+
+function allowGuestAiChat(req){
+  const ip=String(req.socket?.remoteAddress||'unknown');
+  const nowMs=Date.now();
+  let bucket=guestAiBuckets.get(ip);
+  if(!bucket||nowMs-bucket.windowStart>=60_000) bucket={windowStart:nowMs,count:0};
+  bucket.count+=1;
+  guestAiBuckets.set(ip,bucket);
+  if(guestAiBuckets.size>1000){
+    for(const [key,item] of guestAiBuckets){
+      if(nowMs-item.windowStart>=60_000) guestAiBuckets.delete(key);
+    }
+  }
+  return bucket.count<=6;
+}
 
 const mime = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -399,7 +416,7 @@ function analyzeProblem(data,problem,service,urgent=false){
 function detectCustomerLanguage(message){
   const text=String(message||'');
   if(/[\u0900-\u097F]/.test(text)) return 'Hindi';
-  if(/\b(hai|hain|hoon|nahi|nahin|kya|kaise|mera|meri|mujhe|chahiye|karna|kar|yeh|iska|isse|bhejo|batao)\b/i.test(text)) return 'Hinglish';
+  if(/\b(hai|hain|hoon|h|ho|gya|gaya|gayi|kharab|khrab|nahi|nahin|kya|kaise|mera|meri|mujhe|chahiye|karna|kar|kr+|rha|rhe|rhi|rhh?|yeh|iska|isse|bhejo|batao)\b/i.test(text)) return 'Hinglish';
   return 'English';
 }
 function localChatReply(service,language){
@@ -415,10 +432,11 @@ async function tinyFishRepairResearch(service,problem){
   if(!TINYFISH_API_KEY) throw new Error('TinyFish is not configured.');
   const {TinyFish}=await import('@tiny-fish/sdk');
   const client=new TinyFish({apiKey:TINYFISH_API_KEY});
-  const query=encodeURIComponent(`${service} repair ${String(problem||'').slice(0,180)}`);
+  const availableServices=SERVICES.map(item=>item[1]).join(', ');
+  const query=encodeURIComponent(`${String(problem||'').slice(0,180)} home repair service`);
   const stream=await client.agent.stream({
     url:`https://www.wikihow.com/wikiHowTo?search=${query}`,
-    goal:`Research the repair issue for a NearFix home-service customer. Service: ${service}. Customer description: ${String(problem||'').slice(0,500)}. Detect the language used in the customer description and write all customer-facing text in that same language. If the customer writes Hindi in Latin letters, reply in Hinglish using Latin letters; if they write Hindi in Devanagari, reply in Devanagari Hindi. Keep JSON keys, service taxonomy, technician skill names, and urgency enum values in English so the app can use them. Find relevant repair guidance and return a JSON object with keys summary (one short paragraph describing relevant symptoms), possibleCauses (array of up to three possibilities), requiredSkill (professional technician type), urgency (Low, Medium, or High), recommendedNextAction (safe next step). Do not give dangerous DIY instructions or tell the customer to open electrical, gas, or appliance equipment. If unsure, say that a professional inspection is needed in the customer's language.`
+    goal:`Help a NearFix home-service customer with the actual problem they described. The initial service guess is ${service}, but treat the customer's description as the source of truth and correct the service when needed. Choose the closest service from this list: ${availableServices}. Customer description: ${String(problem||'').slice(0,500)}. First identify what is broken and its symptoms, then answer about that specific issue; do not give unrelated plumbing or electrical advice. Detect the language used in the customer description and write all customer-facing text in that same language. If the customer writes Hindi in Latin letters, reply in Hinglish using Latin letters; if they write Hindi in Devanagari, reply in Devanagari Hindi. Keep JSON keys, service taxonomy, technician skill names, and urgency enum values in English so the app can use them. Research only guidance that matches the described problem. Return a JSON object with keys service (one exact service name from the list), summary (one short paragraph specific to this problem), possibleCauses (array of up to three relevant possibilities), requiredSkill (professional technician type), urgency (Low, Medium, or High), recommendedNextAction (safe next step). Do not give dangerous DIY instructions or tell the customer to open electrical, gas, or appliance equipment. If unsure, ask one focused follow-up question in the customer's language instead of guessing.`
   });
   for await(const event of stream){
     if(event.type==='FAILED'||event.type==='ERROR') throw new Error('TinyFish agent could not complete the repair research.');
@@ -637,28 +655,35 @@ async function api(req,res,url){
     const row={id:id('ai'),userId:me.id,type:'problem',input:b.problem,result,createdAt:now()}; data.aiAnalyses.push(row); audit(data,me,'AI_ANALYZE','AIAnalysis',row.id); await savePersistent(data); return json(res,200,{success:true,analysis:result,analysisId:row.id});
   }
   if(req.method==='POST'&&url.pathname==='/api/ai/chat'){
-    if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});
+    if(!me&&!allowGuestAiChat(req)) return json(res,429,{success:false,message:'Please wait a minute before sending another AI request.',code:'RATE_LIMITED'});
     const b=await readBody(req); const message=String(b.message||'').trim();
     if(!message) return json(res,400,{success:false,message:'Message is required',code:'VALIDATION'});
     let reply='Tell me the appliance/service, the exact symptom and whether it is urgent. I can help you choose the right skill and find nearby technicians.'; let service='General Repair'; const text=message.toLowerCase();
     if(/ac|air conditioner|cooling|compressor|gas|एसी|एयर कंडीशनर|ठंडा|कूलिंग/.test(text)){service='AC Repair';reply='This sounds like an AC issue. If water is leaking or the unit is sparking, switch it off safely and avoid opening electrical panels. I recommend an AC technician and a photo/video with the request.';}
-    else if(/pipe|tap|water|leak|drain|plumb|पानी|लीक|नल|पाइप|टपक/.test(text)){service='Plumbing';reply='This looks like a plumbing issue. If water is actively leaking, close the nearest isolation valve if safe. NearFix can show plumbers within your chosen radius and transparent starting prices.';}
-    else if(/switch|spark|wire|electric|fan|socket|mcb|बिजली|स्विच|चिंगारी|तार|पंखा|सॉकेट/.test(text)){service='Electrical';reply='This appears electrical. If there are sparks, burning smell or exposed wires, switch off the affected circuit if safe. Do not touch live wiring; choose a verified electrician.';}
+    else if(/switch|spark|wire|wiring|current|electric|fan|socket|mcb|बिजली|स्विच|चिंगारी|तार|पंखा|सॉकेट/.test(text)){service='Electrical';reply='This appears electrical. If there are sparks, burning smell or exposed wires, switch off the affected circuit if safe. Do not touch live wiring; choose a verified electrician.';}
+    else if(/pipe|tap|nal|water|leak|drain|plumb|पानी|लीक|नल|पाइप|टपक/.test(text)){service='Plumbing';reply='This looks like a plumbing issue. If water is actively leaking, close the nearest isolation valve if safe. NearFix can show plumbers within your chosen radius and transparent starting prices.';}
     else if(/washing|fridge|microwave|appliance|फ्रिज|वॉशिंग|माइक्रोवेव|उपकरण/.test(text)){service='Appliance Repair';reply='This sounds like an appliance repair. Share a clear photo/video and model number if available so the technician can prepare before arriving.';}
     else if(/laptop|computer|wifi|network|pc|printer/.test(text)){service='Computer Repair';reply='This appears to be a computer/network issue. Never share passwords, PINs or OTPs. A computer technician can inspect the device and quote after diagnosis.';}
     else if(/mobile|phone|screen|charging/.test(text)){service='Mobile Repair';reply='This sounds like a mobile repair. Tell me the model and symptom, then NearFix can show nearby mobile technicians and reference parts pricing.';}
     reply=localChatReply(service,detectCustomerLanguage(message))||reply;
     const local={reply,service,mode:'local-smart-assistant',suggestedAction:`Find ${service} technicians near your live location.`};
+    if(service==='Plumbing'&&detectCustomerLanguage(message)==='Hinglish') local.reply='Yeh nal/plumbing repair ka issue lag raha hai. Kya nal se paani leak ho raha hai, ya nal khul-band nahi ho raha? Agar leak ho aur safe ho, to valve band kar dein. Main nearby plumber dhoondhne mein help karunga.';
     if(TINYFISH_API_KEY){
       try{
         const research=await tinyFishRepairResearch(service,message);
+        const correctedService=data.services.find(item=>item.active&&item.name.toLowerCase()===String(research.service||'').trim().toLowerCase());
+        if(correctedService) service=correctedService.name;
+        local.service=service;
+        local.suggestedAction=`Find ${service} technicians near your live location.`;
         local.reply=String(research.summary||reply);
         if(Array.isArray(research.possibleCauses)&&research.possibleCauses.length) local.reply+=` Likely checks include: ${research.possibleCauses.slice(0,3).join('; ')}.`;
         if(research.recommendedNextAction) local.reply+=` ${research.recommendedNextAction}`;
         local.mode='tinyfish-agent';
-      }catch(error){console.error('TinyFish chat lookup failed:',error.message);}
+      }catch(error){console.error('TinyFish chat lookup failed:',error.message);local.mode='tinyfish-unavailable';}
     }
-    data.aiAnalyses.push({id:id('ai'),userId:me.id,type:'chat',input:message,result:local,createdAt:now()}); await savePersistent(data); return json(res,200,{success:true,...local});
+    // Store chat history for signed-in customers; guest prompts stay ephemeral.
+    if(me){data.aiAnalyses.push({id:id('ai'),userId:me.id,type:'chat',input:message,result:local,createdAt:now()}); await savePersistent(data);}
+    return json(res,200,{success:true,...local});
   }
 
   if(req.method==='POST'&&url.pathname==='/api/ai/estimate-price'){

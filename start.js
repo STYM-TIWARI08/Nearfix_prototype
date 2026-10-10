@@ -20,6 +20,7 @@ const backend = spawn(process.execPath, [path.join(__dirname, 'backend', 'server
 });
 
 let opened = false;
+let outputBuffer = '';
 function openBrowser(url) {
   if (opened) return;
   opened = true;
@@ -31,16 +32,31 @@ function openBrowser(url) {
 function check(port, tries = 0) {
   if (tries > 15 || opened) return;
   const req = http.get({host:'127.0.0.1', port, path:'/api/health', timeout:300}, res => {
-    res.resume();
-    if (res.statusCode === 200) return openBrowser(`http://localhost:${port}`);
-    setTimeout(() => check(port + 1, tries + 1), 150);
+    let body='';
+    res.setEncoding('utf8');
+    res.on('data',chunk=>body+=chunk);
+    res.on('end',()=>{
+      let health={};
+      try{health=JSON.parse(body);}catch{}
+      // When a key is configured, skip stale demo servers that still answer on an older port.
+      const hasAgent=health.mode==='tinyfish-agent';
+      if(res.statusCode===200&&(hasAgent||!process.env.TINYFISH_API_KEY)) return openBrowser(`http://localhost:${port}`);
+      setTimeout(() => check(port + 1, tries + 1), 150);
+    });
   });
   req.on('error', () => setTimeout(() => check(port + 1, tries + 1), 150));
   req.on('timeout', () => { req.destroy(); setTimeout(() => check(port + 1, tries + 1), 150); });
 }
-backend.stdout.on('data', chunk => { process.stdout.write(chunk); check(startPort); });
+backend.stdout.on('data', chunk => {
+  const output=String(chunk);
+  process.stdout.write(output);
+  outputBuffer+=output;
+  // The backend may move to the next free port when an older copy is still running.
+  // Open the port this child actually claimed instead of whichever old server answers first.
+  const match=outputBuffer.match(/NearFix API \+ web running at http:\/\/0\.0\.0\.0:(\d+)/);
+  if(match) check(Number(match[1]));
+});
 backend.stderr.on('data', chunk => process.stderr.write(chunk));
 backend.on('exit', code => process.exit(code ?? 0));
-setTimeout(() => check(startPort), 300);
 process.on('SIGINT', () => backend.kill('SIGINT'));
 process.on('SIGTERM', () => backend.kill('SIGTERM'));

@@ -34,31 +34,27 @@ NearFix is a single-project, single-command hackathon/business demo that connect
 
 ## Run once
 
-Requirements: Node.js 18+ and VS Code.
+Requirements: Node.js 18+ and VS Code. Install the packages once after extracting the ZIP:
 
 ```bash
+npm install
 npm start
 ```
 
-That is the only development command you need after extracting the ZIP. `start.js` launches the backend, checks health, automatically finds the next free port if 5000 is busy, and opens the browser.
+Run both commands from the extracted project folder (the folder containing `package.json`). `start.js` launches the backend, checks health, automatically finds the next free port if 5050 is busy, and opens the browser. If it does not open a tab automatically, copy the `NearFix is ready` URL printed in the terminal into your browser.
 
-No frontend/backend terminals need to be started separately. No `npm install` is required because this local package intentionally uses Node built-ins and the existing static frontend.
+You do not need to start a separate frontend server. The backend serves the website and API together.
 
 ## Demo accounts
 
-Customer
-- Email: `customer@nearfix.demo`
-- Password: `demo123`
+Use the **Explore the demo** buttons on the login screen, or use these credentials:
 
-Technician
-- Email: `technician@nearfix.demo`
-- Password: `demo123`
+- Customer: `demo.customer@nearfix.test`
+- Technician: `demo.tech01@nearfix.test` (12 demo technicians are available)
+- Admin: `demo.admin@nearfix.test`
+- Shared password: `NearFixDemo26!`
 
-Admin
-- Email: `admin@nearfix.demo`
-- Password: `demo123`
-
-Additional seeded technician accounts all use `demo123`, for example `vikas@nearfix.demo`, `amit@nearfix.demo`, `pankaj@nearfix.demo` and `sahil@nearfix.demo`.
+Seed or restore these accounts with `node scripts/seed-demo-technicians.js` if you reset the database.
 
 ## Hackathon demo journey
 
