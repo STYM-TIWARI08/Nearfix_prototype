@@ -90,10 +90,8 @@ function removeApplicationCredentials(data){
     if(Object.prototype.hasOwnProperty.call(user,'password')){delete user.password;changed=true;}
     if(Object.prototype.hasOwnProperty.call(user,'passwordHash')){delete user.passwordHash;changed=true;}
   }
-  for(const booking of data.bookings||[]){
-    const verification=booking.arrivalVerification;
-    if(verification?.otp){delete verification.otp;verification.status='EXPIRED';changed=true;}
-  }
+  // Arrival OTPs must remain in server-side state until verified or expired.
+  // bookingView only returns the plain code to its owning customer.
   return changed;
 }
 

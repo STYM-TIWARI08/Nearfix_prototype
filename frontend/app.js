@@ -3739,6 +3739,21 @@ async function hydrateServer(){
 
 let serverSyncTimer=null;
 let activeBookingDetailsId=null;
+function bookingDetailsSyncState(b){
+  return JSON.stringify({
+    status:b.status,
+    arrivalStatus:b.arrivalVerification?.status||null,
+    arrivalOtp:b.arrivalVerification?.otp||null,
+    arrivalExpiresAt:b.arrivalVerification?.expiresAt||null,
+    quoteStatus:b.quote?.status||null,
+    quoteTotal:b.quote?.total||null,
+    paymentStatus:b.paymentStatus||null,
+    mediaCount:Array.isArray(b.media)?b.media.length:0,
+    technicianLat:b.technician?.lat??null,
+    technicianLng:b.technician?.lng??null,
+    technicianLocationUpdatedAt:b.technician?.locationUpdatedAt||null
+  });
+}
 function startServerSync(){
   if(serverSyncTimer) clearInterval(serverSyncTimer);
   serverSyncTimer=setInterval(async()=>{
@@ -3746,7 +3761,19 @@ function startServerSync(){
     try {
       const payload=await nfFetch('/api/bootstrap');
       applyServerState(payload);
-      // Don't replace an open dialog: doing so resets scroll and clears file inputs mid-upload.
+      // Keep an open booking panel in sync, while preserving its scroll position.
+      const detailsPanel=modal().querySelector('[data-booking-details]');
+      if(detailsPanel){
+        const latest=db.bookings.find(b=>String(b.id)===String(activeBookingDetailsId));
+        if(latest&&detailsPanel.dataset.bookingState!==bookingDetailsSyncState(latest)){
+          const scrollTop=detailsPanel.scrollTop;
+          await window.bookingDetails(activeBookingDetailsId);
+          const refreshed=modal().querySelector('[data-booking-details]');
+          if(refreshed)refreshed.scrollTop=scrollTop;
+        }
+        return;
+      }
+      // Don't replace other dialogs: that could reset OTP input or an upload in progress.
       if(document.querySelector('.modal-box')) return;
       if(['customer','technician','admin','bookings'].includes(state.route)) render();
     } catch(e){}
@@ -4119,7 +4146,7 @@ bookingDetails = async function(id){
   const canCancelCustomer=role==='customer' && !['Completed','Cancelled','Service started','Inspection','Awaiting approval'].includes(b.status);
   const canCancelTech=role==='technician' && ['Requested','Accepted','On the way','Arrived'].includes(b.status);
   const evidence=media.map(m=>`<div class="evidence-card"><img src="${esc(m.data)}" alt="${esc(m.name||'Evidence')}" loading="lazy"><div><b>${esc(m.type)}</b><small>${esc(m.name||'Evidence')} · ${esc(m.uploadedRole||'user')}</small></div></div>`).join('');
-  modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box wide">
+  modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box wide" data-booking-details="${esc(id)}" data-booking-state="${esc(bookingDetailsSyncState(b))}">
     <div class="modal-head"><div><span class="eyebrow">SERVICE CONTROL · #${String(id).slice(-6)}</span><h2>${esc(b.service)}</h2><p class="muted">${esc(b.date||'')} · ${esc(b.time||'')} · ${esc(b.location||'Location not shared')}</p></div><button class="close" onclick="closeModal()">×</button></div>
     <div class="status-banner"><span class="status">${esc(b.status)}</span><b>${money(b.total||b.estimate||0)}</b></div><div class="payment-status-strip"><span>💳 Payment: <b>${esc(b.paymentStatus||'PENDING')}</b></span>${b.payment?.method?`<span>Method: <b>${esc(b.payment.method)}</b></span>`:''}${b.payment?.transactionId?`<span>Txn: <b>${esc(b.payment.transactionId)}</b></span>`:''}${b.invoice?.number?`<span>Invoice: <b>${esc(b.invoice.number)}</b></span>`:''}</div>
     <div class="trust-strip"><span>💰 Transparent quote: <b>${quote?'Itemized':'Pending inspection'}</b></span><span>📍 GPS: <b>${b.latitude&&b.longitude?'Captured':'Address only'}</b></span></div>
