@@ -755,6 +755,17 @@ async function api(req,res,url){
     return json(res,200,{success:true,message:'Arrival verified. You can now start the inspection.',booking:bookingView(data,booking,me)});
   }
   const arrivalGetMatch=url.pathname.match(/^\/api\/bookings\/([^/]+)\/arrival-verification$/);
+  if(arrivalGetMatch&&req.method==='POST'){
+    if(!me||me.role!=='customer') return json(res,403,{success:false,message:'Customer access required',code:'FORBIDDEN'});
+    const booking=data.bookings.find(x=>String(x.id)===String(arrivalGetMatch[1]));
+    if(!booking||String(booking.customerId)!==String(me.id)) return json(res,404,{success:false,message:'Booking not found',code:'NOT_FOUND'});
+    if(booking.status!=='ARRIVED') return json(res,409,{success:false,message:'The in-app code is available after the technician marks arrival.',code:'ARRIVAL_OTP_STAGE'});
+    const otp=otpCode();
+    const expiresAt=new Date(Date.now()+OTP_TTL_MS).toISOString();
+    booking.arrivalVerification={status:'PENDING',sentAt:now(),expiresAt,otp,otpHash:crypto.createHash('sha256').update(otp).digest('hex'),attempts:0,deliveryMode:'IN_APP'};
+    await savePersistent(data);
+    return json(res,200,{success:true,status:'PENDING',otp,expiresAt});
+  }
   if(arrivalGetMatch&&req.method==='GET'){
     if(!me) return json(res,401,{success:false,message:'Unauthorized',code:'UNAUTHORIZED'});
     const booking=data.bookings.find(x=>String(x.id)===String(arrivalGetMatch[1]));
