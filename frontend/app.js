@@ -3739,6 +3739,8 @@ let serverSyncInFlight=false;
 let serverSyncKnownBookings=new Map();
 let serverSyncPrimed=false;
 let serverSyncVisibilityBound=false;
+// Avoid rebuilding the entire page on unchanged background polling responses.
+let serverSyncLastRenderSignature=null;
 function bookingDetailsSyncState(b){
   return JSON.stringify({
     status:b.status,
@@ -3758,6 +3760,7 @@ function startServerSync(){
   if(serverSyncTimer) clearInterval(serverSyncTimer);
   serverSyncKnownBookings=new Map(db.bookings.map(b=>[String(b.id),b]));
   serverSyncPrimed=false;
+  serverSyncLastRenderSignature=null;
   const syncNow=async()=>{
     if(serverSyncInFlight||!nfToken||!['customer','technician','admin'].includes(currentUser()?.role)) return;
     serverSyncInFlight=true;
@@ -3794,15 +3797,29 @@ function startServerSync(){
       }
       // Don't replace other dialogs: that could reset OTP input or an upload in progress.
       if(document.querySelector('.modal-box')) return;
-      if(['customer','technician','admin','bookings','find','parts'].includes(state.route)) render();
+      if(['customer','technician','admin','bookings','find','parts'].includes(state.route)){
+        // Preserve the existing 1-second live sync, but only repaint when
+        // visible booking information changes. This keeps buttons responsive.
+        const signature=JSON.stringify(db.bookings.map(b=>[String(b.id),bookingDetailsSyncState(b)]));
+        if(signature===serverSyncLastRenderSignature) return;
+        serverSyncLastRenderSignature=signature;
+        const focused=document.activeElement;
+        const editing=focused&&['INPUT','TEXTAREA','SELECT'].includes(focused.tagName)&&!focused.disabled;
+        if(!editing) render();
+      }
     } catch(e){} finally { serverSyncInFlight=false; }
   };
   void syncNow();
-  serverSyncTimer=setInterval(syncNow,3000);
+  // Check for new jobs and status changes automatically, without page reload.
+  serverSyncTimer=setInterval(()=>{
+    if(document.visibilityState!=='hidden') void syncNow();
+  },1000);
   if(!serverSyncVisibilityBound){
     document.addEventListener('visibilitychange',()=>{
       if(document.visibilityState==='visible') void syncNow();
     });
+    window.addEventListener('focus',()=>void syncNow());
+    window.addEventListener('online',()=>void syncNow());
     serverSyncVisibilityBound=true;
   }
 }
@@ -4181,8 +4198,8 @@ bookingDetails = async function(id){
   activeBookingDetailsId=id;
   const b=db.bookings.find(x=>String(x.id)===String(id)); if(!b)return; const t=tech(b.techId); const role=currentUser()?.role; const quote=b.quote; const media=Array.isArray(b.media)?b.media:[];
   const nextTech={Accepted:'On the way','On the way':'Arrived',Arrived:'Inspection',Inspection:'Service started','Service started':'Completed'};
-  const canCancelCustomer=role==='customer' && !['Completed','Cancelled','Service started','Inspection','Awaiting approval'].includes(b.status);
-  const canCancelTech=role==='technician' && ['Requested','Accepted','On the way','Arrived'].includes(b.status);
+  const canCancelCustomer=role==='customer' && !['Completed','Cancelled'].includes(b.status);
+  const canCancelTech=role==='technician' && !['Completed','Cancelled'].includes(b.status);
   const evidence=media.map(m=>`<div class="evidence-card"><img src="${esc(m.data)}" alt="${esc(m.name||'Evidence')}" loading="lazy"><div><b>${esc(m.type)}</b><small>${esc(m.name||'Evidence')} · ${esc(m.uploadedRole||'user')}</small></div></div>`).join('');
   modal().innerHTML=`<div class="modal" onclick="if(event.target===this)closeModal()"><div class="modal-box wide" data-booking-details="${esc(id)}" data-booking-state="${esc(bookingDetailsSyncState(b))}">
     <div class="modal-head"><div><span class="eyebrow">SERVICE CONTROL · #${String(id).slice(-6)}</span><h2>${esc(b.service)}</h2><p class="muted">${esc(b.date||'')} · ${esc(b.time||'')} · ${esc(b.location||'Location not shared')}</p></div><button class="close" onclick="closeModal()">×</button></div>
@@ -4204,7 +4221,7 @@ bookingDetails = async function(id){
       ${b.status==='On the way'&&role==='customer'?`<button class="btn secondary" onclick="tracking(${id})">📍 Live Map</button>`:''}
       ${role==='customer'&&t?.phone?`<button class="btn whatsapp-btn" onclick="whatsappTechnician(${id})">💬 WhatsApp Technician</button>`:''}
       ${role==='customer'&&canCancelCustomer?`<button class="btn danger" onclick="cancelBooking(${id})">Cancel booking</button>`:''}
-      ${role==='technician'&&canCancelTech?`<button class="btn danger" onclick="cancelBooking(${id})">Reject / cancel</button>`:''}
+      ${role==='technician'&&canCancelTech?`<button class="btn danger" onclick="cancelBooking(${id})">Cancel booking</button>`:''}
       ${role==='technician'&&b.status==='Inspection'?`<button class="btn secondary" onclick="setRoute('scanner');closeModal()">▣ Scan part</button>`:''}
       ${role==='customer'&&t?.lat&&t?.lng?`<button class="btn secondary" onclick="openDirectionsToTechnician(${t.id})">🧭 Directions</button>`:''}
       ${b.status==='Completed'&&role==='customer'&&!db.reviews.some(r=>String(r.bookingId)===String(id))?`<button class="btn secondary" onclick="reviewBooking(${id})">⭐ Rate service</button>`:''}
