@@ -1909,6 +1909,12 @@ function nextBooking2(){
 
   state.bookingDraft=d;
 
+  // A technician explicitly chosen on Find Technician needs no smart matching screen.
+  if(state.selectedTech !== null && state.selectedTech !== undefined && state.selectedTech !== ''){
+    bookingStep(3);
+    return;
+  }
+
   modal().innerHTML=`<div class="modal">
     <div class="modal-box matching">
       <div class="radar big">
