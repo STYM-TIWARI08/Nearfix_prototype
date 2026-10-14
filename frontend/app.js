@@ -4112,8 +4112,15 @@ techCard = function(t){
     <div class="trust-row"><span class="badge green">${esc(reason)}</span>${t.skillVerified||t.verified?'<span class="badge">Skill checked</span>':''}<span class="badge">No degree required · Skill first</span></div>
     <div class="skills">${(t.skills||[]).slice(0,4).map(s=>`<span>${esc(s)}</span>`).join('')}</div>
     <div class="tech-bottom"><div><small>Transparent starting price</small><strong>${money(t.price)}</strong><small>No hidden platform fee</small></div><span class="jobs">${t.jobs||0} jobs · ${t.response||0}% response</span></div>
-    <div class="card-actions"><button class="btn ghost" onclick="techDetails(${t.id})">Full profile</button><button class="btn primary" onclick="startBooking('${esc(t.category)}',${t.id})">Book now</button></div>
+    <div class="card-actions"><button class="btn ghost" onclick="techDetails(${t.id})">Full profile</button><button class="btn primary" onclick="bookListedTechnician(${JSON.stringify(String(t.id)).replaceAll('"','&quot;')})">Book now</button></div>
   </article>`;
+};
+
+/* Book the exact technician shown on Find Technician, including string IDs. */
+window.bookListedTechnician=function(technicianId){
+  const selected=(db.techs||[]).find(t=>String(t.id??t.techId)===String(technicianId));
+  if(!selected){toast('This technician is no longer available. Please refresh the list.');return;}
+  startBooking(selected.category||selected.service||'General Repair',selected.id??selected.techId);
 };
 
 /* Customer booking form: capture an actual issue photo/video as base64 for admin/technician review. */
