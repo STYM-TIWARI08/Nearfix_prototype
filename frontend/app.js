@@ -2140,7 +2140,7 @@ function bookingDetails(id){
 
         ${b.status==='Requested'&&isTech
           ? `<button class="btn ghost" onclick="rejectBooking(${b.id});closeModal()">Reject</button>
-             <button class="btn primary" onclick="acceptBooking(${b.id});closeModal()">Accept</button>`
+             <button class="btn primary" onclick="acceptBooking(${b.id})">Accept</button>`
           : ''
         }
 
@@ -3931,7 +3931,28 @@ async function syncBookingStatus(id,status){
   const serverStatus={'Requested':'REQUESTED','Accepted':'ACCEPTED','On the way':'ON_THE_WAY','Arrived':'ARRIVED','Inspection':'INSPECTION','Service started':'IN_PROGRESS','Awaiting approval':'AWAITING_APPROVAL','Completed':'COMPLETED','Cancelled':'CANCELLED'}[status]||status;
   const r=await nfFetch(`/api/bookings/${id}`,{method:'PATCH',body:JSON.stringify({status:serverStatus})}); applyServerState(await nfFetch('/api/bootstrap')); return r;
 }
-window.acceptBooking=async function(id){try{await syncBookingStatus(id,'Accepted');render();toast('Request accepted. Customer notified.');}catch(e){toast(e.message);}};
+// Accept immediately after the server confirms the transition; a slow bootstrap
+// refresh must never make a successful acceptance look like a failed click.
+const nfAcceptInFlight=new Set();
+window.acceptBooking=async function(id){
+  const key=String(id);
+  if(nfAcceptInFlight.has(key))return;
+  const booking=db.bookings.find(b=>String(b.id)===key);
+  if(!booking){toast('Booking not found. Please reopen Jobs.');return;}
+  if(booking.status!=='Requested'){
+    toast(booking.status==='Accepted'?'Request already accepted.':'This request is no longer pending.');return;
+  }
+  nfAcceptInFlight.add(key);
+  try{
+    const response=await nfFetch(`/api/bookings/${encodeURIComponent(key)}`,{method:'PATCH',body:JSON.stringify({status:'ACCEPTED'})});
+    const updated=db.bookings.find(b=>String(b.id)===key);
+    if(updated){updated.status=nfStatus(response.booking?.status||'ACCEPTED');saveDB();}
+    closeModal();render();toast('Request accepted. Customer notified.');
+    // Live polling remains enabled; refresh independently without delaying UI.
+    void nfFetch('/api/bootstrap').then(applyServerState).catch(e=>console.warn('Booking refresh:',e.message));
+  }catch(e){toast(e.message||'Could not accept this request.');}
+  finally{nfAcceptInFlight.delete(key);}
+};
 window.rejectBooking=async function(id){try{await syncBookingStatus(id,'Cancelled');render();toast('Request rejected.');}catch(e){toast(e.message);}};
 function arrivalOtpIsActive(arrival){return arrival?.status==='PENDING'&&Boolean(arrival.otp)&&(!arrival.expiresAt||Date.now()<=new Date(arrival.expiresAt).getTime());}
 window.showArrivalOtp=async function(id){
